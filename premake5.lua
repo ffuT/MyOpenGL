@@ -19,14 +19,15 @@ project "MyOpenGl"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}"
 
-    files { "src/**.cpp", "src/**.h", "src/**.hpp", "headers/**.h", "headers/**.h" }  -- Source and header files
+    files { "src/**.cpp", "src/**.h", "src/**.hpp", "headers/**.h", "headers/**.h", "res/**" }  -- Source and header files
 
     includedirs { "include", "Dependencies/glfw/include", "Dependencies/glew/include", "src/vendor" }
 
     -- Link GLFW and GLEW libraries
     filter "system:windows"                             
         libdirs { "Dependencies/glfw/lib-vc2022", "Dependencies/glew/lib/Release/x64" }
-        links { "glfw3", "glew32", "opengl32" }  -- OpenGL library for Windows
+        links { "glfw3", "glew32s", "opengl32" }  -- OpenGL library for Windows
+        defines {"GLEW_STATIC"}
 
     filter "system:linux"
         links { "glfw", "GLEW", "GL" }  -- OpenGL library for Linux
