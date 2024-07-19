@@ -19,7 +19,7 @@ project "MyOpenGl"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}"
 
-    files { "src/**.cpp", "src/**.h", "src/**.hpp", "headers/**.h", "headers/**.h", "res/**" }  -- Source and header files
+    files { "src/**.cpp", "src/**.h", "src/**.hpp", "res/**" }  -- Source and header files
 
     includedirs { "include", "Dependencies/glfw/include", "Dependencies/glew/include", "src/vendor" }
 
