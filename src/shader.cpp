@@ -4,7 +4,6 @@
 #include <sstream>
 
 #include "shader.h"
-#include "macros.h"
 
 Shader::Shader(const std::string& filepath) :
     m_FilePath(filepath), m_RendererID(0) {
@@ -14,7 +13,7 @@ Shader::Shader(const std::string& filepath) :
 }
 
 Shader::~Shader() {
-    GLCall(glDeleteProgram(m_RendererID));
+    glDeleteProgram(m_RendererID);
 }
 
 ShaderProgramSource Shader::ParseShader(const std::string& filepath) {
