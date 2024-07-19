@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "Shader.h"
+#include "shader.h"
 #include "macros.h"
 
 Shader::Shader(const std::string& filepath) :
