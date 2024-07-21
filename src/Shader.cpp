@@ -7,7 +7,6 @@
 
 #include "Shader.h"
 
-
 Shader::Shader(const std::string& filepath) :
     m_FilePath(filepath), m_RendererID(0) {
 
@@ -58,7 +57,7 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
     if (result == GL_FALSE) {
         int lenght;
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght);
-        char* message = (char*)_malloca(lenght * sizeof(char));
+        char* message = (char*)malloc(lenght * sizeof(char));
         glGetShaderInfoLog(id, lenght, &lenght, message);
         std::cout << "failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << "shader!\n";
         std::cout << message << std::endl;

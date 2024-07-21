@@ -21,7 +21,7 @@ project "MyOpenGl"
 
     files { "src/**.cpp", "src/**.h", "src/**.hpp", "res/**" }  -- Source and header files
 
-    includedirs { "include", "Dependencies/glfw/include", "Dependencies/glew/include", "src/vendor" }
+    includedirs { "include", "Dependencies/glfw/include", "Dependencies/glew/include", "src/vendor", "res/**" }
 
     -- Link GLFW and GLEW libraries
     filter "system:windows"                             

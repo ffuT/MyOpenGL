@@ -81,8 +81,8 @@ int main(void)
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    Shader shader("../res/shaders/BasicShader.shader");
+    
+    Shader shader("res/shaders/BasicShader.shader");
     shader.Bind();
     shader.SetUniformMat4f("u_view", view);
     shader.SetUniformMat4f("u_proj", proj);
