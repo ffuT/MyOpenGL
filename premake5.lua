@@ -7,6 +7,7 @@ workspace "MyOpenGl"
     filter "system:windows"
         architecture "x64"
         systemversion "latest"
+        debugdir ""
 
     filter "system:linux"
         architecture "x64"
@@ -20,6 +21,8 @@ project "MyOpenGl"
     targetdir "bin/%{cfg.buildcfg}"
 
     files { "src/**.cpp", "src/**.h", "src/**.hpp", "res/**" }  -- Source and header files
+
+    cppdialect "C++20" -- Choose C++17, or C++20
 
     includedirs { "include", "Dependencies/glfw/include", "Dependencies/glew/include", "src/vendor", "res/**" }
 

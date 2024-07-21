@@ -1,6 +1,8 @@
 #include <iostream>
 #include <chrono>
 
+#include <filesystem>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -30,6 +32,7 @@ unsigned int* indices = CreateSphereIndices(48);
 
 int main(void)
 {
+    std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
     GLFWwindow* window;
     /* Initialize the library */
     if (!glfwInit())
