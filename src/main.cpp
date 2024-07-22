@@ -14,6 +14,9 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "Shader.h"
+#include "VertexArray.h"
+#include "VertexBuffer.h"
+#include "ElementArrayBuffer.h"
 
 float* CreateSphere(const float radius, const int PointAmount);
 unsigned int* CreateSphereIndices(const int PointAmount);
@@ -22,9 +25,9 @@ constexpr int WIDTH = 1280, HEIGHT = 720;
 
 glm::mat4 model = glm::mat4(1.0f);
 glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-glm::mat4 view = glm::lookAt(glm::vec3(0.0, 0.0, 50.0),
-                             glm::vec3(0.0, 0.0, 0.0),
-                             glm::vec3(0.0, 1.0, 0.0));
+glm::mat4 view = glm::lookAt(glm::vec3(0.0, 0.0, 50.0), // pos
+                             glm::vec3(0.0, 0.0, 0.0),  // look
+                             glm::vec3(0.0, 1.0, 0.0)); // up
 
 float *vertices = CreateSphere(5, 48);
 
@@ -68,30 +71,22 @@ int main(void)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    VertexArray VAO;
+    VertexBuffer VBO(3 * 48 * 48 * sizeof(float), vertices);
+    ElementArrayBuffer EBO(6 * 47 * 47 * sizeof(unsigned int), indices);
 
-    glBindVertexArray(VAO);
+    VAO.Bind();
+    VAO.Bind();
+    EBO.Bind();
+    VAO.BindVertexBuffer(VBO, 0, 3, GL_FLOAT, GL_FALSE , 3 * sizeof(float), (void*)0);
+    VAO.BindElementArrayBuffer(EBO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, (3 * 48 * 48) * sizeof(float), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (6 * 47 * 47) * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    
     Shader shader("res/shaders/BasicShader.shader");
     shader.Bind();
     shader.SetUniformMat4f("u_view", view);
     shader.SetUniformMat4f("u_proj", proj);
     shader.SetUniformMat4f("u_model", model);
     shader.Bind();
-    glBindVertexArray(VAO);
 
     auto now = std::chrono::system_clock::now();
     auto last = std::chrono::system_clock::now();
@@ -130,13 +125,10 @@ int main(void)
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-
     glfwTerminate();
     return 0;
 }
+
 
 constexpr float PI = 3.1415926535897932;
 
@@ -158,7 +150,7 @@ float* CreateSphere(const float radius, const int PointAmount) {
         }
     }
     return points;
-} //thanks gpt
+}
 
 unsigned int* CreateSphereIndices(const int PointAmount) {
     const int totalIndices = 6 * (PointAmount - 1) * (PointAmount - 1);
@@ -180,4 +172,4 @@ unsigned int* CreateSphereIndices(const int PointAmount) {
         }
     }
     return indices;
-} //thanks gpt
+}
