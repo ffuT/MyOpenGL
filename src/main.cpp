@@ -25,6 +25,7 @@ void keyPressed();
 
 constexpr int WIDTH = 1280, HEIGHT = 720;
 float delta = 0.0f;
+float RenderDelta = 0.0f;
 
 GLFWwindow* window;
 
@@ -60,8 +61,6 @@ int main(void){
 
     glfwMakeContextCurrent(window);
 
-    glfwSwapInterval(true); //vsync
-
     glfwSetKeyCallback(window, keyCallback);
 
     glViewport(0, 0, WIDTH, HEIGHT);
@@ -71,10 +70,13 @@ int main(void){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glfwSwapInterval(true); //vsyncs
+
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
+
 
     VertexArray VAO;
     VertexBuffer VBO(3 * 48 * 48 * sizeof(float), vertices);
@@ -98,7 +100,8 @@ int main(void){
     while (!glfwWindowShouldClose(window)) { // window/game loop
         last = now;
         now = std::chrono::system_clock::now();
-        delta = (float)(now - last).count() * 0.0000001;
+        delta = (float)(now - last).count() / 10000;
+        RenderDelta = 1000.0f / ImGui::GetIO().Framerate;
         static float color[4] = { 0.1, 0.1, 0.1, 1.0 };
 
         keyPressed();
@@ -140,28 +143,28 @@ int main(void){
 void keyPressed() {
     //movement ez rotation a bitcch
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        pos.z += 10 * delta;
-        look.z += 10 * delta;
+        pos.z += 0.1 * RenderDelta;
+        look.z += 0.1 * RenderDelta;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        pos.z-= 10 * delta;
-        look.z-= 10 * delta;
+        pos.z-= 0.1 * RenderDelta;
+        look.z-= 0.1 * RenderDelta;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        pos.x += 10 * delta;
-        look.x += 10 * delta;
+        pos.x += 0.1 * RenderDelta;
+        look.x += 0.1 * RenderDelta;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        pos.x -= 10 * delta;
-        look.x -= 10 * delta;
+        pos.x -= 0.1 * RenderDelta;
+        look.x -= 0.1 * RenderDelta;
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        pos.y += 10 * delta;
-        look.y += 10 * delta;
+        pos.y += 0.1 * RenderDelta;
+        look.y += 0.1 * RenderDelta;
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-        pos.y-= 10 * delta;
-        look.y -= 10 * delta;
+        pos.y-= 0.1 * RenderDelta;
+        look.y -= 0.1 * RenderDelta;
     }
 }
 
