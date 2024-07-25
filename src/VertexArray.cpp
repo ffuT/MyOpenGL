@@ -16,7 +16,7 @@ void VertexArray::Unbind() const{
     glBindVertexArray(0);
 }
 
-void VertexArray::BindVertexBuffer(const VertexBuffer& vbo, GLuint index, GLint size,
+void VertexArray::AddVertexBuffer(const VertexBuffer& vbo, GLuint index, GLint size,
     GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) {
     Bind();
     vbo.Bind();

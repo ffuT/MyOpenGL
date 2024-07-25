@@ -14,7 +14,7 @@ public:
 	void Bind() const;
 	void Unbind() const;
 
-	void BindVertexBuffer(const VertexBuffer& vbo, GLuint index, GLint size,
+	void AddVertexBuffer(const VertexBuffer& vbo, GLuint index, GLint size,
 		GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
 
 	void BindElementArrayBuffer(const ElementArrayBuffer& ebo);
