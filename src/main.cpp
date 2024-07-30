@@ -17,6 +17,7 @@
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "ElementArrayBuffer.h"
+#include "Camera.h"
 
 float* CreateSphere(const float radius, const int PointAmount);
 unsigned int* CreateSphereIndices(const int PointAmount);
@@ -29,10 +30,9 @@ float RenderDelta = 0.0f;
 
 GLFWwindow* window;
 
-glm::vec3 pos(0.0, 0.0, 0.0),
-          look(0.0, 0.0, 1.0),
-          up(0.0, 1.0, 0.0);
-glm::mat4 view = glm::lookAt(pos, look, up);
+Camera cam;
+
+glm::mat4 view = cam.GetViewMatrix();
 glm::mat4 proj = glm::perspective(glm::radians(70.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
 glm::mat4 model = glm::mat4(1.0f);
 
@@ -110,7 +110,7 @@ int main(void){
         glClearColor(color[0], color[1], color[2], color[3]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        view = glm::lookAt(pos, look, up);
+        view = cam.GetViewMatrix();
 
         shader.SetUniformMat4f("u_view", view);
         shader.SetUniformMat4f("u_proj", proj);
@@ -125,7 +125,8 @@ int main(void){
 
         ImGui::Begin("Test");
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::Text("Position %.3f x %.3f y %.3f z", pos.x, pos.y, pos. z);
+        ImGui::Text("Position: x:%.3f  y:%.3f  z:%.3f ", cam.m_Position.x, cam.m_Position.y, cam.m_Position.z);
+        ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", cam.m_Front.x, cam.m_Front.y, cam.m_Front.z);
         ImGui::ColorEdit4("clear_Color", color);
 
         ImGui::End();
@@ -141,31 +142,29 @@ int main(void){
 }
 
 void keyPressed() {
-    //movement ez rotation a bitcch
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        pos.z += 0.1 * RenderDelta;
-        look.z += 0.1 * RenderDelta;
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        pos.z-= 0.1 * RenderDelta;
-        look.z-= 0.1 * RenderDelta;
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        pos.x += 0.1 * RenderDelta;
-        look.x += 0.1 * RenderDelta;
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        pos.x -= 0.1 * RenderDelta;
-        look.x -= 0.1 * RenderDelta;
-    }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        pos.y += 0.1 * RenderDelta;
-        look.y += 0.1 * RenderDelta;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-        pos.y-= 0.1 * RenderDelta;
-        look.y -= 0.1 * RenderDelta;
-    }
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cam.ProcessKeyboard(FORWARD, delta);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cam.ProcessKeyboard(BACKWARD, delta);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) 
+        cam.ProcessKeyboard(LEFT, delta);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) 
+        cam.ProcessKeyboard(RIGHT, delta);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        cam.ProcessKeyboard(FORWARD, delta);
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+        cam.ProcessKeyboard(FORWARD, delta);
+
+    //rotation
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        cam.ProcessKeyboard(rotLEFT, delta);
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        cam.ProcessKeyboard(rotRIGHT, delta);
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        cam.ProcessKeyboard(rotUP, delta);
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        cam.ProcessKeyboard(rotDOWN, delta);
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
