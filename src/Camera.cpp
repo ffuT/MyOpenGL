@@ -6,7 +6,6 @@ Camera::Camera() :
 	m_Up(glm::vec3(0.0, 1.0, 0.0)),
 	m_Right(glm::vec3(1.0, 0.0, 0.0)),
 	m_WorldUp(m_Up)
-
 {
 
 }
@@ -36,18 +35,22 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float delta){
         m_Position -= m_Right * velocity;
     if (direction == RIGHT)
         m_Position += m_Right * velocity;
+    if (direction == UP)
+        m_Position += m_Up * velocity;
+    if (direction == DOWN)
+        m_Position -= m_Up * velocity;
     //temp
     if (direction == rotRIGHT)
-        m_Yaw += 2.2;
+        m_Yaw += 0.22;
     if (direction == rotLEFT)
-        m_Yaw -= 2.2;
+        m_Yaw -= 0.22;
     if (direction == rotUP){
-        m_Pitch += 2.2;
+        m_Pitch += 0.22;
         if (m_Pitch > 89.0f)
             m_Pitch = 89.0f;
     }
     if (direction == rotDOWN){
-        m_Pitch -= 2.2;
+        m_Pitch -= 0.22;
         if (m_Pitch < -89.0f)
             m_Pitch = -89.0f;
     }
