@@ -22,11 +22,11 @@ void Camera::Update(){
     m_Front = glm::normalize(front);
     m_Right = glm::normalize(glm::cross(m_Front, m_WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
     m_Up = glm::normalize(glm::cross(m_Right, m_Front));
-   
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float delta){
     float velocity = m_MovementSpeed * delta;
+    float turnspeed = m_TurnSpeed * delta;
     if (direction == FORWARD)
         m_Position += m_Front * velocity;
     if (direction == BACKWARD)
@@ -41,16 +41,15 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float delta){
         m_Position -= m_Up * velocity;
     //temp
     if (direction == rotRIGHT)
-        m_Yaw += 0.22;
-    if (direction == rotLEFT)
-        m_Yaw -= 0.22;
+        m_Yaw += turnspeed;
+    else if (direction == rotLEFT)
+        m_Yaw -= turnspeed;
     if (direction == rotUP){
-        m_Pitch += 0.22;
+        m_Pitch += turnspeed;
         if (m_Pitch > 89.0f)
             m_Pitch = 89.0f;
-    }
-    if (direction == rotDOWN){
-        m_Pitch -= 0.22;
+    } else if (direction == rotDOWN){
+        m_Pitch -= turnspeed;
         if (m_Pitch < -89.0f)
             m_Pitch = -89.0f;
     }
