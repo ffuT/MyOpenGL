@@ -39,21 +39,32 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float delta){
         m_Position += m_Up * velocity;
     if (direction == DOWN)
         m_Position -= m_Up * velocity;
-    //temp
+    /* keyboard turning disabled
     if (direction == rotRIGHT)
-        m_Yaw += 0.22;
+        m_Yaw += 0.22 * delta;
     if (direction == rotLEFT)
-        m_Yaw -= 0.22;
+        m_Yaw -= 0.22 * delta;
     if (direction == rotUP){
-        m_Pitch += 0.22;
+        m_Pitch += 0.22 * delta;
         if (m_Pitch > 89.0f)
             m_Pitch = 89.0f;
     }
     if (direction == rotDOWN){
-        m_Pitch -= 0.22;
+        m_Pitch -= 0.22 * delta;
         if (m_Pitch < -89.0f)
             m_Pitch = -89.0f;
     }
-
+    */
     Update();
 }
+
+void Camera::ProcessMouse(float xOffset, float yOffset) {
+    m_Yaw += xOffset * m_MouseSensitivity;
+    m_Pitch += yOffset * m_MouseSensitivity;
+    if (m_Pitch > 89.0f) 
+        m_Pitch = 89.0f;
+    if (m_Pitch < -89.0f) 
+        m_Pitch = -89.0f;
+    Update();
+}
+

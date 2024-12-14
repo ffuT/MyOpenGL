@@ -19,49 +19,22 @@
 #include "VertexBuffer.h"
 #include "ElementArrayBuffer.h"
 #include "Camera.h"
+#include "Extras.h" //all my helper shit that doesnt really fit in anywhere
 
-GLuint loadCubemap(std::vector<std::string> faces) {
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+//program params
+constexpr bool USE_VSYNC = false;
+constexpr int WIDTH = 1280, HEIGHT = 720;
+constexpr float YAW = 0.022f, PITCH = 0.022f; //same turn speed as CS2, UE5 default = 0.07
 
-    int width, height, nrChannels;
-    for (unsigned int i = 0; i < faces.size(); i++) {
-        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-        if (data) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            stbi_image_free(data);
-        }
-        else {
-            std::cerr << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
-            stbi_image_free(data);
-        }
-    }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    return textureID;
-}
-
-float skyboxVertices[];
-std::vector<std::string> faces{
-    "res/textures/skybox/right.jpg",
-    "res/textures/skybox/left.jpg",
-    "res/textures/skybox/top.jpg",
-    "res/textures/skybox/bottom.jpg",
-    "res/textures/skybox/front.jpg",
-    "res/textures/skybox/back.jpg"
-};
-
-float* CreateSphere(const float radius, const int PointAmount);
-unsigned int* CreateSphereIndices(const int PointAmount);
+//functions
+void MousePosCallBack(GLFWwindow* window, double xpos, double ypos);
+void MouseCallBack(GLFWwindow* window, int button, int action, int mods);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void keyPressed();
 
-constexpr int WIDTH = 1280, HEIGHT = 720;
+//program variables
+MouseInputMode CurrentMode = WINDOW_MODE;
+
 float delta = 0.0f;
 float RenderDelta = 0.0f;
 
@@ -72,6 +45,11 @@ Camera cam;
 glm::mat4 view = cam.GetViewMatrix();
 glm::mat4 proj = glm::perspective(glm::radians(70.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
 glm::mat4 model = glm::mat4(1.0f);
+
+float lastX = 400.0f;
+float lastY = 300.0f;
+float sensitivity = 0.1f;
+bool firstMouse = true;
 
 float* vertices = CreateSphere(5, 48);
 unsigned int* indices = CreateSphereIndices(48);
@@ -98,6 +76,8 @@ int main(void){
 
     glfwMakeContextCurrent(window);
 
+    glfwSetMouseButtonCallback(window, MouseCallBack);
+    glfwSetCursorPosCallback(window, MousePosCallBack);
     glfwSetKeyCallback(window, keyCallback);
 
     glViewport(0, 0, WIDTH, HEIGHT);
@@ -108,7 +88,7 @@ int main(void){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glfwSwapInterval(true); //vsyncs
+    glfwSwapInterval(USE_VSYNC); //vsyncs
 
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
@@ -196,6 +176,7 @@ int main(void){
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::Text("Position: x:%.3f  y:%.3f  z:%.3f ", cam.m_Position.x, cam.m_Position.y, cam.m_Position.z);
         ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", cam.m_Front.x, cam.m_Front.y, cam.m_Front.z);
+        ImGui::Text("Current Window Mode: %d", CurrentMode);
 
         ImGui::End();
 
@@ -236,101 +217,49 @@ void keyPressed() {
         cam.ProcessKeyboard(rotDOWN, delta);
 }
 
+void MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
+    if (CurrentMode == WINDOW_MODE){
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+            ToggleMouseInputMode(window, CurrentMode);
+            firstMouse = true;
+        }
+    } else { //cameramode
+
+    }
+}
+
+void MousePosCallBack(GLFWwindow* window, double xpos, double ypos) {
+    if (CurrentMode == WINDOW_MODE)
+        return;
+    
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false; 
+    }
+
+    float xOffset = (xpos - lastX) * YAW;
+    float yOffset = (lastY - ypos) * PITCH;
+
+    lastX = xpos;
+    lastY = ypos;
+
+    cam.ProcessMouse(xOffset, yOffset);
+}
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
         switch (key) {
         case GLFW_KEY_ESCAPE:
-            std::cout << "Escape key pressed, closing window." << std::endl;
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
+            if (CurrentMode == WINDOW_MODE){
+                std::cout << "Escape key pressed, closing window." << std::endl;
+                glfwSetWindowShouldClose(window, GLFW_TRUE);
+            } else {
+                ToggleMouseInputMode(window, CurrentMode); //leave cameramode
+
+            }
             break;
+
         }
     }
 }
-
-constexpr float PI = 3.1415926535897932;
-float* CreateSphere(const float radius, const int PointAmount) {
-    const int totalelements = 3 * PointAmount * PointAmount; // Adjusted for more points
-
-    float* points = new float[totalelements];
-
-    int index = 0;
-    for (size_t i = 0; i < PointAmount; i++) {
-        float phi = PI * i / (PointAmount - 1); // Ranges from 0 to PI
-
-        for (size_t j = 0; j < PointAmount; j++) {
-            float theta = 2 * PI * j / (PointAmount - 1); // Ranges from 0 to 2*PI
-
-            points[index++] = radius * sin(phi) * cos(theta);
-            points[index++] = radius * sin(phi) * sin(theta);
-            points[index++] = radius * cos(phi);
-        }
-    }
-    return points;
-}
-
-unsigned int* CreateSphereIndices(const int PointAmount) {
-    const int totalIndices = 6 * (PointAmount - 1) * (PointAmount - 1);
-    unsigned int* indices = new unsigned int[totalIndices];
-
-    int index = 0;
-    for (int i = 0; i < PointAmount - 1; i++) {
-        for (int j = 0; j < PointAmount - 1; j++) {
-            int current = i * PointAmount + j;
-            int next = current + PointAmount;
-
-            indices[index++] = current;
-            indices[index++] = next;
-            indices[index++] = current + 1;
-
-            indices[index++] = current + 1;
-            indices[index++] = next;
-            indices[index++] = next + 1;
-        }
-    }
-    return indices;
-}
-
-float skyboxVertices[] = {
-    // positions          
-    -1.0f,  1.0f, -1.0f,
-    -1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-     1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-
-    -1.0f, -1.0f,  1.0f,
-    -1.0f, -1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f,  1.0f,
-    -1.0f, -1.0f,  1.0f,
-
-     1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-
-    -1.0f, -1.0f,  1.0f,
-    -1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f, -1.0f,  1.0f,
-    -1.0f, -1.0f,  1.0f,
-
-    -1.0f,  1.0f, -1.0f,
-     1.0f,  1.0f, -1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-    -1.0f,  1.0f,  1.0f,
-    -1.0f,  1.0f, -1.0f,
-
-    -1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f,  1.0f,
-     1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f,  1.0f,
-     1.0f, -1.0f,  1.0f
-};
