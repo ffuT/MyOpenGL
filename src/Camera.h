@@ -16,18 +16,13 @@ enum Camera_Movement {
     rotDOWN
 };
 
-const float m_YAW = -90.0f;
-const float m_PITCH = 0.0f;
-//const float SPEED = 2.5f;
-//const float ZOOM = 45.0f;
-
 class Camera{
 public:
+    const glm::vec3 m_WorldUp = glm::vec3(0.0, 1.0, 0.0);
     glm::vec3 m_Position;
     glm::vec3 m_Front;
-    glm::vec3 m_Up;
     glm::vec3 m_Right;
-    glm::vec3 m_WorldUp;
+    glm::vec3 m_Up;
     
     float m_Yaw = -90.0f;
     float m_Pitch = 0.0f;

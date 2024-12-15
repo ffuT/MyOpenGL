@@ -147,7 +147,7 @@ int main(void){
         glDepthFunc(GL_LESS);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //RENDER SPHERE
+        //render sphere
         VAO.Bind();
         shader.Bind();
         shader.SetUniformMat4f("u_view", view);
@@ -186,6 +186,7 @@ int main(void){
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
     glfwTerminate();
     return 0;
 }
@@ -206,18 +207,14 @@ void keyPressed() {
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
         cam.ProcessKeyboard(DOWN, delta);
 
-    //rotation temp -> TODO use mouse xy
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        cam.ProcessKeyboard(rotLEFT, delta);
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        cam.ProcessKeyboard(rotRIGHT, delta);
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        cam.ProcessKeyboard(rotUP, delta);
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        cam.ProcessKeyboard(rotDOWN, delta);
 }
 
 void MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
+
+    if (ImGui::GetIO().WantCaptureMouse) { //ignore mouseclicks on imgui
+        return;
+    }
+
     if (CurrentMode == WINDOW_MODE){
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
             ToggleMouseInputMode(window, CurrentMode);
@@ -251,15 +248,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (action == GLFW_PRESS) {
         switch (key) {
         case GLFW_KEY_ESCAPE:
-            if (CurrentMode == WINDOW_MODE){
+            if (CurrentMode == WINDOW_MODE){    //close
                 std::cout << "Escape key pressed, closing window." << std::endl;
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
-            } else {
-                ToggleMouseInputMode(window, CurrentMode); //leave cameramode
-
+            } else {    //leave cameramode
+                ToggleMouseInputMode(window, CurrentMode);
             }
             break;
-
         }
     }
 }
