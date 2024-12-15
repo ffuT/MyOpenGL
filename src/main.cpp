@@ -22,9 +22,9 @@
 #include "Extras.h" //all my helper shit that doesnt really fit in anywhere
 
 //program params
-constexpr bool USE_VSYNC = false;
 constexpr int WIDTH = 1280, HEIGHT = 720;
 constexpr float YAW = 0.022f, PITCH = 0.022f; //same turn speed as CS2, UE5 default = 0.07
+const bool USE_VSYNC = true;
 
 //functions
 void MousePosCallBack(GLFWwindow* window, double xpos, double ypos);
@@ -114,14 +114,14 @@ int main(void){
 
     VAO.Unbind();
     VBO.Unbind();
-    
+
     VertexArray skyboxVAO;
     VertexBuffer skyboxVBO( 108 * sizeof(float), skyboxVertices);
     skyboxVAO.Bind();
     skyboxVAO.AddVertexBuffer(skyboxVBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     skyboxVAO.Unbind();
     skyboxVBO.Unbind();
-    
+
     Shader skyboxShader("res/shaders/Skybox.shader");
     skyboxShader.Bind();
     skyboxShader.UnBind();
@@ -129,7 +129,7 @@ int main(void){
     skyboxVAO.Unbind();
     skyboxVBO.Unbind();
 
-    GLuint cubemapTexture = loadCubemap(faces);    
+    GLuint cubemapTexture = loadCubemap(faces);
 
     auto now = std::chrono::system_clock::now();
     auto last = std::chrono::system_clock::now();
@@ -196,9 +196,9 @@ void keyPressed() {
         cam.ProcessKeyboard(FORWARD, delta);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         cam.ProcessKeyboard(BACKWARD, delta);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) 
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cam.ProcessKeyboard(LEFT, delta);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) 
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cam.ProcessKeyboard(RIGHT, delta);
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
         cam.ProcessKeyboard(UP, delta);
@@ -228,11 +228,11 @@ void MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
 void MousePosCallBack(GLFWwindow* window, double xpos, double ypos) {
     if (CurrentMode == WINDOW_MODE)
         return;
-    
+
     if (firstMouse) {
         lastX = xpos;
         lastY = ypos;
-        firstMouse = false; 
+        firstMouse = false;
     }
 
     float xOffset = (xpos - lastX) * YAW;
