@@ -13,6 +13,10 @@ Camera::~Camera(){
 
 }
 
+glm::vec3 Camera::GetPos(){
+    return m_Position;
+}
+
 void Camera::Update(){
     glm::vec3 front;
     front.x = cos(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));

@@ -62,8 +62,29 @@ unsigned int* CreateSphereIndices(const int PointAmount) {
     return indices;
 }
 
+float* CreateSphereNormals(const float* points, const int PointAmount) {
+    float* normals = new float[3 * PointAmount * PointAmount]; // 3 components per normal (x, y, z)
 
-//skybox stuff
+    int index = 0;
+    for (int i = 0; i < PointAmount; i++) {
+        for (int j = 0; j < PointAmount; j++) {
+            // Fetch the point position
+            float x = points[3 * (i * PointAmount + j)];
+            float y = points[3 * (i * PointAmount + j) + 1];
+            float z = points[3 * (i * PointAmount + j) + 2];
+
+            // Normalize the normal (it’s the same as the position for a unit sphere)
+            float length = sqrt(x * x + y * y + z * z);
+            normals[index++] = x / length; // Normalized x
+            normals[index++] = y / length; // Normalized y
+            normals[index++] = z / length; // Normalized z
+        }
+    }
+    return normals;
+}
+
+
+//skybox stuff      
 std::vector<std::string> faces{
     "res/textures/skybox/right.jpg",
     "res/textures/skybox/left.jpg",

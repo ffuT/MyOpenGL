@@ -34,6 +34,8 @@ public:
     Camera();
     ~Camera();
 
+    glm::vec3 GetPos();
+
     void Update();
     void ProcessKeyboard(Camera_Movement movement, float delta);
     void ProcessMouse(float xOffset, float yOffset);

@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-
 #include <GL/glew.h>
 
 #include "Shader.h"
@@ -113,6 +112,14 @@ void Shader::SetUniform4f(const std::string name, glm::vec4 vec) {
 
 void Shader::SetUniformMat4f(const std::string name, const glm::mat4& matrix) {
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
+}
+
+void Shader::SetUniform3f(const std::string name, float* in) {
+    glUniform3f(GetUniformLocation(name), in[0], in[1], in[2]);
+}
+
+void Shader::SetUniform3f(const std::string name, glm::vec3 vec) {
+    glUniform3f(GetUniformLocation(name), vec.x, vec.y, vec.z);
 }
 
 unsigned int Shader::GetUniformLocation(const std::string& name) {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 class VertexBuffer{
 private:
 	unsigned int m_ID = 0;
