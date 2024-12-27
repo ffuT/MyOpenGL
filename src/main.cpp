@@ -25,8 +25,8 @@
 #include "Extras.h" //all my helper shit that doesnt really fit in anywhere
 
 //program params
+unsigned int WIDTH = 1280, HEIGHT = 720;
 constexpr bool USE_VSYNC = false;
-constexpr int WIDTH = 1280, HEIGHT = 720;
 constexpr float YAW = 0.022f, PITCH = 0.022f; //same turn speed as CS2, UE5 default = 0.07
 
 //functions
@@ -53,7 +53,7 @@ float lastY = 300.0f;
 float sensitivity = 0.1f;
 bool firstMouse = true;
 
-int main(void){
+int main(){
     
     if (!glfwInit()) {
         std::cout << "error initializing glfw" << std::endl;
@@ -75,9 +75,15 @@ int main(void){
 
     glfwMakeContextCurrent(window);
 
+    //glfw callbacks
     glfwSetMouseButtonCallback(window, MouseCallBack);
     glfwSetCursorPosCallback(window, MousePosCallBack);
     glfwSetKeyCallback(window, keyCallback);
+    glfwSetFramebufferSizeCallback(window, [](GLFWwindow* win, int width, int height) {
+        glViewport(0, 0, width, height);
+        HEIGHT = height;
+        WIDTH = width;
+        std::cout << "Viewport resized to " << width << "x" << height << std::endl;});
 
     glViewport(0, 0, WIDTH, HEIGHT);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
@@ -94,15 +100,9 @@ int main(void){
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
     Sphere sphere = Sphere(5, 48);
-
     sphere.Transform = glm::translate(glm::mat4(1.0), glm::vec3(-0.0, -5.0, -50.0));
 
     Shader shader("res/shaders/NewShader.shader");
-    shader.Bind();
-    shader.SetUniformMat4f("u_model", sphere.GetModelMatrix());
-    shader.SetUniformMat4f("u_view", view);
-    shader.SetUniformMat4f("u_proj", proj);
-    shader.UnBind();
 
     VertexArray skyboxVAO;
     VertexBuffer skyboxVBO(108 * sizeof(float), skyboxVertices);
@@ -142,9 +142,8 @@ int main(void){
         shader.SetUniformMat4f("u_view", view);
         shader.SetUniformMat4f("u_proj", proj);
         shader.SetUniformMat4f("u_model", sphere.GetModelMatrix());
-        glDrawElements(GL_TRIANGLES, 6 * (48 - 1) * (48 - 1), GL_UNSIGNED_INT, 0);
-        shader.UnBind();
         sphere.RenderStop();
+        shader.UnBind();
 
         // skybox here
         glDepthFunc(GL_LEQUAL);

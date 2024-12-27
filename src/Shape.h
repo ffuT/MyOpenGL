@@ -29,8 +29,12 @@ public:
 		const std::vector<float>& normals, 
 		const std::vector<unsigned int>& indices,
 		const ShaderProgram& shaderName);
+	
 	virtual ~Shape();
+	
 	virtual void RenderStart();
 	virtual void RenderStop();
+
 	virtual glm::mat4 GetModelMatrix();
+	virtual ShaderProgram GetShaderName();
 };

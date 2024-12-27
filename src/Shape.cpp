@@ -36,3 +36,7 @@ void Shape::RenderStop() {
 glm::mat4 Shape::GetModelMatrix(){
 	return Transform * (Rotation * Scale);
 }
+
+ShaderProgram Shape::GetShaderName(){
+	return ShaderName;
+}
