@@ -1,13 +1,6 @@
 #pragma once
 #include <GLFW/glfw3.h>
 
-//temp shader stuff
-enum ShaderProgram {
-    Skybox,
-    NewShader,
-    BasicShader
-};
-
 //input stuff
 enum MouseInputMode {
     WINDOW_MODE,

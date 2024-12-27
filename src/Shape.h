@@ -1,14 +1,12 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
-#include "Shader.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "ElementArrayBuffer.h"
-#include "Extras.h"
+#include "ShaderManager.h"
 
 class Shape{
 protected:	

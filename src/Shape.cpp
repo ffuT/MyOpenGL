@@ -1,5 +1,4 @@
 #include "Shape.h"
-#include <GL/glew.h>
 
 Shape::Shape(const std::vector<float>& vertices,
 	const std::vector<float>& normals,
