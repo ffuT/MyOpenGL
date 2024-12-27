@@ -1,13 +1,14 @@
 #include "Shape.h"
+#include <iostream>
 
 Shape::Shape(const std::vector<float>& vertices,
 	const std::vector<float>& normals,
 	const std::vector<unsigned int>& indices,
 	const ShaderProgram& shaderName)
 	: Vertices(vertices), Normals(normals), Indices(indices),
-		VBOPos(Vertices.size() * sizeof(float), Vertices.data()),
-		VBONorm(Normals.size() * sizeof(float), Normals.data()),
-		EBO(Indices.size() * sizeof(unsigned int), Indices.data()),
+		VBOPos(vertices.size() * sizeof(float), vertices.data()),
+		VBONorm(normals.size() * sizeof(float), normals.data()),
+		EBO(indices.size() * sizeof(unsigned int), indices.data()),
 		ShaderName(shaderName) {
 
 	VAO.Bind();
@@ -23,13 +24,15 @@ Shape::Shape(const std::vector<float>& vertices,
 Shape::~Shape(){
 }
 
-void Shape::Render(){
+void Shape::RenderStart(){
 	VAO.Bind();
+}
+
+void Shape::RenderStop() {
 	glDrawElements(GL_TRIANGLES, Indices.size(), GL_UNSIGNED_INT, 0);
 	VAO.Unbind();
 }
 
-glm::mat4 Shape::GetModelMatrix()
-{
-	return glm::mat4(1.0); //Transform * Rotation * Scale
+glm::mat4 Shape::GetModelMatrix(){
+	return Transform * (Rotation * Scale);
 }

@@ -19,6 +19,9 @@
 #include "VertexBuffer.h"
 #include "ElementArrayBuffer.h"
 #include "Camera.h"
+#include "ShaderManager.h"
+#include "Shape.h"
+#include "Sphere.h"
 #include "Extras.h" //all my helper shit that doesnt really fit in anywhere
 
 //program params
@@ -44,19 +47,14 @@ Camera cam;
 
 glm::mat4 view = cam.GetViewMatrix();
 glm::mat4 proj = glm::perspective(glm::radians(70.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
-glm::mat4 model = glm::mat4(1.0f);
 
 float lastX = 400.0f;
 float lastY = 300.0f;
 float sensitivity = 0.1f;
 bool firstMouse = true;
 
-float* vertices = CreateSphere(5, 48);
-float* normals = CreateSphereNormals(vertices, 48);
-unsigned int* indices = CreateSphereIndices(48);
-
 int main(void){
-
+    
     if (!glfwInit()) {
         std::cout << "error initializing glfw" << std::endl;
         return -1;
@@ -95,31 +93,17 @@ int main(void){
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
-    VertexArray VAO;
-    VertexBuffer VBO(3 * 48 * 48 * sizeof(float), vertices);
-    //VertexBuffer VBOTex(2 * 48 * 48 * sizeof(float), vertices);
-    VertexBuffer VBONorm(3 * 48 * 48 * sizeof(float), normals);
-    ElementArrayBuffer EBO(6 * 47 * 47 * sizeof(unsigned int), indices);
+    Sphere sphere = Sphere(5, 48);
 
-    VAO.Bind();
-    EBO.Bind();
-    VAO.AddVertexBuffer(VBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    //VAO.AddVertexBuffer(VBOTex, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    VAO.AddVertexBuffer(VBONorm, 2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    VAO.BindElementArrayBuffer(EBO);
+    sphere.Transform = glm::translate(glm::mat4(1.0), glm::vec3(-0.0, -5.0, -50.0));
 
-    //Shader shader("res/shaders/BasicShader.shader");
     Shader shader("res/shaders/NewShader.shader");
     shader.Bind();
-    shader.SetUniformMat4f("u_model", model);
+    shader.SetUniformMat4f("u_model", sphere.GetModelMatrix());
     shader.SetUniformMat4f("u_view", view);
     shader.SetUniformMat4f("u_proj", proj);
-
     shader.UnBind();
 
-    VAO.Unbind();
-    VBO.Unbind();
-    
     VertexArray skyboxVAO;
     VertexBuffer skyboxVBO(108 * sizeof(float), skyboxVertices);
     skyboxVAO.Bind();
@@ -153,14 +137,14 @@ int main(void){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //render sphere
-        VAO.Bind();
+        sphere.RenderStart();
         shader.Bind();
         shader.SetUniformMat4f("u_view", view);
         shader.SetUniformMat4f("u_proj", proj);
-        shader.SetUniformMat4f("u_model", model);
+        shader.SetUniformMat4f("u_model", sphere.GetModelMatrix());
         glDrawElements(GL_TRIANGLES, 6 * (48 - 1) * (48 - 1), GL_UNSIGNED_INT, 0);
         shader.UnBind();
-        VAO.Unbind();
+        sphere.RenderStop();
 
         // skybox here
         glDepthFunc(GL_LEQUAL);
@@ -283,6 +267,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         switch (key) {
         case GLFW_KEY_ESCAPE:
             if (CurrentMode == WINDOW_MODE){    //close
+                break; //comment out to close on esc
                 std::cout << "Escape key pressed, closing window." << std::endl;
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
             } else {    //leave cameramode
