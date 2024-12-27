@@ -31,7 +31,7 @@ public:
 		const std::vector<unsigned int>& indices,
 		const ShaderProgram& shaderName);
 	virtual ~Shape();
-	virtual void Render();
+	virtual void RenderStart();
+	virtual void RenderStop();
 	virtual glm::mat4 GetModelMatrix();
-
 };

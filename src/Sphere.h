@@ -1,0 +1,12 @@
+#pragma once
+#include "Shape.h"
+
+class Sphere : public Shape{
+public:
+    Sphere(const float& radius, const int& pointAmount);
+    ~Sphere();
+
+private:
+    const float m_Radius;
+    const int m_PointAmount;
+};

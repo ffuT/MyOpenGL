@@ -1,7 +1,8 @@
 #include "VertexArray.h"
+#include "macros.h"
 
 VertexArray::VertexArray(){
-    glGenVertexArrays(1, &m_ID);
+   GLCall(glGenVertexArrays(1, &m_ID));
 }
 
 VertexArray::~VertexArray(){

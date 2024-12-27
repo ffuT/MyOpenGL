@@ -23,13 +23,15 @@ Shape::Shape(const std::vector<float>& vertices,
 Shape::~Shape(){
 }
 
-void Shape::Render(){
+void Shape::RenderStart(){
 	VAO.Bind();
+}
+
+void Shape::RenderStop() {
 	glDrawElements(GL_TRIANGLES, Indices.size(), GL_UNSIGNED_INT, 0);
 	VAO.Unbind();
 }
 
-glm::mat4 Shape::GetModelMatrix()
-{
-	return glm::mat4(1.0); //Transform * Rotation * Scale
+glm::mat4 Shape::GetModelMatrix(){
+	return Transform * Rotation * Scale;
 }
