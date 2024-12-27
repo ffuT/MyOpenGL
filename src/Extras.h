@@ -7,7 +7,7 @@ enum MouseInputMode {
     CAMERA_MODE
 };
 
-void ToggleMouseInputMode(GLFWwindow* window,MouseInputMode &mode) {
+void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode) {
     if (mode == WINDOW_MODE) {
         mode = CAMERA_MODE;
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
