@@ -3,7 +3,7 @@
 
 //helper functions
 const float PI = 3.14159265358979323846f;
-static std::vector<float> CreateSphere(const float radius, const int PointAmount) {
+std::vector<float> CreateSphere(const float radius, const int PointAmount) {
     const int totalelements = 3 * PointAmount * PointAmount; // Adjusted for more points
 
     std::vector<float> points;
@@ -11,8 +11,6 @@ static std::vector<float> CreateSphere(const float radius, const int PointAmount
 
     for (int i = 0; i < PointAmount; i++) {
         float phi = PI * i / (PointAmount - 1); // Ranges from 0 to PI
-
-        std::cout << phi << "\n";
 
         for (int j = 0; j < PointAmount; j++) {
             float theta = 2 * PI * j / (PointAmount - 1); // Ranges from 0 to 2*PI
@@ -22,11 +20,10 @@ static std::vector<float> CreateSphere(const float radius, const int PointAmount
             points.push_back(radius * cos(phi));
         }
     }
-    std::cout << "point\n";
     return points;
 };
 
-static std::vector<unsigned int> CreateSphereIndices(const int PointAmount) {
+std::vector<unsigned int> CreateSphereIndices(const int PointAmount) {
     const int totalIndices = 6 * (PointAmount - 1) * (PointAmount - 1);
 
     std::vector<unsigned int> indices;
@@ -46,11 +43,10 @@ static std::vector<unsigned int> CreateSphereIndices(const int PointAmount) {
             indices.push_back(next + 1);
         }
     }
-    std::cout << "ind\n";
     return indices;
 };
 
-static std::vector<float> CreateSphereNormals(const std::vector<float>& points, const int PointAmount) {
+std::vector<float> CreateSphereNormals(const std::vector<float>& points, const int PointAmount) {
     std::vector<float> normals;
     normals.reserve(3 * PointAmount * PointAmount); // 3 components per normal (x, y, z)
 
@@ -68,17 +64,15 @@ static std::vector<float> CreateSphereNormals(const std::vector<float>& points, 
             normals.push_back(z / length); // Normalized z
         }
     }
-    std::cout << "norm\n";
     return normals;
 };
 
 Sphere::Sphere(const float& radius, const int& pointAmount)
 	: m_Radius(radius), m_PointAmount(pointAmount),
-	Shape(CreateSphere(m_Radius, m_PointAmount),
-		  CreateSphereNormals(Vertices, m_PointAmount),
-		  CreateSphereIndices(m_PointAmount),
+	Shape(CreateSphere(radius, pointAmount),
+		  CreateSphereNormals(CreateSphere(radius, pointAmount), pointAmount),
+		  CreateSphereIndices(pointAmount),
 		  NewShader){
-    std::cout << "yes";
 }
 
 Sphere::~Sphere(){

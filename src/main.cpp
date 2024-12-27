@@ -47,17 +47,14 @@ Camera cam;
 
 glm::mat4 view = cam.GetViewMatrix();
 glm::mat4 proj = glm::perspective(glm::radians(70.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
-glm::mat4 model = glm::mat4(1.0f);
 
 float lastX = 400.0f;
 float lastY = 300.0f;
 float sensitivity = 0.1f;
 bool firstMouse = true;
 
-Sphere sphere = Sphere(5, 48);
-
 int main(void){
-
+    
     if (!glfwInit()) {
         std::cout << "error initializing glfw" << std::endl;
         return -1;
@@ -96,9 +93,13 @@ int main(void){
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
+    Sphere sphere = Sphere(5, 48);
+
+    sphere.Transform = glm::translate(glm::mat4(1.0), glm::vec3(-0.0, -5.0, -50.0));
+
     Shader shader("res/shaders/NewShader.shader");
     shader.Bind();
-    shader.SetUniformMat4f("u_model", model);
+    shader.SetUniformMat4f("u_model", sphere.GetModelMatrix());
     shader.SetUniformMat4f("u_view", view);
     shader.SetUniformMat4f("u_proj", proj);
     shader.UnBind();
@@ -140,7 +141,7 @@ int main(void){
         shader.Bind();
         shader.SetUniformMat4f("u_view", view);
         shader.SetUniformMat4f("u_proj", proj);
-        shader.SetUniformMat4f("u_model", model);
+        shader.SetUniformMat4f("u_model", sphere.GetModelMatrix());
         glDrawElements(GL_TRIANGLES, 6 * (48 - 1) * (48 - 1), GL_UNSIGNED_INT, 0);
         shader.UnBind();
         sphere.RenderStop();
@@ -266,6 +267,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         switch (key) {
         case GLFW_KEY_ESCAPE:
             if (CurrentMode == WINDOW_MODE){    //close
+                break; //comment out to close on esc
                 std::cout << "Escape key pressed, closing window." << std::endl;
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
             } else {    //leave cameramode
