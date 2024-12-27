@@ -102,7 +102,6 @@ int main(void){
     ElementArrayBuffer EBO(6 * 47 * 47 * sizeof(unsigned int), indices);
 
     VAO.Bind();
-    VAO.Bind();
     EBO.Bind();
     VAO.AddVertexBuffer(VBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     //VAO.AddVertexBuffer(VBOTex, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);

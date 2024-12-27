@@ -1,13 +1,20 @@
 #pragma once
 #include <GLFW/glfw3.h>
 
+//temp shader stuff
+enum ShaderProgram {
+    Skybox,
+    NewShader,
+    BasicShader
+};
+
 //input stuff
 enum MouseInputMode {
     WINDOW_MODE,
     CAMERA_MODE
 };
 
-void ToggleMouseInputMode(GLFWwindow* window,MouseInputMode &mode) {
+void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode) {
     if (mode == WINDOW_MODE) {
         mode = CAMERA_MODE;
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
