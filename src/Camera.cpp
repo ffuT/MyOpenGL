@@ -28,19 +28,24 @@ void Camera::Update(){
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float delta){
-    float velocity = m_MovementSpeed * delta;
+    glm::vec3 MovementDir = glm::vec3(0.0);
+
     if (direction == FORWARD)
-        m_Position += m_Front * velocity;
+        MovementDir += m_Front;
     if (direction == BACKWARD)
-        m_Position -= m_Front * velocity;
+        MovementDir -= m_Front;
     if (direction == LEFT)
-        m_Position -= m_Right * velocity;
+        MovementDir -= m_Right;
     if (direction == RIGHT)
-        m_Position += m_Right * velocity;
+        MovementDir += m_Right;
     if (direction == UP)
-        m_Position += m_Up * velocity;
+        MovementDir += m_Up;
     if (direction == DOWN)
-        m_Position -= m_Up * velocity;
+        MovementDir -= m_Up;
+
+    float velocity = delta * m_MovementSpeed;
+    m_Position += glm::normalize(MovementDir) * velocity;
+
     Update();
 }
 

@@ -26,7 +26,7 @@ public:
     
     float m_Yaw = -90.0f;
     float m_Pitch = 0.0f;
-    float m_MovementSpeed = 0.02;
+    float m_MovementSpeed = 0.05;
     float m_MouseSensitivity = 2;
     //float m_Zoom;
     

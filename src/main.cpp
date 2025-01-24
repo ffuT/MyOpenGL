@@ -41,6 +41,8 @@ MouseInputMode CurrentMode = WINDOW_MODE;
 float delta = 0.0f;
 float RenderDelta = 0.0f;
 
+std::vector<Shape*> Objects;
+
 GLFWwindow* window;
 
 Camera cam;
@@ -98,26 +100,39 @@ int main(){
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
+    
+    ShaderManger shaderManager;
+
+    Sphere light = Sphere(1, 36, ShaderProgram::UnlitShader);
+    Objects.push_back(&light);
 
     Sphere sphere = Sphere(5, 48);
-    sphere.Transform = glm::translate(glm::mat4(1.0), glm::vec3(-0.0, -5.0, -50.0));
+    sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-0.0, -5.0, -50.0)));
+    sphere.SetColor(glm::vec4(1, 0, 0, 1));
+    Objects.push_back(&sphere);
 
-    Shader shader("res/shaders/NewShader.shader");
+    Sphere sphere2 = Sphere(5, 48);
+    sphere2.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-0.0, -5.0, -25.0)));
+    sphere2.SetColor(glm::vec4(0, 1, 0, 1));
+    Objects.push_back(&sphere2);
+  
+    Sphere sphere3 = Sphere(5, 48);
+    sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-0.0, -5.0, 0.0)));
+    sphere3.SetColor(glm::vec4(0, 0, 1, 1));
+    Objects.push_back(&sphere3);
 
+    //skybox
     VertexArray skyboxVAO;
     VertexBuffer skyboxVBO(108 * sizeof(float), skyboxVertices);
     skyboxVAO.Bind();
     skyboxVAO.AddVertexBuffer(skyboxVBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     skyboxVAO.Unbind();
     skyboxVBO.Unbind();
-    
     Shader skyboxShader("res/shaders/Skybox.shader");
     skyboxShader.Bind();
     skyboxShader.UnBind();
-
     skyboxVAO.Unbind();
     skyboxVBO.Unbind();
-
     GLuint cubemapTexture = loadCubemap(faces);
 
     auto now = std::chrono::system_clock::now();
@@ -136,14 +151,30 @@ int main(){
         glDepthFunc(GL_LESS);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //render sphere
-        sphere.RenderStart();
-        shader.Bind();
-        shader.SetUniformMat4f("u_view", view);
-        shader.SetUniformMat4f("u_proj", proj);
-        shader.SetUniformMat4f("u_model", sphere.GetModelMatrix());
-        sphere.RenderStop();
-        shader.UnBind();
+        static glm::vec3 light(10, 10, 0);
+        static glm::vec3 lightCol(1, 1, 1);
+
+        static float ambient = 0.15, spec = 0.5;
+
+        Objects[0]->SetColor(glm::vec4(lightCol, 1.0));
+        Objects[0]->SetTransform(glm::translate(glm::mat4(1.0), light));
+
+        for (Shape* s : Objects) {  //render all objects stored in list
+            s->RenderStart();
+            Shader* currentshader = shaderManager.GetShader(s->GetShader());
+            currentshader->Bind();
+            currentshader->SetUniformMat4f("u_view", view);
+            currentshader->SetUniformMat4f("u_proj", proj);
+            currentshader->SetUniformMat4f("u_model", s->GetModelMatrix());
+            currentshader->SetUniform3f("u_sphereColor", s->GetColor());
+            currentshader->SetUniform1f("u_ambientStrength", ambient);  // s->GetAmbient
+            currentshader->SetUniform1f("u_specularStrength", spec);    // s->GetSpecular
+            currentshader->SetUniform3f("u_lightPos", light);
+            currentshader->SetUniform3f("u_viewPos", cam.GetPos());
+            currentshader->SetUniform3f("u_lightColor", lightCol);
+            s->RenderStop();
+            currentshader->UnBind();
+        }
 
         // skybox here
         glDepthFunc(GL_LEQUAL);
@@ -166,22 +197,6 @@ int main(){
         ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", cam.m_Front.x, cam.m_Front.y, cam.m_Front.z);
         ImGui::Text("Cameramode Mode: %d", CurrentMode);
 
-        static glm::vec3 light(10, 10, 0);
-        static glm::vec3 lightCol(1, 1, 1);
-        static glm::vec3 sphereCol(1, 0, 0);
-        static float ambient = 0.15, spec = 0.5;
-
-        shader.Bind();
-        shader.SetUniform1f("u_ambientStrength", ambient);
-        shader.SetUniform1f("u_specularStrength", spec);
-        shader.SetUniform3f("u_lightPos", light);
-        shader.SetUniform3f("u_viewPos", cam.GetPos());
-        shader.SetUniform3f("u_lightColor", lightCol);
-        shader.SetUniform3f("u_sphereColor", sphereCol);
-        shader.UnBind();
-
-        ImGui::ColorPicker3("Sphere Color: ", (float*)&sphereCol);
-        ImGui::NewLine();
         ImGui::ColorEdit3("Light Color: ", (float*) &lightCol);
         ImGui::NewLine();
         ImGui::DragFloat3("Light position", (float*)&light);

@@ -75,6 +75,14 @@ Sphere::Sphere(const float& radius, const int& pointAmount)
 		  NewShader){
 }
 
+Sphere::Sphere(const float& radius, const int& pointAmount, ShaderProgram shadername)
+    : m_Radius(radius), m_PointAmount(pointAmount),
+    Shape(CreateSphere(radius, pointAmount),
+        CreateSphereNormals(CreateSphere(radius, pointAmount), pointAmount),
+        CreateSphereIndices(pointAmount),
+        shadername) {
+}
+
 Sphere::~Sphere(){
 
 }
