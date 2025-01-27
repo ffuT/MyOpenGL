@@ -17,14 +17,23 @@ void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode) {
     }
 };
 
-//skybox stuff      
-std::vector<std::string> faces{
-    "res/textures/skybox/right.jpg",
-    "res/textures/skybox/left.jpg",
-    "res/textures/skybox/top.jpg",
-    "res/textures/skybox/bottom.jpg",
-    "res/textures/skybox/front.jpg",
-    "res/textures/skybox/back.jpg"
+namespace skyboxes { //skybox stuff
+    const std::vector<std::string> Tutorial{
+        "res/textures/skybox/right.jpg",
+        "res/textures/skybox/left.jpg",
+        "res/textures/skybox/top.jpg",
+        "res/textures/skybox/bottom.jpg",
+        "res/textures/skybox/front.jpg",
+        "res/textures/skybox/back.jpg"
+    };
+    const std::vector<std::string> Space{
+        "res/textures/skyboxSpace/right.png",
+        "res/textures/skyboxSpace/left.png",
+        "res/textures/skyboxSpace/top.png",
+        "res/textures/skyboxSpace/bottom.png",
+        "res/textures/skyboxSpace/front.png",
+        "res/textures/skyboxSpace/back.png"
+    };
 };
 
 GLuint loadCubemap(std::vector<std::string> faces) {
@@ -36,7 +45,7 @@ GLuint loadCubemap(std::vector<std::string> faces) {
     for (unsigned int i = 0; i < faces.size(); i++) {
         unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
         if (data) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, nrChannels == 4 ? GL_RGBA : GL_RGB, width, height, 0, nrChannels == 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         }
         else {

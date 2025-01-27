@@ -36,7 +36,7 @@ out vec4 FragColor;
 uniform sampler2D texture1;     // Texture sampler
 uniform vec3 u_lightPos;        // Light position
 uniform vec3 u_lightColor;      // Light color
-uniform vec3 u_sphereColor;     // sphere color
+uniform vec3 u_Color;           // Object color
 uniform vec3 u_viewPos;
 uniform float u_ambientStrength;
 uniform float u_specularStrength;
@@ -61,7 +61,6 @@ void main() {
     vec3 specular = specularStrength * spec * u_lightColor;
 
     // Combine results
-    vec3 result = (ambient + diffuse + specular) * u_sphereColor;
+    vec3 result = (ambient + diffuse + specular) * u_Color;
     FragColor = vec4(result, 1.0);
-
 }

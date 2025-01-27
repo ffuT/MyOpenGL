@@ -6,8 +6,7 @@ public:
     Sphere(const float& radius, const int& pointAmount);
     Sphere(const float& radius, const int& pointAmount, ShaderProgram shadername);
     ~Sphere();
-
-private:
+    
     const float m_Radius;
     const int m_PointAmount;
 };

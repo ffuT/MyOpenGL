@@ -28,18 +28,20 @@
 unsigned int WIDTH = 1280, HEIGHT = 720;
 constexpr bool USE_VSYNC = false;
 constexpr float YAW = 0.022f, PITCH = 0.022f; //same turn speed as CS2, UE5 default = 0.07
+bool isFullscreen = false;
+int windowedX, windowedY, windowedWidth, windowedHeight; // To save windowed mode state
 
 //functions
 void MousePosCallBack(GLFWwindow* window, double xpos, double ypos);
 void MouseCallBack(GLFWwindow* window, int button, int action, int mods);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void keyPressed();
+void keyPressed(float delta);
+void toggleFullscreen();
 
 //program variables
 MouseInputMode CurrentMode = WINDOW_MODE;
 
 float delta = 0.0f;
-float RenderDelta = 0.0f;
 
 std::vector<Shape*> Objects;
 
@@ -62,7 +64,7 @@ int main(){
         return -1;
     }
 
-    window = glfwCreateWindow(WIDTH, HEIGHT, "My Open GL Program", NULL, NULL);
+    window = glfwCreateWindow(WIDTH, HEIGHT, "Loading...", NULL, NULL);
     if (!window) {
         glfwTerminate();
         std::cout << "error creating window" << std::endl;
@@ -77,6 +79,12 @@ int main(){
 
     glfwMakeContextCurrent(window);
 
+    glfwSetWindowAttrib(window, GLFW_RESIZABLE, GLFW_FALSE);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black color
+    glClear(GL_COLOR_BUFFER_BIT);
+    glfwSwapBuffers(window); // Clear to black while initializing
+
     //glfw callbacks
     glfwSetMouseButtonCallback(window, MouseCallBack);
     glfwSetCursorPosCallback(window, MousePosCallBack);
@@ -84,8 +92,7 @@ int main(){
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow* win, int width, int height) {
         glViewport(0, 0, width, height);
         HEIGHT = height;
-        WIDTH = width;
-        std::cout << "Viewport resized to " << width << "x" << height << std::endl;});
+        WIDTH = width;});
 
     glViewport(0, 0, WIDTH, HEIGHT);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
@@ -107,17 +114,17 @@ int main(){
     Objects.push_back(&light);
 
     Sphere sphere = Sphere(5, 48);
-    sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-0.0, -5.0, -50.0)));
+    sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-25.0, -5.0, -50.0)));
     sphere.SetColor(glm::vec4(1, 0, 0, 1));
     Objects.push_back(&sphere);
 
     Sphere sphere2 = Sphere(5, 48);
-    sphere2.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-0.0, -5.0, -25.0)));
+    sphere2.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(0.0, -5.0, -50.0)));
     sphere2.SetColor(glm::vec4(0, 1, 0, 1));
     Objects.push_back(&sphere2);
   
     Sphere sphere3 = Sphere(5, 48);
-    sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-0.0, -5.0, 0.0)));
+    sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(25.0, -5.0, -50.0)));
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     Objects.push_back(&sphere3);
 
@@ -133,25 +140,26 @@ int main(){
     skyboxShader.UnBind();
     skyboxVAO.Unbind();
     skyboxVBO.Unbind();
-    GLuint cubemapTexture = loadCubemap(faces);
+    GLuint cubemapTexture = loadCubemap(skyboxes::Space);
 
     auto now = std::chrono::system_clock::now();
     auto last = std::chrono::system_clock::now();
+
+    glfwSetWindowTitle(window, "My OpenGL Program");
     while (!glfwWindowShouldClose(window)) { // window/game loop
         //update values
         last = now;
         now = std::chrono::system_clock::now();
         delta = (float)(now - last).count() / 10000;
-        RenderDelta = 1000.0f / ImGui::GetIO().Framerate;
         view = cam.GetViewMatrix();
 
-        keyPressed(); //keypress check
+        keyPressed(delta); //keypress check
 
         /* Render here */
         glDepthFunc(GL_LESS);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        static glm::vec3 light(10, 10, 0);
+        static glm::vec3 light(0, 25, -10);
         static glm::vec3 lightCol(1, 1, 1);
 
         static float ambient = 0.15, spec = 0.5;
@@ -166,7 +174,7 @@ int main(){
             currentshader->SetUniformMat4f("u_view", view);
             currentshader->SetUniformMat4f("u_proj", proj);
             currentshader->SetUniformMat4f("u_model", s->GetModelMatrix());
-            currentshader->SetUniform3f("u_sphereColor", s->GetColor());
+            currentshader->SetUniform3f("u_Color", s->GetColor());
             currentshader->SetUniform1f("u_ambientStrength", ambient);  // s->GetAmbient
             currentshader->SetUniform1f("u_specularStrength", spec);    // s->GetSpecular
             currentshader->SetUniform3f("u_lightPos", light);
@@ -217,8 +225,7 @@ int main(){
     return 0;
 }
 
-void keyPressed() {
-
+void keyPressed(float delta) {
     //camera movement
     if (CurrentMode == MouseInputMode::CAMERA_MODE){
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -241,8 +248,30 @@ void keyPressed() {
 
 }
 
-void MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (action == GLFW_PRESS) {
+        switch (key) {
+        case GLFW_KEY_ESCAPE:
+            if (CurrentMode == WINDOW_MODE) {    //close
+                //break; //comment out to close on esc
+                std::cout << "Escape key pressed, closing window." << std::endl;
+                glfwSetWindowShouldClose(window, GLFW_TRUE);
+            }
+            else {    //leave cameramode
+                ToggleMouseInputMode(window, CurrentMode);
+            }
+            break;
+        case GLFW_KEY_F11:
+            toggleFullscreen();
+            break;
+        case GLFW_KEY_F:
+            toggleFullscreen();
+            break;
+        }
+    }
+}
 
+void MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
     if (ImGui::GetIO().WantCaptureMouse) { //ignore mouseclicks on imgui
         return;
     }
@@ -276,18 +305,17 @@ void MousePosCallBack(GLFWwindow* window, double xpos, double ypos) {
     cam.ProcessMouse(xOffset, yOffset);
 }
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (action == GLFW_PRESS) {
-        switch (key) {
-        case GLFW_KEY_ESCAPE:
-            if (CurrentMode == WINDOW_MODE){    //close
-                break; //comment out to close on esc
-                std::cout << "Escape key pressed, closing window." << std::endl;
-                glfwSetWindowShouldClose(window, GLFW_TRUE);
-            } else {    //leave cameramode
-                ToggleMouseInputMode(window, CurrentMode);
-            }
-            break;
-        }
+void toggleFullscreen() {
+    static GLFWmonitor* monitor = glfwGetPrimaryMonitor(); // Get the primary monitor
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);   // Get monitor resolution
+
+    if (isFullscreen) {
+        glfwSetWindowMonitor(window, nullptr, windowedX, windowedY, windowedWidth, windowedHeight, 0);
+    } else {
+        glfwGetWindowPos(window, &windowedX, &windowedY);
+        glfwGetWindowSize(window, &windowedWidth, &windowedHeight);
+
+        glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
     }
+    isFullscreen = !isFullscreen;
 }
