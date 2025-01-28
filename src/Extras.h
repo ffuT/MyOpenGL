@@ -62,7 +62,7 @@ GLuint loadCubemap(std::vector<std::string> faces) {
     return textureID;
 };
 
-float skyboxVertices[] = {
+float skyboxVertices[108] = {
     // positions          
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,

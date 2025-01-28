@@ -26,10 +26,8 @@
 
 //program params
 unsigned int WIDTH = 1280, HEIGHT = 720;
-constexpr bool USE_VSYNC = false;
 constexpr float YAW = 0.022f, PITCH = 0.022f; //same turn speed as CS2, UE5 default = 0.07
-bool isFullscreen = false;
-int windowedX, windowedY, windowedWidth, windowedHeight; // To save windowed mode state
+constexpr bool USE_VSYNC = false;
 
 //functions
 void MousePosCallBack(GLFWwindow* window, double xpos, double ypos);
@@ -39,18 +37,19 @@ void keyPressed(float delta);
 void toggleFullscreen();
 
 //program variables
-MouseInputMode CurrentMode = WINDOW_MODE;
-
+bool isFullscreen = false;
+int windowedX, windowedY, windowedWidth, windowedHeight; // save windowed mode state
 float delta = 0.0f;
-
-std::vector<Shape*> Objects;
 
 GLFWwindow* window;
 
+std::vector<Shape*> Objects;
+
+MouseInputMode CurrentWindowMode = WINDOW_MODE;
+
 Camera cam;
 
-glm::mat4 view = cam.GetViewMatrix();
-glm::mat4 proj = glm::perspective(glm::radians(70.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
+glm::mat4 proj = glm::perspective(glm::radians(75.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
 
 float lastX = 400.0f;
 float lastY = 300.0f;
@@ -58,7 +57,6 @@ float sensitivity = 0.1f;
 bool firstMouse = true;
 
 int main(){
-    
     if (!glfwInit()) {
         std::cout << "error initializing glfw" << std::endl;
         return -1;
@@ -80,6 +78,7 @@ int main(){
     glfwMakeContextCurrent(window);
 
     glfwSetWindowAttrib(window, GLFW_RESIZABLE, GLFW_FALSE);
+    glfwSwapInterval(USE_VSYNC); //vsyncs
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black color
     glClear(GL_COLOR_BUFFER_BIT);
@@ -101,8 +100,6 @@ int main(){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glfwSwapInterval(USE_VSYNC); //vsyncs
-
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -110,20 +107,20 @@ int main(){
     
     ShaderManger shaderManager;
 
-    Sphere light = Sphere(1, 36, ShaderProgram::UnlitShader);
+    Sphere light = Sphere(1, 16, ShaderProgram::UnlitShader);
     Objects.push_back(&light);
 
-    Sphere sphere = Sphere(5, 48);
+    Sphere sphere = Sphere(5, 32);
     sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-25.0, -5.0, -50.0)));
     sphere.SetColor(glm::vec4(1, 0, 0, 1));
     Objects.push_back(&sphere);
 
-    Sphere sphere2 = Sphere(5, 48);
+    Sphere sphere2 = Sphere(5, 32);
     sphere2.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(0.0, -5.0, -50.0)));
     sphere2.SetColor(glm::vec4(0, 1, 0, 1));
     Objects.push_back(&sphere2);
   
-    Sphere sphere3 = Sphere(5, 48);
+    Sphere sphere3 = Sphere(5, 32);
     sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(25.0, -5.0, -50.0)));
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     Objects.push_back(&sphere3);
@@ -151,7 +148,6 @@ int main(){
         last = now;
         now = std::chrono::system_clock::now();
         delta = (float)(now - last).count() / 10000;
-        view = cam.GetViewMatrix();
 
         keyPressed(delta); //keypress check
 
@@ -162,7 +158,7 @@ int main(){
         static glm::vec3 light(0, 25, -10);
         static glm::vec3 lightCol(1, 1, 1);
 
-        static float ambient = 0.15, spec = 0.5;
+        static float ambient = 0.01, spec = 0.5;
 
         Objects[0]->SetColor(glm::vec4(lightCol, 1.0));
         Objects[0]->SetTransform(glm::translate(glm::mat4(1.0), light));
@@ -171,7 +167,7 @@ int main(){
             s->RenderStart();
             Shader* currentshader = shaderManager.GetShader(s->GetShader());
             currentshader->Bind();
-            currentshader->SetUniformMat4f("u_view", view);
+            currentshader->SetUniformMat4f("u_view", cam.GetViewMatrix());
             currentshader->SetUniformMat4f("u_proj", proj);
             currentshader->SetUniformMat4f("u_model", s->GetModelMatrix());
             currentshader->SetUniform3f("u_Color", s->GetColor());
@@ -188,7 +184,7 @@ int main(){
         glDepthFunc(GL_LEQUAL);
         skyboxVAO.Bind();
         skyboxShader.Bind();
-        skyboxShader.SetUniformMat4f("u_view", glm::mat4(glm::mat3(view)));
+        skyboxShader.SetUniformMat4f("u_view", glm::mat4(glm::mat3(cam.GetViewMatrix())));
         skyboxShader.SetUniformMat4f("u_proj", proj);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         skyboxShader.UnBind();
@@ -200,15 +196,14 @@ int main(){
         ImGui::NewFrame();
 
         ImGui::Begin("Test");
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::Text("Position: x:%.3f  y:%.3f  z:%.3f ", cam.m_Position.x, cam.m_Position.y, cam.m_Position.z);
+        ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("Position: x:%.3f  y:%.3f  z:%.1f ", cam.m_Position.x, cam.m_Position.y, cam.m_Position.z);
         ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", cam.m_Front.x, cam.m_Front.y, cam.m_Front.z);
-        ImGui::Text("Cameramode Mode: %d", CurrentMode);
+        ImGui::Text("Cameramode Mode: %d", CurrentWindowMode);
 
         ImGui::ColorEdit3("Light Color: ", (float*) &lightCol);
+        ImGui::DragFloat3("Light position", (float*) &light);
         ImGui::NewLine();
-        ImGui::DragFloat3("Light position", (float*)&light);
-
         ImGui::DragFloat("Ambient Strength: ", &ambient, 0.001f, 0.0f, 1.0f);
         ImGui::DragFloat("Specular Strength: ", &spec, 0.001f, 0.0f, 1.0f);
 
@@ -227,7 +222,7 @@ int main(){
 
 void keyPressed(float delta) {
     //camera movement
-    if (CurrentMode == MouseInputMode::CAMERA_MODE){
+    if (CurrentWindowMode == MouseInputMode::CAMERA_MODE){
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
             cam.ProcessKeyboard(FORWARD, delta);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -245,20 +240,19 @@ void keyPressed(float delta) {
     }   else {
 
     }
-
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
         switch (key) {
         case GLFW_KEY_ESCAPE:
-            if (CurrentMode == WINDOW_MODE) {    //close
+            if (CurrentWindowMode == WINDOW_MODE) {    //close
                 //break; //comment out to close on esc
                 std::cout << "Escape key pressed, closing window." << std::endl;
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
             }
             else {    //leave cameramode
-                ToggleMouseInputMode(window, CurrentMode);
+                ToggleMouseInputMode(window, CurrentWindowMode);
             }
             break;
         case GLFW_KEY_F11:
@@ -276,9 +270,9 @@ void MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
         return;
     }
 
-    if (CurrentMode == WINDOW_MODE){
+    if (CurrentWindowMode == WINDOW_MODE){
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-            ToggleMouseInputMode(window, CurrentMode);
+            ToggleMouseInputMode(window, CurrentWindowMode);
             firstMouse = true;
         }
     } else { //cameramode
@@ -287,7 +281,7 @@ void MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
 }
 
 void MousePosCallBack(GLFWwindow* window, double xpos, double ypos) {
-    if (CurrentMode == WINDOW_MODE)
+    if (CurrentWindowMode == WINDOW_MODE)
         return;
     
     if (firstMouse) {

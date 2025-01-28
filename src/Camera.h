@@ -28,7 +28,6 @@ public:
     float m_Pitch = 0.0f;
     float m_MovementSpeed = 0.05;
     float m_MouseSensitivity = 2;
-    //float m_Zoom;
     
 public:
     Camera();

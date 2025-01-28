@@ -45,7 +45,6 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float delta){
 
     float velocity = delta * m_MovementSpeed;
     m_Position += glm::normalize(MovementDir) * velocity;
-
     Update();
 }
 
@@ -58,4 +57,3 @@ void Camera::ProcessMouse(float xOffset, float yOffset) {
         m_Pitch = -89.0f;
     Update();
 }
-

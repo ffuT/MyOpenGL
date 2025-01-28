@@ -1,7 +1,6 @@
 #include "Sphere.h"
 #include <iostream>
 
-//helper functions
 const float PI = 3.14159265358979323846f;
 std::vector<float> CreateSphere(const float radius, const int PointAmount) {
     const int totalelements = 3 * PointAmount * PointAmount; // Adjusted for more points
@@ -68,11 +67,12 @@ std::vector<float> CreateSphereNormals(const std::vector<float>& points, const i
 };
 
 Sphere::Sphere(const float& radius, const int& pointAmount)
-	: m_Radius(radius), m_PointAmount(pointAmount),
-	Shape(CreateSphere(radius, pointAmount),
-		  CreateSphereNormals(CreateSphere(radius, pointAmount), pointAmount),
+	: m_Radius(1), m_PointAmount(pointAmount),
+	Shape(CreateSphere(1, pointAmount),
+		  CreateSphereNormals(CreateSphere(1, pointAmount), pointAmount),
 		  CreateSphereIndices(pointAmount),
 		  NewShader){
+    m_Scale = glm::scale(m_Scale, glm::vec3(5.0));
 }
 
 Sphere::Sphere(const float& radius, const int& pointAmount, ShaderProgram shadername)
