@@ -17,7 +17,7 @@ void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode) {
     }
 };
 
-namespace skyboxes { //skybox stuff
+namespace skyboxes { //skybox stuff maybe move to texture manager at some point in future
     const std::vector<std::string> Tutorial{
         "res/textures/skybox/right.jpg",
         "res/textures/skybox/left.jpg",

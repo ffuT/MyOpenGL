@@ -3,7 +3,7 @@
 
 //temp shader stuff
 enum ShaderProgram {
-    Skybox,
+    SkyboxShader,
     NewShader,
     BasicShader,
     UnlitShader

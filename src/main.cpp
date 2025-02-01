@@ -14,13 +14,13 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include "Renderer.h"
 #include "Shader.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "ElementArrayBuffer.h"
 #include "Camera.h"
 #include "ShaderManager.h"
-#include "Shape.h"
 #include "Sphere.h"
 #include "Extras.h" //all my helper shit that doesnt really fit in anywhere
 
@@ -105,7 +105,7 @@ int main(){
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
     
-    ShaderManger shaderManager;
+    Renderer renderer = Renderer();
 
     Sphere light = Sphere(1, 16, ShaderProgram::UnlitShader);
     Objects.push_back(&light);
@@ -124,24 +124,19 @@ int main(){
     sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(25.0, -5.0, -50.0)));
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     Objects.push_back(&sphere3);
-
+    
     //skybox
     VertexArray skyboxVAO;
     VertexBuffer skyboxVBO(108 * sizeof(float), skyboxVertices);
     skyboxVAO.Bind();
     skyboxVAO.AddVertexBuffer(skyboxVBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    skyboxVAO.Unbind();
-    skyboxVBO.Unbind();
     Shader skyboxShader("res/shaders/Skybox.shader");
-    skyboxShader.Bind();
-    skyboxShader.UnBind();
     skyboxVAO.Unbind();
     skyboxVBO.Unbind();
     GLuint cubemapTexture = loadCubemap(skyboxes::Space);
 
     auto now = std::chrono::system_clock::now();
     auto last = std::chrono::system_clock::now();
-
     glfwSetWindowTitle(window, "My OpenGL Program");
     while (!glfwWindowShouldClose(window)) { // window/game loop
         //update values
@@ -152,33 +147,15 @@ int main(){
         keyPressed(delta); //keypress check
 
         /* Render here */
-        glDepthFunc(GL_LESS);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         static glm::vec3 light(0, 25, -10);
         static glm::vec3 lightCol(1, 1, 1);
 
-        static float ambient = 0.01, spec = 0.5;
-
         Objects[0]->SetColor(glm::vec4(lightCol, 1.0));
         Objects[0]->SetTransform(glm::translate(glm::mat4(1.0), light));
 
-        for (Shape* s : Objects) {  //render all objects stored in list
-            s->RenderStart();
-            Shader* currentshader = shaderManager.GetShader(s->GetShader());
-            currentshader->Bind();
-            currentshader->SetUniformMat4f("u_view", cam.GetViewMatrix());
-            currentshader->SetUniformMat4f("u_proj", proj);
-            currentshader->SetUniformMat4f("u_model", s->GetModelMatrix());
-            currentshader->SetUniform3f("u_Color", s->GetColor());
-            currentshader->SetUniform1f("u_ambientStrength", ambient);  // s->GetAmbient
-            currentshader->SetUniform1f("u_specularStrength", spec);    // s->GetSpecular
-            currentshader->SetUniform3f("u_lightPos", light);
-            currentshader->SetUniform3f("u_viewPos", cam.GetPos());
-            currentshader->SetUniform3f("u_lightColor", lightCol);
-            s->RenderStop();
-            currentshader->UnBind();
-        }
+        renderer.RenderObjects(Objects, cam, proj, light, lightCol);
 
         // skybox here
         glDepthFunc(GL_LEQUAL);
@@ -197,16 +174,12 @@ int main(){
 
         ImGui::Begin("Test");
         ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::Text("Position: x:%.3f  y:%.3f  z:%.1f ", cam.m_Position.x, cam.m_Position.y, cam.m_Position.z);
-        ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", cam.m_Front.x, cam.m_Front.y, cam.m_Front.z);
+        ImGui::Text("Position: x:%.3f  y:%.3f  z:%.1f ", cam.GetPos().x, cam.GetPos().y, cam.GetPos().z);
+        ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", cam.GetFront().x, cam.GetFront().y, cam.GetFront().z);
         ImGui::Text("Cameramode Mode: %d", CurrentWindowMode);
 
         ImGui::ColorEdit3("Light Color: ", (float*) &lightCol);
         ImGui::DragFloat3("Light position", (float*) &light);
-        ImGui::NewLine();
-        ImGui::DragFloat("Ambient Strength: ", &ambient, 0.001f, 0.0f, 1.0f);
-        ImGui::DragFloat("Specular Strength: ", &spec, 0.001f, 0.0f, 1.0f);
-
         ImGui::End();
 
         ImGui::Render();
@@ -237,8 +210,10 @@ void keyPressed(float delta) {
             cam.ProcessKeyboard(DOWN, delta);
         if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
             cam.ProcessKeyboard(DOWN, delta);
-    }   else {
-
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+            cam.ProcessKeyboard(ROLLLEFT, delta);
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+            cam.ProcessKeyboard(ROLLRIGHT, delta);
     }
 }
 
@@ -250,8 +225,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 //break; //comment out to close on esc
                 std::cout << "Escape key pressed, closing window." << std::endl;
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
-            }
-            else {    //leave cameramode
+            } else {    //leave cameramode
                 ToggleMouseInputMode(window, CurrentWindowMode);
             }
             break;

@@ -1,59 +1,78 @@
 #include "Camera.h"
+#include <iostream>
 
-Camera::Camera() :
-	m_Position(glm::vec3(0.0)),
-	m_Front(glm::vec3(0.0, 0.0, -1.0)),
-	m_Up(glm::vec3(0.0, 1.0, 0.0)),
-	m_Right(glm::vec3(1.0, 0.0, 0.0))
-{
+/*
+    I dont understand quaternions... thank you chatgpt and deepseek
+*/
 
+Camera::Camera() {
 }
 
-Camera::~Camera(){
-
+Camera::~Camera() {
 }
 
-glm::vec3 Camera::GetPos(){
+glm::vec3 Camera::GetPos() {
     return m_Position;
 }
 
-void Camera::Update(){
-    glm::vec3 front;
-    front.x = cos(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
-    front.y = sin(glm::radians(m_Pitch));
-    front.z = sin(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
-    m_Front = glm::normalize(front);
-    m_Right = glm::normalize(glm::cross(m_Front, m_WorldUp));
-    m_Up = glm::normalize(glm::cross(m_Right, m_Front));
+glm::vec3 Camera::GetFront()
+{
+    return m_Orientation * glm::vec3(0.0, 0.0, -1.0);
 }
 
-void Camera::ProcessKeyboard(Camera_Movement direction, float delta){
+glm::mat4 Camera::GetViewMatrix() {
+        glm::vec3 front = m_Orientation * glm::vec3(0.0, 0.0, -1.0);
+        glm::vec3 up = m_Orientation * glm::vec3(0.0, 1.0, 0.0);
+        return glm::lookAt(m_Position, m_Position + front, up);
+}
+
+void Camera::ProcessKeyboard(Camera_Movement direction, float delta) {
     glm::vec3 MovementDir = glm::vec3(0.0);
 
+    // Calculate local front, right, and up vectors based on the current orientation
+    glm::vec3 front = m_Orientation * glm::vec3(0.0, 0.0, -1.0);
+    glm::vec3 right = m_Orientation * glm::vec3(1.0, 0.0, 0.0);
+    glm::vec3 up = m_Orientation * glm::vec3(0.0, 1.0, 0.0);
+
     if (direction == FORWARD)
-        MovementDir += m_Front;
+        MovementDir += front;
     if (direction == BACKWARD)
-        MovementDir -= m_Front;
+        MovementDir -= front;
     if (direction == LEFT)
-        MovementDir -= m_Right;
+        MovementDir -= right;
     if (direction == RIGHT)
-        MovementDir += m_Right;
+        MovementDir += right;
     if (direction == UP)
-        MovementDir += m_Up;
+        MovementDir += up;
     if (direction == DOWN)
-        MovementDir -= m_Up;
+        MovementDir -= up;
+
+    if (direction == ROLLLEFT || direction == ROLLRIGHT) {
+        float rollSpeed = m_MovementSpeed * 1.5; // Adjust roll speed as needed
+        float rollAngle = rollSpeed * delta;
+
+        if (direction == ROLLLEFT)
+            rollAngle = -rollAngle;
+
+        glm::vec3 front = glm::normalize(m_Orientation * glm::vec3(0.0, 0.0, -1.0));
+        glm::quat rollQuat = glm::angleAxis(glm::radians(rollAngle), front);
+
+        m_Orientation = rollQuat * m_Orientation;
+        m_Orientation = glm::normalize(m_Orientation);
+        return;
+    }
 
     float velocity = delta * m_MovementSpeed;
     m_Position += glm::normalize(MovementDir) * velocity;
-    Update();
 }
 
 void Camera::ProcessMouse(float xOffset, float yOffset) {
-    m_Yaw += xOffset * m_MouseSensitivity;
-    m_Pitch += yOffset * m_MouseSensitivity;
-    if (m_Pitch > 89.0f) 
-        m_Pitch = 89.0f;
-    if (m_Pitch < -89.0f) 
-        m_Pitch = -89.0f;
-    Update();
+    glm::vec3 localRight = m_Orientation * glm::vec3(1.0, 0.0, 0.0);
+    glm::vec3 localUp = m_Orientation * glm::vec3(0.0, 1.0, 0.0);
+
+    glm::quat yawQuat = glm::angleAxis(glm::radians(-xOffset * m_MouseSensitivity), localUp); // Rotate around local up
+    glm::quat pitchQuat = glm::angleAxis(glm::radians(yOffset * m_MouseSensitivity), localRight); // Rotate around local right
+
+    m_Orientation = yawQuat * pitchQuat * m_Orientation;
+    m_Orientation = glm::normalize(m_Orientation); // Normalize to avoid drift
 }

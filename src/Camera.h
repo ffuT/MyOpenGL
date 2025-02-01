@@ -1,7 +1,11 @@
 #pragma once
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+/*
+    I dont understand quaternions... thank you chatgpt and deepseek
+*/
 
 enum Camera_Movement {
     FORWARD,
@@ -10,34 +14,26 @@ enum Camera_Movement {
     RIGHT,
     UP,
     DOWN,
-    rotRIGHT,
-    rotLEFT,
-    rotUP,
-    rotDOWN
+    ROLLLEFT,
+    ROLLRIGHT
 };
 
-class Camera{
-public:
+class Camera {
+private:
     const glm::vec3 m_WorldUp = glm::vec3(0.0, 1.0, 0.0);
-    glm::vec3 m_Position;
-    glm::vec3 m_Front;
-    glm::vec3 m_Right;
-    glm::vec3 m_Up;
-    
-    float m_Yaw = -90.0f;
-    float m_Pitch = 0.0f;
-    float m_MovementSpeed = 0.05;
-    float m_MouseSensitivity = 2;
-    
+    const float m_MovementSpeed = 0.05;
+    const float m_MouseSensitivity = 2;
+
+    glm::vec3 m_Position = glm::vec3(0.0);
+    glm::quat m_Orientation = glm::quat(1.0, 0.0, 0.0, 0.0);
+
 public:
     Camera();
     ~Camera();
-
     glm::vec3 GetPos();
+    glm::vec3 GetFront();
+    glm::mat4 GetViewMatrix();
 
-    void Update();
     void ProcessKeyboard(Camera_Movement movement, float delta);
     void ProcessMouse(float xOffset, float yOffset);
-    inline glm::mat4 GetViewMatrix() { return glm::lookAt(m_Position, (m_Position + m_Front), m_Up);}
-
 };

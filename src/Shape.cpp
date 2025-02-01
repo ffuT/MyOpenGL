@@ -5,11 +5,11 @@ Shape::Shape(const std::vector<float>& vertices,
 	const std::vector<float>& normals,
 	const std::vector<unsigned int>& indices,
 	const ShaderProgram& shaderName)
-	: Vertices(vertices), Normals(normals), Indices(indices),
+	: m_Vertices(vertices), m_Normals(normals), m_Indices(indices),
 	m_VBOPos(vertices.size() * sizeof(float), vertices.data()),
 	m_VBONorm(normals.size() * sizeof(float), normals.data()),
 	m_EBO(indices.size() * sizeof(unsigned int), indices.data()),
-		ShaderName(shaderName) {
+	m_ShaderName(shaderName) {
 
 	m_VAO.Bind();
 	m_EBO.Bind();
@@ -26,11 +26,11 @@ Shape::Shape(const std::vector<float>& vertices,
 	const std::vector<unsigned int>& indices,
 	const ShaderProgram& shaderName,
 	const glm::vec4& color)
-	: Vertices(vertices), Normals(normals), Indices(indices),
+	: m_Vertices(vertices), m_Normals(normals), m_Indices(indices),
 	m_VBOPos(vertices.size() * sizeof(float), vertices.data()),
 	m_VBONorm(normals.size() * sizeof(float), normals.data()),
 	m_EBO(indices.size() * sizeof(unsigned int), indices.data()),
-	ShaderName(shaderName), Color(color) {
+	m_ShaderName(shaderName), m_Color(color) {
 
 	m_VAO.Bind();
 	m_EBO.Bind();
@@ -42,25 +42,25 @@ Shape::Shape(const std::vector<float>& vertices,
 	m_EBO.Unbind();
 }
 
-
 Shape::~Shape(){
 }
 
-void Shape::RenderStart(){
+void Shape::Render() {
 	m_VAO.Bind();
-}
-
-void Shape::RenderStop() {
-	glDrawElements(GL_TRIANGLES, Indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);
 	m_VAO.Unbind();
 }
 
 ShaderProgram Shape::GetShader(){
-	return ShaderName;
+	return m_ShaderName;
 }
 
 glm::vec4 Shape::GetColor(){
-	return Color;
+	return m_Color;
+}
+
+float Shape::GetSpecular(){
+	return m_SpecularStrenght;
 }
 
 void Shape::SetTransform(glm::mat4 transform){
@@ -68,7 +68,7 @@ void Shape::SetTransform(glm::mat4 transform){
 }
 
 void Shape::SetColor(const glm::vec4 color){
-	Color = color;
+	m_Color = color;
 }
 
 glm::mat4 Shape::GetModelMatrix(){
@@ -76,5 +76,5 @@ glm::mat4 Shape::GetModelMatrix(){
 }
 
 ShaderProgram Shape::GetShaderName(){
-	return ShaderName;
+	return m_ShaderName;
 }

@@ -10,14 +10,15 @@
 
 class Shape{
 protected:	
-	std::vector<float> Vertices;
-	std::vector<float> Normals;
-	std::vector<unsigned int> Indices;
-	glm::vec4 Color = glm::vec4(1.0);
+	std::vector<float> m_Vertices;
+	std::vector<float> m_Normals;
+	std::vector<unsigned int> m_Indices;
+	glm::vec4 m_Color = glm::vec4(1.0);
+	float m_SpecularStrenght = 0.5;
 
-	ShaderProgram ShaderName;
+	ShaderProgram m_ShaderName;
 
-	VertexArray m_VAO = VertexArray();
+	VertexArray m_VAO;
 	VertexBuffer m_VBOPos;
 	VertexBuffer m_VBONorm;
 	ElementArrayBuffer m_EBO;
@@ -40,13 +41,14 @@ public:
 	
 	virtual ~Shape();
 	
-	virtual void RenderStart();
-	virtual void RenderStop();
+	virtual void Render();
 
 	virtual ShaderProgram GetShader();
 	virtual ShaderProgram GetShaderName();
 	virtual glm::mat4 GetModelMatrix();
 	virtual glm::vec4 GetColor();
+
+	virtual float GetSpecular();
 
 	virtual void SetTransform(glm::mat4 transform);
 
