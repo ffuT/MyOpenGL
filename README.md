@@ -10,3 +10,4 @@ Mouse1 to go into camera mode <br>
 Mouse to move Camera <br>
 Esc to leave camera mode, and if in window mode close program <br>
 WASD to move, C to go down, Spacebar to go up <br>
+Q and E to Roll camera <br>
