@@ -1,5 +1,4 @@
 #pragma once
-
 #include <string>
 #include <unordered_map>
 
@@ -12,11 +11,6 @@ struct ShaderProgramSource {
 };
 
 class Shader {
-private:
-	std::string m_FilePath;
-	unsigned int m_RendererID;
-	std::unordered_map<std::string, int> m_UniformLocationCahce;
-
 public:
 	Shader(const std::string& filepath);
 	~Shader();
@@ -39,4 +33,8 @@ private:
 	unsigned int CompileShader(unsigned int type, const std::string& source);
 	unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
 	unsigned int GetUniformLocation(const std::string& name);
+
+	std::string m_FilePath;
+	unsigned int m_RendererID;
+	std::unordered_map<std::string, int> m_UniformLocationCahce;
 };

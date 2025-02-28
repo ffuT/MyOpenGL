@@ -6,40 +6,40 @@ Game::Game(const  char* title) : m_title(title) {
         exit(-1);
     }
 
-    window = glfwCreateWindow(WIDTH, HEIGHT, "Loading...", NULL, NULL);
-    if (!window) {
+    m_window = glfwCreateWindow(WIDTH, HEIGHT, "Loading...", NULL, NULL);
+    if (!m_window) {
         glfwTerminate();
         std::cout << "error creating window" << std::endl;
         exit(-1);
     }
 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(m_window);
     if (glewInit() != GLEW_OK)
         std::cout << "Error!" << std::endl;
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(m_window);
 
-    glfwSetWindowAttrib(window, GLFW_RESIZABLE, GLFW_FALSE);
+    glfwSetWindowAttrib(m_window, GLFW_RESIZABLE, GLFW_FALSE);
     glfwSwapInterval(USE_VSYNC); //vsyncs
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glfwSwapBuffers(window); // Clear to black while initializing
+    glfwSwapBuffers(m_window); // Clear to black while initializing
 
     //glfw callbacks
-    glfwSetWindowUserPointer(window, this);
-    glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
+    glfwSetWindowUserPointer(m_window, this);
+    glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int mods) {
         static_cast<Game*>(glfwGetWindowUserPointer(window))->MouseCallBack(window, button, action, mods);
         });
-    glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
+    glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double xpos, double ypos) {
         static_cast<Game*>(glfwGetWindowUserPointer(window))->MousePosCallBack(window, xpos, ypos);
         });
-    glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+    glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
         static_cast<Game*>(glfwGetWindowUserPointer(window))->keyCallback(window, key, scancode, action, mods);
         });
-    glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+    glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
         static_cast<Game*>(glfwGetWindowUserPointer(window))->FramebufferSizeCallBack(window, width, height);
         });
 
@@ -52,7 +52,7 @@ Game::Game(const  char* title) : m_title(title) {
 
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplGlfw_InitForOpenGL(m_window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 }
 
@@ -93,14 +93,14 @@ void Game::Run(){
     
     auto last = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
-    glfwSetWindowTitle(window, m_title);
-    while (!glfwWindowShouldClose(window)) { // window/game loop
+    glfwSetWindowTitle(m_window, m_title);
+    while (!glfwWindowShouldClose(m_window)) { // window/game loop
         //update values
         last = now;
         now = std::chrono::high_resolution_clock::now();
-        delta = (now - last).count();
+        m_delta = (now - last).count();
 
-        keyPressed(delta); //keypress check
+        keyPressed(m_delta); //keypress check
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -111,13 +111,13 @@ void Game::Run(){
         m_objects[0]->SetColor(glm::vec4(lightCol, 1.0));
         m_objects[0]->SetTransform(glm::translate(glm::mat4(1.0), light));
 
-        renderer.RenderObjects(m_objects, cam, m_proj, light, lightCol);
+        renderer.RenderObjects(m_objects, m_cam, m_proj, light, lightCol);
 
         // skybox here
         glDepthFunc(GL_LEQUAL);
         skyboxVAO.Bind();
         skyboxShader.Bind();
-        skyboxShader.SetUniformMat4f("u_view", glm::mat4(glm::mat3(cam.GetViewMatrix())));
+        skyboxShader.SetUniformMat4f("u_view", glm::mat4(glm::mat3(m_cam.GetViewMatrix())));
         skyboxShader.SetUniformMat4f("u_proj", m_proj);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         skyboxShader.UnBind();
@@ -130,9 +130,9 @@ void Game::Run(){
 
         ImGui::Begin("Test");
         ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::Text("Position: x:%.3f  y:%.3f  z:%.1f ", cam.GetPos().x, cam.GetPos().y, cam.GetPos().z);
-        ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", cam.GetFront().x, cam.GetFront().y, cam.GetFront().z);
-        ImGui::Text("Cameramode Mode: %d", currentWindowMode);
+        ImGui::Text("Position: x:%.3f  y:%.3f  z:%.1f ", m_cam.GetPos().x, m_cam.GetPos().y, m_cam.GetPos().z);
+        ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", m_cam.GetFront().x, m_cam.GetFront().y, m_cam.GetFront().z);
+        ImGui::Text("Cameramode Mode: %d", m_currentWindowMode);
 
         ImGui::ColorEdit3("Light Color: ", (float*)&lightCol);
         ImGui::DragFloat3("Light position", (float*)&light);
@@ -141,7 +141,7 @@ void Game::Run(){
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(m_window);
         glfwPollEvents();
     }
 
@@ -150,25 +150,25 @@ void Game::Run(){
 
 void Game::keyPressed(float delta) {
     //camera movement
-    if (currentWindowMode == MouseInputMode::CAMERA_MODE) {
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            cam.ProcessKeyboard(FORWARD, delta);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            cam.ProcessKeyboard(BACKWARD, delta);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            cam.ProcessKeyboard(LEFT, delta);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            cam.ProcessKeyboard(RIGHT, delta);
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-            cam.ProcessKeyboard(UP, delta);
-        if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-            cam.ProcessKeyboard(DOWN, delta);
-        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-            cam.ProcessKeyboard(DOWN, delta);
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-            cam.ProcessKeyboard(ROLLLEFT, delta);
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-            cam.ProcessKeyboard(ROLLRIGHT, delta);
+    if (m_currentWindowMode == MouseInputMode::CAMERA_MODE) {
+        if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
+            m_cam.ProcessKeyboard(FORWARD, delta);
+        if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
+            m_cam.ProcessKeyboard(BACKWARD, delta);
+        if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
+            m_cam.ProcessKeyboard(LEFT, delta);
+        if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
+            m_cam.ProcessKeyboard(RIGHT, delta);
+        if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            m_cam.ProcessKeyboard(UP, delta);
+        if (glfwGetKey(m_window, GLFW_KEY_C) == GLFW_PRESS)
+            m_cam.ProcessKeyboard(DOWN, delta);
+        if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+            m_cam.ProcessKeyboard(DOWN, delta);
+        if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
+            m_cam.ProcessKeyboard(ROLLLEFT, delta);
+        if (glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS)
+            m_cam.ProcessKeyboard(ROLLRIGHT, delta);
     }
 }
 
@@ -188,13 +188,13 @@ void Game::toggleFullscreen() {
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);   // Get monitor resolution
 
     if (IS_FULLSCREEN) {
-        glfwSetWindowMonitor(window, nullptr, windowedX, windowedY, windowedWidth, windowedHeight, 0);
+        glfwSetWindowMonitor(m_window, nullptr, m_windowedX, m_windowedY, m_windowedWidth, m_windowedHeight, 0);
     }
     else {
-        glfwGetWindowPos(window, &windowedX, &windowedY);
-        glfwGetWindowSize(window, &windowedWidth, &windowedHeight);
+        glfwGetWindowPos(m_window, &m_windowedX, &m_windowedY);
+        glfwGetWindowSize(m_window, &m_windowedWidth, &m_windowedHeight);
 
-        glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+        glfwSetWindowMonitor(m_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
     }
     IS_FULLSCREEN = !IS_FULLSCREEN;
 }
@@ -203,13 +203,13 @@ void Game::keyCallback(GLFWwindow* window, int key, int scancode, int action, in
     if (action == GLFW_PRESS) {
         switch (key) {
         case GLFW_KEY_ESCAPE:
-            if (currentWindowMode == MouseInputMode::WINDOW_MODE) {    //close
+            if (m_currentWindowMode == MouseInputMode::WINDOW_MODE) {    //close
                 //break; //comment out to close on esc
                 std::cout << "Escape key pressed, closing m_window." << std::endl;
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
             }
             else {    //leave cameramode
-                ToggleMouseInputMode(window, currentWindowMode);
+                ToggleMouseInputMode(window, m_currentWindowMode);
             }
             break;
         case GLFW_KEY_F11:
@@ -227,10 +227,10 @@ void Game::MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
         return;
     }
 
-    if (currentWindowMode == MouseInputMode::WINDOW_MODE) {
+    if (m_currentWindowMode == MouseInputMode::WINDOW_MODE) {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-            ToggleMouseInputMode(window, currentWindowMode);
-            firstMouse = true;
+            ToggleMouseInputMode(window, m_currentWindowMode);
+            FIRST_MOUSE = true;
         }
     }
     else { //cameramode
@@ -239,22 +239,22 @@ void Game::MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
 }
 
 void Game::MousePosCallBack(GLFWwindow* window, double xpos, double ypos) {
-    if (currentWindowMode == MouseInputMode::WINDOW_MODE)
+    if (m_currentWindowMode == MouseInputMode::WINDOW_MODE)
         return;
 
-    if (firstMouse) {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
+    if (FIRST_MOUSE) {
+        m_lastX = xpos;
+        m_lastY = ypos;
+        FIRST_MOUSE = false;
     }
 
-    float xOffset = (xpos - lastX) * YAW;
-    float yOffset = (lastY - ypos) * PITCH;
+    float xOffset = (xpos - m_lastX) * YAW;
+    float yOffset = (m_lastY - ypos) * PITCH;
 
-    lastX = xpos;
-    lastY = ypos;
+    m_lastX = xpos;
+    m_lastY = ypos;
 
-    cam.ProcessMouse(xOffset, yOffset);
+    m_cam.ProcessMouse(xOffset, yOffset);
 }
 
 void Game::FramebufferSizeCallBack(GLFWwindow* window, int width, int height){

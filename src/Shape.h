@@ -1,5 +1,4 @@
 #pragma once
-
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -9,7 +8,32 @@
 #include "ShaderManager.h"
 
 class Shape{
-protected:	
+public:
+	Shape(const std::vector<float>& vertices,
+		const std::vector<float>& normals, 
+		const std::vector<unsigned int>& indices,
+		const ShaderProgram& shaderName);
+
+	Shape(const std::vector<float>& vertices,
+		const std::vector<float>& normals, 
+		const std::vector<unsigned int>& indices,
+		const ShaderProgram& shaderName,
+		const glm::vec4& color);
+	
+	virtual ~Shape();
+
+	virtual void Render();
+
+	virtual void SetTransform(glm::mat4 transform);
+	virtual void SetColor(const glm::vec4 color);
+	
+	virtual float GetSpecular();
+	virtual ShaderProgram GetShader();
+	virtual ShaderProgram GetShaderName();
+	virtual glm::mat4 GetModelMatrix();
+	virtual glm::vec4 GetColor();
+
+protected:
 	std::vector<float> m_Vertices;
 	std::vector<float> m_Normals;
 	std::vector<unsigned int> m_Indices;
@@ -27,30 +51,4 @@ protected:
 	glm::mat4 m_Rotation = glm::mat4(1.0);
 	glm::mat4 m_Transform = glm::mat4(1.0);
 
-public:
-	Shape(const std::vector<float>& vertices,
-		const std::vector<float>& normals, 
-		const std::vector<unsigned int>& indices,
-		const ShaderProgram& shaderName);
-
-	Shape(const std::vector<float>& vertices,
-		const std::vector<float>& normals, 
-		const std::vector<unsigned int>& indices,
-		const ShaderProgram& shaderName,
-		const glm::vec4& color);
-	
-	virtual ~Shape();
-	
-	virtual void Render();
-
-	virtual ShaderProgram GetShader();
-	virtual ShaderProgram GetShaderName();
-	virtual glm::mat4 GetModelMatrix();
-	virtual glm::vec4 GetColor();
-
-	virtual float GetSpecular();
-
-	virtual void SetTransform(glm::mat4 transform);
-
-	virtual void SetColor(const glm::vec4 color);
 };

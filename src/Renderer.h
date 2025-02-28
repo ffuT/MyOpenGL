@@ -5,7 +5,6 @@
 #include "Camera.h"
 
 class Renderer{
-
 public:
 	Renderer();
 	~Renderer();

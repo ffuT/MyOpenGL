@@ -4,9 +4,6 @@
 #include "ElementArrayBuffer.h"
 
 class VertexArray{
-private:
-	unsigned int m_ID;
-
 public:
 	VertexArray();
 	~VertexArray();
@@ -18,5 +15,8 @@ public:
 		GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
 
 	void BindElementArrayBuffer(const ElementArrayBuffer& ebo);
+
+private:
+	unsigned int m_ID;
 };
 
