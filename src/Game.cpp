@@ -63,10 +63,11 @@ Game::~Game(){
 void Game::Run(){
     Renderer renderer = Renderer();
 
-    Sphere light = Sphere(1, 16, ShaderProgram::UnlitShader);
+    Sphere light = Sphere(2, 16, ShaderProgram::UnlitShader);
     m_objects.push_back(&light);
 
     Sphere sphere = Sphere(5, 32);
+    sphere.SetTextID((char*) "sphere 1");
     sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-25.0, -5.0, -50.0)));
     sphere.SetColor(glm::vec4(1, 0, 0, 1));
     m_objects.push_back(&sphere);
@@ -81,7 +82,7 @@ void Game::Run(){
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     m_objects.push_back(&sphere3);
 
-    //skybox
+    //skybox needs abstraction
     VertexArray skyboxVAO;
     VertexBuffer skyboxVBO(108 * sizeof(float), skyboxes::skyboxVertices);
     skyboxVAO.Bind();
@@ -100,18 +101,14 @@ void Game::Run(){
         now = std::chrono::high_resolution_clock::now();
         m_delta = (now - last).count();
 
-        keyPressed(m_delta); //keypress check
-
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        static glm::vec3 light(0, 25, -10);
+        static glm::vec3 light(0, 92, -25);
         static glm::vec3 lightCol(1, 1, 1);
 
-        m_objects[0]->SetColor(glm::vec4(lightCol, 1.0));
-        m_objects[0]->SetTransform(glm::translate(glm::mat4(1.0), light));
+        keyPressed(m_delta); //keypress check
 
-        renderer.RenderObjects(m_objects, m_cam, m_proj, light, lightCol);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        Render(renderer, lightCol, light);
 
         // skybox here
         glDepthFunc(GL_LEQUAL);
@@ -123,29 +120,90 @@ void Game::Run(){
         skyboxShader.UnBind();
         skyboxVAO.Unbind();
 
-        //imgui
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::Begin("Test");
-        ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::Text("Position: x:%.3f  y:%.3f  z:%.1f ", m_cam.GetPos().x, m_cam.GetPos().y, m_cam.GetPos().z);
-        ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", m_cam.GetFront().x, m_cam.GetFront().y, m_cam.GetFront().z);
-        ImGui::Text("Cameramode Mode: %d", m_currentWindowMode);
-
-        ImGui::ColorEdit3("Light Color: ", (float*)&lightCol);
-        ImGui::DragFloat3("Light position", (float*)&light);
-        ImGui::End();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        RenderImGui(lightCol, light);
 
         glfwSwapBuffers(m_window);
         glfwPollEvents();
     }
 
     glfwTerminate();
+}
+
+void Game::Render(Renderer& renderer, glm::vec3& lightcol, glm::vec3& lightpos) {
+    m_objects[0]->SetColor(glm::vec4(lightcol, 1.0));
+    m_objects[0]->SetTransform(glm::translate(glm::mat4(1.0), lightpos));
+
+    renderer.RenderObjects(m_objects, m_cam, m_proj, lightpos, lightcol);
+}
+
+void Game::RenderImGui(glm::vec3& lightcol, glm::vec3& lightpos){
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("ImGui");
+    ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Text("Position: x:%.3f  y:%.3f  z:%.1f ", m_cam.GetPos().x, m_cam.GetPos().y, m_cam.GetPos().z);
+    ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", m_cam.GetFront().x, m_cam.GetFront().y, m_cam.GetFront().z);
+    ImGui::Text("Camera Mode: %s", m_currentWindowMode ? "true" : "false");
+
+    ImGui::NewLine();
+    ImGui::TextColored(ImVec4(1, 1, 1, 1), "Settings");
+
+    if (ImGui::Button("Fullscreen"))
+        toggleFullscreen();
+    ImGui::SameLine();
+    ImGui::Text(": %s", IS_FULLSCREEN ? "on" : "off");
+   
+    if (ImGui::Button("VSync")) {
+        USE_VSYNC = !USE_VSYNC;
+        glfwSwapInterval(USE_VSYNC);
+    }
+    ImGui::SameLine();
+    ImGui::Text(": %s", USE_VSYNC ? "on" : "off");
+    ImGui::NewLine();
+    
+    ImGui::TextColored(ImVec4(1, 1, 1, 1), "Scene");
+    ImGui::ColorEdit3("Light Color: ", (float*)&lightcol);
+    ImGui::DragFloat3("Light position", (float*)&lightpos);
+
+    ImGui::Spacing();
+
+    static int selectedSphereIndex = -1;
+    if (ImGui::BeginCombo("Object", selectedSphereIndex >= 0 ? ("Object " + std::to_string(selectedSphereIndex) + ": " + m_objects[selectedSphereIndex]->GetTextID()).c_str()  : "Objects")) {
+        for (int i = 1; i < m_objects.size(); i++) { // Skip light sphere at index 0
+            std::string itemLabel = "Index " + std::to_string(i) + ": " + m_objects[i]->GetTextID();
+            bool isSelected = (selectedSphereIndex == i);
+            if (ImGui::Selectable(itemLabel.c_str(), isSelected))
+                selectedSphereIndex = i;
+            if (isSelected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+
+    if (selectedSphereIndex >= 0 && selectedSphereIndex < m_objects.size()) {
+        Sphere* selectedSphere = static_cast<Sphere*>(m_objects[selectedSphereIndex]);
+
+        float specular = selectedSphere->GetSpecular();
+        glm::vec4 color = selectedSphere->GetColor();
+        glm::vec3 position = glm::vec3(selectedSphere->GetTransform()[3]); // Get translation from matrix
+
+        ImGui::DragFloat("Specular", (float*)&specular, 0.001f, 0, 1);
+        ImGui::ColorEdit3("Color", (float*)&color);
+        ImGui::DragFloat3("Position", (float*)&position, 0.1f);
+
+        selectedSphere->SetColor(color);
+        selectedSphere->SetTransform(glm::translate(glm::mat4(1.0), position));
+        selectedSphere->SetSpecular(specular);
+    }
+
+    ImGui::NewLine();
+
+    ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Game::keyPressed(float delta) {

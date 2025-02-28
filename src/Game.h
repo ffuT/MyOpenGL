@@ -37,6 +37,9 @@ public:
     void Run();
 
 private:
+    void Render(Renderer& renderer, glm::vec3& lightcol, glm::vec3& lightpos);
+    void RenderImGui(glm::vec3& lightcol, glm::vec3& lightpos);
+
     void toggleFullscreen();
     void keyPressed(float delta);
     void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode);

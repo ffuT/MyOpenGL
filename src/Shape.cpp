@@ -4,8 +4,8 @@
 Shape::Shape(const std::vector<float>& vertices,
 	const std::vector<float>& normals,
 	const std::vector<unsigned int>& indices,
-	const ShaderProgram& shaderName)
-	: m_Vertices(vertices), m_Normals(normals), m_Indices(indices),
+	const ShaderProgram& shaderName) :	
+	m_Vertices(vertices), m_Normals(normals), m_Indices(indices),
 	m_VBOPos(vertices.size() * sizeof(float), vertices.data()),
 	m_VBONorm(normals.size() * sizeof(float), normals.data()),
 	m_EBO(indices.size() * sizeof(unsigned int), indices.data()),
@@ -21,12 +21,13 @@ Shape::Shape(const std::vector<float>& vertices,
 	m_EBO.Unbind();
 }
 
-Shape::Shape(const std::vector<float>& vertices,
+Shape::Shape(
+	const std::vector<float>& vertices,
 	const std::vector<float>& normals,
 	const std::vector<unsigned int>& indices,
 	const ShaderProgram& shaderName,
-	const glm::vec4& color)
-	: m_Vertices(vertices), m_Normals(normals), m_Indices(indices),
+	const glm::vec4& color) :
+	m_Vertices(vertices), m_Normals(normals), m_Indices(indices),
 	m_VBOPos(vertices.size() * sizeof(float), vertices.data()),
 	m_VBONorm(normals.size() * sizeof(float), normals.data()),
 	m_EBO(indices.size() * sizeof(unsigned int), indices.data()),
@@ -59,6 +60,10 @@ glm::vec4 Shape::GetColor(){
 	return m_Color;
 }
 
+const char* Shape::GetTextID(){
+	return ObjectTextID.c_str();
+}
+
 float Shape::GetSpecular(){
 	return m_SpecularStrenght;
 }
@@ -71,8 +76,20 @@ void Shape::SetColor(const glm::vec4 color){
 	m_Color = color;
 }
 
+void Shape::SetSpecular(const float spec){
+	m_SpecularStrenght = spec;
+}
+
+void Shape::SetTextID(char* name){
+	ObjectTextID = name;
+}
+
 glm::mat4 Shape::GetModelMatrix(){
 	return m_Transform * (m_Rotation * m_Scale);
+}
+
+glm::mat4 Shape::GetTransform(){
+	return m_Transform;
 }
 
 ShaderProgram Shape::GetShaderName(){
