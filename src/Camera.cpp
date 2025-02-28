@@ -15,8 +15,7 @@ glm::vec3 Camera::GetPos() {
     return m_Position;
 }
 
-glm::vec3 Camera::GetFront()
-{
+glm::vec3 Camera::GetFront(){
     return m_Orientation * glm::vec3(0.0, 0.0, -1.0);
 }
 
@@ -27,6 +26,7 @@ glm::mat4 Camera::GetViewMatrix() {
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float delta) {
+    float moveSpeed = m_MovementSpeed / 1000000;
     glm::vec3 MovementDir = glm::vec3(0.0);
 
     // Calculate local front, right, and up vectors based on the current orientation
@@ -48,7 +48,7 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float delta) {
         MovementDir -= up;
 
     if (direction == ROLLLEFT || direction == ROLLRIGHT) {
-        float rollSpeed = m_MovementSpeed * 1.5; // Adjust roll speed as needed
+        float rollSpeed = moveSpeed * 1.5; // adjust roll speed
         float rollAngle = rollSpeed * delta;
 
         if (direction == ROLLLEFT)
@@ -62,7 +62,7 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float delta) {
         return;
     }
 
-    float velocity = delta * m_MovementSpeed;
+    float velocity = delta * moveSpeed;
     m_Position += glm::normalize(MovementDir) * velocity;
 }
 
@@ -74,5 +74,5 @@ void Camera::ProcessMouse(float xOffset, float yOffset) {
     glm::quat pitchQuat = glm::angleAxis(glm::radians(yOffset * m_MouseSensitivity), localRight); // Rotate around local right
 
     m_Orientation = yawQuat * pitchQuat * m_Orientation;
-    m_Orientation = glm::normalize(m_Orientation); // Normalize to avoid drift
+    m_Orientation = glm::normalize(m_Orientation);
 }

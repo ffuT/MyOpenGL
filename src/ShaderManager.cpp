@@ -1,7 +1,7 @@
 #include "ShaderManager.h"
 #include "Shader.h"
 
-ShaderManger::ShaderManger(){
+ShaderManger::ShaderManger() {
 
 }
 

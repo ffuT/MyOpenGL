@@ -20,9 +20,8 @@ enum Camera_Movement {
 
 class Camera {
 private:
-    const glm::vec3 m_WorldUp = glm::vec3(0.0, 1.0, 0.0);
-    const float m_MovementSpeed = 0.05;
-    const float m_MouseSensitivity = 2;
+    const float m_MovementSpeed = 0.1;  // x speed * 1000 = movement in 3d space a second
+    const float m_MouseSensitivity = 2; // same as in cs2: yaw = 0,022
 
     glm::vec3 m_Position = glm::vec3(0.0);
     glm::quat m_Orientation = glm::quat(1.0, 0.0, 0.0, 0.0);
