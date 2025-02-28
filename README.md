@@ -4,7 +4,7 @@ The program uses GLFW, GLEW, IMGUI, and GLM. The code is inspired by The Chernos
 but has major diffrences based on my preferences and how i want to structure the code. Its a project i work on sometimes, but has no real goals other than just learning
 ## Build and run
 it build using premake5 <br>
-It builds and runs on both windows and my linux (arch) machine, but with bugs on linux
+It builds and runs on both windows and my linux (arch) machine
 ## Key Binds
 Mouse1 to go into camera mode <br>
 Mouse to move Camera <br>
