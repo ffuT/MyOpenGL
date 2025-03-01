@@ -19,4 +19,4 @@ WASD to move, C to go down, Spacebar to go up <br>
 Q and E to Roll camera <br>
 
 ## Preview
-![Preview](https://i.gyazo.com/0b3e155cfadcc25cfdf49cd8e250abd4.gif)
+![Preview](https://i.gyazo.com/c748d074aba0e7100d40b2bf5c4e5f6e.gif)
