@@ -15,7 +15,7 @@ then to get the visual studio project files run `premake5 vs2022` (or whatever v
 For Linux it depends what distribution you use, but for arch its simple. <br>
 first install premake run `sudo pacman -S premake5` <br>
 then to create the project run `premake5 gmake` <br> 
-finally to compile the code run `make -C Build/` in the project dir <br>
+finally to compile the code run `make -C Build/` <br>
 
 ## Key Binds
 <b>Mouse1</b> to go into camera mode <br>
