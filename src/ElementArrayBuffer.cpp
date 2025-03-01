@@ -1,7 +1,7 @@
 #include "ElementArrayBuffer.h"
 #include <GL/glew.h>
 
-ElementArrayBuffer::ElementArrayBuffer(unsigned int size, const void* data){
+ElementArrayBuffer::ElementArrayBuffer(const unsigned int size, const void* data){
 	glGenBuffers(1, &m_ID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);

@@ -9,7 +9,7 @@ ShaderManger::~ShaderManger(){
 
 }
 
-Shader* ShaderManger::GetShader(ShaderProgram ShaderName){
+Shader* ShaderManger::GetShader(const ShaderProgram& ShaderName) {
 	switch (ShaderName){
 		case ShaderProgram::SkyboxShader:
 			return &m_SkyboxShader;

@@ -14,7 +14,7 @@ public:
     ShaderManger();
     ~ShaderManger();
 
-    Shader* GetShader(ShaderProgram ShaderName);
+    Shader* GetShader(const ShaderProgram& ShaderName);
 
 private:
     Shader m_SkyboxShader = Shader("res/shaders/Skybox.shader");

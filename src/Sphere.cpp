@@ -1,8 +1,8 @@
 #include "Sphere.h"
 #include <iostream>
 
-const float PI = 3.14159265358979323846f;
-std::vector<float> CreateSphere(const float radius, const int PointAmount) {
+constexpr float PI = 3.14159265358979323846f;
+static std::vector<float> CreateSphere(const float radius, const int PointAmount) {
     const int totalelements = 3 * PointAmount * PointAmount; // Adjusted for more points
 
     std::vector<float> points;
@@ -22,7 +22,7 @@ std::vector<float> CreateSphere(const float radius, const int PointAmount) {
     return points;
 };
 
-std::vector<unsigned int> CreateSphereIndices(const int PointAmount) {
+static std::vector<unsigned int> CreateSphereIndices(const int PointAmount) {
     const int totalIndices = 6 * (PointAmount - 1) * (PointAmount - 1);
 
     std::vector<unsigned int> indices;
@@ -45,7 +45,7 @@ std::vector<unsigned int> CreateSphereIndices(const int PointAmount) {
     return indices;
 };
 
-std::vector<float> CreateSphereNormals(const std::vector<float>& points, const int PointAmount) {
+static std::vector<float> CreateSphereNormals(const std::vector<float>& points, const int PointAmount) {
     std::vector<float> normals;
     normals.reserve(3 * PointAmount * PointAmount); // 3 components per normal (x, y, z)
 

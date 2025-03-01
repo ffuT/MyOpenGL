@@ -2,7 +2,7 @@
 
 class ElementArrayBuffer{
 public:
-	ElementArrayBuffer(unsigned int size, const void* data);
+	ElementArrayBuffer(const unsigned int size, const void* data);
 	~ElementArrayBuffer();
 
 	void Bind() const;

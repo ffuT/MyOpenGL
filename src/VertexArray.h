@@ -12,9 +12,9 @@ public:
 	void Unbind() const;
 
 	void AddVertexBuffer(const VertexBuffer& vbo, GLuint index, GLint size,
-		GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
+		GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) const;
 
-	void BindElementArrayBuffer(const ElementArrayBuffer& ebo);
+	void BindElementArrayBuffer(const ElementArrayBuffer& ebo) const;
 
 private:
 	unsigned int m_ID;

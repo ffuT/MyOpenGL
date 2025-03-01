@@ -1,6 +1,6 @@
 #include "Game.h"
 
-Game::Game(const  char* title) : m_title(title) {
+Game::Game(const  char* title) : TITLE(title) {
     if (!glfwInit()) {
         std::cout << "error initializing glfw" << std::endl;
         exit(-1);
@@ -94,7 +94,7 @@ void Game::Run(){
     
     auto last = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
-    glfwSetWindowTitle(m_window, m_title);
+    glfwSetWindowTitle(m_window, TITLE);
     while (!glfwWindowShouldClose(m_window)) { // window/game loop
         //update values
         last = now;
@@ -206,7 +206,7 @@ void Game::RenderImGui(glm::vec3& lightcol, glm::vec3& lightpos){
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void Game::keyPressed(float delta) {
+void Game::keyPressed(const float& delta) {
     //camera movement
     if (m_currentWindowMode == MouseInputMode::CAMERA_MODE) {
         if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)

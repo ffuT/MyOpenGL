@@ -6,7 +6,7 @@ Renderer::Renderer() {
 Renderer::~Renderer(){
 }
 
-void Renderer::RenderObjects(std::vector<Shape*> objects, Camera cam, glm::mat4 proj, glm::vec3 lightpos, glm::vec3 lightcol) {
+void Renderer::RenderObjects(std::vector<Shape*>& objects, Camera& cam, glm::mat4& proj, glm::vec3& lightpos, glm::vec3& lightcol) {
 	glDepthFunc(GL_LESS);
 	for (Shape* obj: objects){
 		Shader* shader = m_ShaderManager.GetShader(obj->GetShader());
@@ -31,5 +31,3 @@ void Renderer::RenderObjects(std::vector<Shape*> objects, Camera cam, glm::mat4 
 		shader->UnBind();
 	}
 }
-
-

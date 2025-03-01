@@ -41,7 +41,7 @@ private:
     void RenderImGui(glm::vec3& lightcol, glm::vec3& lightpos);
 
     void toggleFullscreen();
-    void keyPressed(float delta);
+    void keyPressed(const float& delta);
     void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode);
     void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     void MouseCallBack(GLFWwindow* window, int button, int action, int mods);
@@ -49,7 +49,7 @@ private:
     void FramebufferSizeCallBack(GLFWwindow* window, int width, int height);
 
     //program params
-    const char* m_title;
+    const char* TITLE;
     float YAW = 0.022f, PITCH = 0.022f; //same turn speed as CS2, UE5 default = 0.07
     unsigned int WIDTH = 1280, HEIGHT = 720;
 

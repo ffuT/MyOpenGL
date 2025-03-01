@@ -11,21 +11,21 @@ Camera::Camera() {
 Camera::~Camera() {
 }
 
-glm::vec3 Camera::GetPos() {
+glm::vec3 Camera::GetPos() const {
     return m_Position;
 }
 
-glm::vec3 Camera::GetFront(){
+glm::vec3 Camera::GetFront() const {
     return m_Orientation * glm::vec3(0.0, 0.0, -1.0);
 }
 
-glm::mat4 Camera::GetViewMatrix() {
+glm::mat4 Camera::GetViewMatrix() const {
         glm::vec3 front = m_Orientation * glm::vec3(0.0, 0.0, -1.0);
         glm::vec3 up = m_Orientation * glm::vec3(0.0, 1.0, 0.0);
         return glm::lookAt(m_Position, m_Position + front, up);
 }
 
-void Camera::ProcessKeyboard(Camera_Movement direction, float delta) {
+void Camera::ProcessKeyboard(const Camera_Movement& direction, const float& delta) {
     float moveSpeed = m_MovementSpeed / 1000000;
     glm::vec3 MovementDir = glm::vec3(0.0);
 
@@ -66,7 +66,7 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float delta) {
     m_Position += glm::normalize(MovementDir) * velocity;
 }
 
-void Camera::ProcessMouse(float xOffset, float yOffset) {
+void Camera::ProcessMouse(const float& xOffset, const float& yOffset) {
     glm::vec3 localRight = m_Orientation * glm::vec3(1.0, 0.0, 0.0);
     glm::vec3 localUp = m_Orientation * glm::vec3(0.0, 1.0, 0.0);
 

@@ -46,25 +46,25 @@ Shape::Shape(
 Shape::~Shape(){
 }
 
-void Shape::Render() {
+void Shape::Render() const {
 	m_VAO.Bind();
 	glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);
 	m_VAO.Unbind();
 }
 
-ShaderProgram Shape::GetShader(){
+ShaderProgram Shape::GetShader() const {
 	return m_ShaderName;
 }
 
-glm::vec4 Shape::GetColor(){
+glm::vec4 Shape::GetColor() const {
 	return m_Color;
 }
 
-const char* Shape::GetTextID(){
+const char* Shape::GetTextID() const {
 	return ObjectTextID.c_str();
 }
 
-float Shape::GetSpecular(){
+float Shape::GetSpecular() const {
 	return m_SpecularStrenght;
 }
 
@@ -84,14 +84,14 @@ void Shape::SetTextID(char* name){
 	ObjectTextID = name;
 }
 
-glm::mat4 Shape::GetModelMatrix(){
+glm::mat4 Shape::GetModelMatrix() const {
 	return m_Transform * (m_Rotation * m_Scale);
 }
 
-glm::mat4 Shape::GetTransform(){
+glm::mat4 Shape::GetTransform() const {
 	return m_Transform;
 }
 
-ShaderProgram Shape::GetShaderName(){
+ShaderProgram Shape::GetShaderName() const {
 	return m_ShaderName;
 }

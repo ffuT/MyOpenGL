@@ -18,14 +18,14 @@ void VertexArray::Unbind() const{
 }
 
 void VertexArray::AddVertexBuffer(const VertexBuffer& vbo, GLuint index, GLint size,
-    GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) {
+    GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) const {
     Bind();
     vbo.Bind();
     glVertexAttribPointer(index, size, type, normalized, stride, pointer);
     glEnableVertexAttribArray(index);
 }
 
-void VertexArray::BindElementArrayBuffer(const ElementArrayBuffer& ebo) {
+void VertexArray::BindElementArrayBuffer(const ElementArrayBuffer& ebo) const {
     Bind();
     ebo.Bind();
 }

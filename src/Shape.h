@@ -22,20 +22,20 @@ public:
 	
 	virtual ~Shape();
 
-	virtual void Render();
+	virtual void Render() const;
 
 	virtual void SetTransform(const glm::mat4 transform);
 	virtual void SetColor(const glm::vec4 color);
 	virtual void SetSpecular(const float spec);
 	virtual void SetTextID(char* name);
 	
-	virtual float GetSpecular();
-	virtual ShaderProgram GetShader();
-	virtual ShaderProgram GetShaderName();
-	virtual glm::mat4 GetModelMatrix();
-	virtual glm::mat4 GetTransform();
-	virtual glm::vec4 GetColor();
-	virtual const char* GetTextID();
+	virtual float GetSpecular() const;
+	virtual ShaderProgram GetShader() const;
+	virtual ShaderProgram GetShaderName() const;
+	virtual glm::mat4 GetModelMatrix() const;
+	virtual glm::mat4 GetTransform() const;
+	virtual glm::vec4 GetColor() const;
+	virtual const char* GetTextID() const;
 
 	std::string ObjectTextID;
 protected:
