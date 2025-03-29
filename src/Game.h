@@ -30,6 +30,13 @@ enum MouseInputMode {
 	CAMERA_MODE
 };
 
+static void ImGuiSwitch(bool& input, const char* str) {
+    if (ImGui::Button(str)) 
+        input = !input;
+    ImGui::SameLine();
+    ImGui::Text(": %s", input ? "on" : "off");
+};
+
 class Game {
 public:
     Game(const char* title);
@@ -57,6 +64,7 @@ private:
     bool USE_VSYNC = false;
     bool IS_FULLSCREEN = false;
     bool FIRST_MOUSE = true;
+    bool USE_DEBUG_XHAIR = true;
 
     float m_lastX = 400.0f;
     float m_lastY = 300.0f;
@@ -69,4 +77,13 @@ private:
     float m_delta = 0.0f;
     std::vector<Shape*> m_objects;
     glm::mat4 m_proj = glm::perspective(glm::radians(75.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
+
+    float XHairVertices[18] = {
+        // X-axis (Red)
+        -0.02f,  0.0f, 0.0f,  0.02f, 0.0f, 0.0f,
+        // Y-axis (Green)
+        0.0f, -0.02f, 0.0f,  0.0f, 0.02f, 0.0f,
+        // Z-axis (Blue)
+        0.0f, 0.0f, -0.02f,  0.0f, 0.0f, 0.02f
+    };
 };

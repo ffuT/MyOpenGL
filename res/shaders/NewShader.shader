@@ -23,7 +23,6 @@ void main() {
     TexCoords = aTexCoords;
 }
 
-
 #shader fragment
 #version 330 core
 

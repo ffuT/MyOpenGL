@@ -6,7 +6,8 @@ enum ShaderProgram {
     SkyboxShader,
     NewShader,
     BasicShader,
-    UnlitShader
+    UnlitShader,
+    CrosshairShader
 };
 
 class ShaderManger {
@@ -21,4 +22,5 @@ private:
     Shader m_NewShader = Shader("res/shaders/NewShader.shader");
     Shader m_BasicShader = Shader("res/shaders/BasicShader.shader");
     Shader m_UnlitShader = Shader("res/shaders/UnlitShader.shader");
+    Shader m_CrosshairShader = Shader("res/shaders/Crosshair.shader");
 };

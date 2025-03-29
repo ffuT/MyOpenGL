@@ -82,6 +82,14 @@ void Game::Run(){
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     m_objects.push_back(&sphere3);
 
+    //debug crosshair
+    VertexArray XhairVAO;
+    VertexBuffer XhairVBO(18*sizeof(float), XHairVertices);
+    XhairVAO.Bind();
+    XhairVAO.AddVertexBuffer(XhairVBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    XhairVAO.Unbind();
+    XhairVBO.Unbind();
+
     //skybox needs abstraction
     VertexArray skyboxVAO;
     VertexBuffer skyboxVBO(108 * sizeof(float), skyboxes::skyboxVertices);
@@ -108,8 +116,6 @@ void Game::Run(){
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Render(renderer, lightCol, light);
-
         // skybox here
         glDepthFunc(GL_LEQUAL);
         skyboxVAO.Bind();
@@ -119,6 +125,27 @@ void Game::Run(){
         glDrawArrays(GL_TRIANGLES, 0, 36);
         skyboxShader.UnBind();
         skyboxVAO.Unbind();
+
+        Render(renderer, lightCol, light);
+
+        if (USE_DEBUG_XHAIR) {
+            glm::vec3 cameraPos = m_cam.GetPos() + m_cam.GetFront();
+            const float LINE_LENGTH = 0.025f;
+            // X-axis
+            XHairVertices[0] = cameraPos.x; XHairVertices[1] = cameraPos.y; XHairVertices[2] = cameraPos.z;
+            XHairVertices[3] = cameraPos.x + LINE_LENGTH; XHairVertices[4] = cameraPos.y; XHairVertices[5] = cameraPos.z;
+            // Y-axis
+            XHairVertices[6] = cameraPos.x; XHairVertices[7] = cameraPos.y; XHairVertices[8] = cameraPos.z;
+            XHairVertices[9] = cameraPos.x; XHairVertices[10] = cameraPos.y + LINE_LENGTH; XHairVertices[11] = cameraPos.z;
+            // Z-axis
+            XHairVertices[12] = cameraPos.x; XHairVertices[13] = cameraPos.y; XHairVertices[14] = cameraPos.z;
+            XHairVertices[15] = cameraPos.x; XHairVertices[16] = cameraPos.y; XHairVertices[17] = cameraPos.z + LINE_LENGTH;
+            //render
+            XhairVBO.Bind();
+            XhairVBO.UpdateBuffer(0, 18 * sizeof(float), XHairVertices);
+            XhairVBO.Unbind();
+            renderer.RenderXhair(XhairVAO, m_cam, m_proj);
+        }
 
         RenderImGui(lightCol, light);
 
@@ -143,7 +170,23 @@ void Game::RenderImGui(glm::vec3& lightcol, glm::vec3& lightpos){
 
     ImGui::Begin("ImGui");
     ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::Text("Position: x:%.3f  y:%.3f  z:%.1f ", m_cam.GetPos().x, m_cam.GetPos().y, m_cam.GetPos().z);
+    
+    ImGui::Text("Position: ");  //pos start
+    ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f)); // Red
+    ImGui::Text("x:%.3f", m_cam.GetPos().x);
+    ImGui::PopStyleColor();
+
+    ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f)); // Green
+    ImGui::Text(" y:%.3f", m_cam.GetPos().y);
+    ImGui::PopStyleColor();
+
+    ImGui::SameLine();
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.33f, 1.0f, 1.0f)); // Blue
+    ImGui::Text(" z:%.1f", m_cam.GetPos().z);
+    ImGui::PopStyleColor();     // pos end
+   
     ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", m_cam.GetFront().x, m_cam.GetFront().y, m_cam.GetFront().z);
     ImGui::Text("Camera Mode: %s", m_currentWindowMode ? "true" : "false");
 
@@ -155,12 +198,14 @@ void Game::RenderImGui(glm::vec3& lightcol, glm::vec3& lightpos){
     ImGui::SameLine();
     ImGui::Text(": %s", IS_FULLSCREEN ? "on" : "off");
    
-    if (ImGui::Button("VSync")) {
+    if (ImGui::Button("Vsync")){
         USE_VSYNC = !USE_VSYNC;
         glfwSwapInterval(USE_VSYNC);
     }
     ImGui::SameLine();
     ImGui::Text(": %s", USE_VSYNC ? "on" : "off");
+
+    ImGuiSwitch(USE_DEBUG_XHAIR, "Debug Xhair");
     ImGui::NewLine();
     
     ImGui::TextColored(ImVec4(1, 1, 1, 1), "Scene");

@@ -22,5 +22,8 @@ Shader* ShaderManger::GetShader(const ShaderProgram& ShaderName) {
 
 		case ShaderProgram::UnlitShader:
 			return &m_UnlitShader;
+
+		case ShaderProgram::CrosshairShader:
+			return &m_CrosshairShader;
 	}
 }
