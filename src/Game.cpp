@@ -67,7 +67,7 @@ void Game::Run(){
     m_objects.push_back(&light);
 
     Sphere sphere = Sphere(5, 32);
-    sphere.SetTextID((char*) "sphere 1");
+    sphere.SetTextID("sphere 1");
     sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-25.0, -5.0, -50.0)));
     sphere.SetColor(glm::vec4(1, 0, 0, 1));
     m_objects.push_back(&sphere);
@@ -264,9 +264,8 @@ void Game::keyPressed(const float& delta) {
             m_cam.ProcessKeyboard(RIGHT, delta);
         if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
             m_cam.ProcessKeyboard(UP, delta);
-        if (glfwGetKey(m_window, GLFW_KEY_C) == GLFW_PRESS)
-            m_cam.ProcessKeyboard(DOWN, delta);
-        if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        if (glfwGetKey(m_window, GLFW_KEY_C) || // C or Ctrl
+            glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
             m_cam.ProcessKeyboard(DOWN, delta);
         if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
             m_cam.ProcessKeyboard(ROLLLEFT, delta);

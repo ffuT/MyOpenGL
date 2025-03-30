@@ -61,7 +61,7 @@ glm::vec4 Shape::GetColor() const {
 }
 
 const char* Shape::GetTextID() const {
-	return ObjectTextID.c_str();
+	return m_ObjectTextID.c_str();
 }
 
 float Shape::GetSpecular() const {
@@ -80,8 +80,8 @@ void Shape::SetSpecular(const float spec){
 	m_SpecularStrenght = spec;
 }
 
-void Shape::SetTextID(char* name){
-	ObjectTextID = name;
+void Shape::SetTextID(const char* name){
+	m_ObjectTextID = name;
 }
 
 glm::mat4 Shape::GetModelMatrix() const {

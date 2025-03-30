@@ -27,7 +27,7 @@ public:
 	virtual void SetTransform(const glm::mat4 transform);
 	virtual void SetColor(const glm::vec4 color);
 	virtual void SetSpecular(const float spec);
-	virtual void SetTextID(char* name);
+	virtual void SetTextID(const char* name);
 	
 	virtual float GetSpecular() const;
 	virtual ShaderProgram GetShader() const;
@@ -37,7 +37,7 @@ public:
 	virtual glm::vec4 GetColor() const;
 	virtual const char* GetTextID() const;
 
-	std::string ObjectTextID;
+	std::string m_ObjectTextID;
 protected:
 	std::vector<float> m_Vertices;
 	std::vector<float> m_Normals;
@@ -55,5 +55,4 @@ protected:
 	glm::mat4 m_Scale = glm::mat4(1.0);
 	glm::mat4 m_Rotation = glm::mat4(1.0);
 	glm::mat4 m_Transform = glm::mat4(1.0);
-
 };

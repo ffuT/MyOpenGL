@@ -55,12 +55,10 @@ private:
     void MousePosCallBack(GLFWwindow* window, double xpos, double ypos);
     void FramebufferSizeCallBack(GLFWwindow* window, int width, int height);
 
-    //program params
     const char* TITLE;
     float YAW = 0.022f, PITCH = 0.022f; //same turn speed as CS2, UE5 default = 0.07
     unsigned int WIDTH = 1280, HEIGHT = 720;
 
-    //program variables
     bool USE_VSYNC = false;
     bool IS_FULLSCREEN = false;
     bool FIRST_MOUSE = true;
@@ -79,11 +77,8 @@ private:
     glm::mat4 m_proj = glm::perspective(glm::radians(75.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
 
     float XHairVertices[18] = {
-        // X-axis (Red)
-        -0.02f,  0.0f, 0.0f,  0.02f, 0.0f, 0.0f,
-        // Y-axis (Green)
-        0.0f, -0.02f, 0.0f,  0.0f, 0.02f, 0.0f,
-        // Z-axis (Blue)
-        0.0f, 0.0f, -0.02f,  0.0f, 0.0f, 0.02f
+        -0.02f, 0.0f,  0.0f,  0.02f, 0.0f,  0.0f,
+         0.0f, -0.02f, 0.0f,  0.0f,  0.02f, 0.0f,
+         0.0f,  0.0f, -0.02f, 0.0f,  0.0f,  0.02f
     };
 };

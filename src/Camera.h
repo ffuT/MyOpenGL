@@ -35,5 +35,4 @@ private:
 
     glm::vec3 m_Position = glm::vec3(0.0);
     glm::quat m_Orientation = glm::quat(1.0, 0.0, 0.0, 0.0);
-
 };
