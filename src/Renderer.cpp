@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include <cstring>
 
 Renderer::Renderer() {
 }
@@ -72,4 +73,3 @@ void Renderer::RenderXhair(const VertexArray &vao, const Camera& cam, const glm:
 	vao.Unbind();
 	glEnable(GL_DEPTH_TEST);
 }
-
