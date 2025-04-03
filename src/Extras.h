@@ -1,4 +1,13 @@
 #pragma once
+#include <filesystem>
+#include <stb_image/stb_image.h>
+#include <iostream>
+
+struct Light {
+    glm::vec3 position;
+    glm::vec3 color;
+    float intensity;
+};
 
 namespace skyboxes { //skybox stuff maybe move to texture manager at some point in future
     const std::vector<std::string> Tutorial{

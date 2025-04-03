@@ -25,10 +25,8 @@ in vec2 TexCoords; // Interpolated texture coordinates
 out vec4 FragColor; // Output color
 
 uniform sampler2D texture1;     // Texture sampler
-uniform vec3 u_Color;           // Optional solid color
+uniform vec3 u_color;           // Optional solid color
 
 void main() {
-    
-    // Use texture color or fall back to the solid color
-    FragColor = vec4(u_Color, 1.0);
+    FragColor = vec4(u_color, 1.0);
 }

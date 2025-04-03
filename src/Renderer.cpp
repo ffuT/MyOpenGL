@@ -7,7 +7,7 @@ Renderer::Renderer() {
 Renderer::~Renderer(){
 }
 
-void Renderer::RenderObjects(std::vector<Shape*>& objects, Camera& cam, glm::mat4& proj, glm::vec3& lightpos, glm::vec3& lightcol) {
+void Renderer::RenderObjects(std::vector<Shape*>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj) {
 	glDepthFunc(GL_LESS);
 	for (Shape* obj: objects){
 		Shader* currentshader = m_ShaderManager.GetShader(obj->GetShader());
@@ -17,15 +17,28 @@ void Renderer::RenderObjects(std::vector<Shape*>& objects, Camera& cam, glm::mat
 		currentshader->SetUniformMat4f("u_model", obj->GetModelMatrix());
 		switch (obj->GetShaderName()){
 			case NewShader:
-				currentshader->SetUniform3f("u_Color", obj->GetColor());
-				currentshader->SetUniform1f("u_ambientStrength", 0.01f);
+				currentshader->SetUniform4f("u_color", obj->GetColor());
 				currentshader->SetUniform1f("u_specularStrength", obj->GetSpecular());
-				currentshader->SetUniform3f("u_lightPos", lightpos);
 				currentshader->SetUniform3f("u_viewPos", cam.GetPos());
-				currentshader->SetUniform3f("u_lightColor", lightcol);
+				currentshader->SetUniform1i("numLights", lights.size());
+				for (int i = 0; i < lights.size(); i++) {
+					std::string lightName = "lights[" + std::to_string(i) + "].";
+					currentshader->SetUniform3f(lightName + "position", lights[i].position);
+					currentshader->SetUniform3f(lightName + "color", lights[i].color);
+					currentshader->SetUniform1f(lightName + "intensity", lights[i].intensity);
+				}
 				break;
 			case UnlitShader:
-				currentshader->SetUniform3f("u_Color", obj->GetColor());
+				if (strcmp(obj->GetTextID(), "PointLight") == 0) {	
+					for (int i = 0; i < lights.size(); i++) {	//very inefficient
+						obj->SetTransform(glm::translate(glm::mat4(1.0), lights[i].position));
+						currentshader->SetUniformMat4f("u_model", obj->GetModelMatrix());
+						currentshader->SetUniform3f("u_color", lights[i].color);
+						obj->Render();
+					}
+				} else {
+					currentshader->SetUniform3f("u_color", obj->GetColor());
+				}
 				break;
 		}
 		obj->Render();

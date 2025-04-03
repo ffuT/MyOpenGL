@@ -63,8 +63,23 @@ Game::~Game(){
 void Game::Run(){
     Renderer renderer = Renderer();
 
-    Sphere light = Sphere(2, 16, ShaderProgram::UnlitShader);
-    m_objects.push_back(&light);
+    Sphere pointLight = Sphere(1, 12, ShaderProgram::UnlitShader);
+    pointLight.SetTextID("PointLight");
+    m_objects.push_back(&pointLight);
+    
+    Light pointlight1 = Light(
+        glm::vec3(0, 92, -25),
+        glm::vec3(1.0),
+        1.0f
+    );
+    m_lights.push_back(pointlight1);
+
+    Light pointlight2 = Light(
+        glm::vec3(0, -92, 25),
+        glm::vec3(1.0),
+        0.25f
+    );
+    m_lights.push_back(pointlight2);
 
     Sphere sphere = Sphere(5, 32);
     sphere.SetTextID("sphere 1");
@@ -109,9 +124,6 @@ void Game::Run(){
         now = std::chrono::high_resolution_clock::now();
         m_delta = (now - last).count();
 
-        static glm::vec3 light(0, 92, -25);
-        static glm::vec3 lightCol(1, 1, 1);
-
         keyPressed(m_delta); //keypress check
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -126,28 +138,12 @@ void Game::Run(){
         skyboxShader.UnBind();
         skyboxVAO.Unbind();
 
-        Render(renderer, lightCol, light);
+        Render(renderer);
 
-        if (USE_DEBUG_XHAIR) {
-            glm::vec3 cameraPos = m_cam.GetPos() + m_cam.GetFront();
-            const float LINE_LENGTH = 0.025f;
-            // X-axis
-            XHairVertices[0] = cameraPos.x; XHairVertices[1] = cameraPos.y; XHairVertices[2] = cameraPos.z;
-            XHairVertices[3] = cameraPos.x + LINE_LENGTH; XHairVertices[4] = cameraPos.y; XHairVertices[5] = cameraPos.z;
-            // Y-axis
-            XHairVertices[6] = cameraPos.x; XHairVertices[7] = cameraPos.y; XHairVertices[8] = cameraPos.z;
-            XHairVertices[9] = cameraPos.x; XHairVertices[10] = cameraPos.y + LINE_LENGTH; XHairVertices[11] = cameraPos.z;
-            // Z-axis
-            XHairVertices[12] = cameraPos.x; XHairVertices[13] = cameraPos.y; XHairVertices[14] = cameraPos.z;
-            XHairVertices[15] = cameraPos.x; XHairVertices[16] = cameraPos.y; XHairVertices[17] = cameraPos.z + LINE_LENGTH;
-            //render
-            XhairVBO.Bind();
-            XhairVBO.UpdateBuffer(0, 18 * sizeof(float), XHairVertices);
-            XhairVBO.Unbind();
-            renderer.RenderXhair(XhairVAO, m_cam, m_proj);
-        }
+        if (USE_DEBUG_XHAIR)
+            UpdateXHair(renderer, XhairVAO, XhairVBO);
 
-        RenderImGui(lightCol, light);
+        RenderImGui();
 
         glfwSwapBuffers(m_window);
         glfwPollEvents();
@@ -156,14 +152,15 @@ void Game::Run(){
     glfwTerminate();
 }
 
-void Game::Render(Renderer& renderer, glm::vec3& lightcol, glm::vec3& lightpos) {
+void Game::Render(Renderer& renderer) {
+    /* 
     m_objects[0]->SetColor(glm::vec4(lightcol, 1.0));
     m_objects[0]->SetTransform(glm::translate(glm::mat4(1.0), lightpos));
-
-    renderer.RenderObjects(m_objects, m_cam, m_proj, lightpos, lightcol);
+    */
+    renderer.RenderObjects(m_objects,m_lights , m_cam, m_proj);
 }
 
-void Game::RenderImGui(glm::vec3& lightcol, glm::vec3& lightpos){
+void Game::RenderImGui(){
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -207,11 +204,7 @@ void Game::RenderImGui(glm::vec3& lightcol, glm::vec3& lightpos){
 
     ImGuiSwitch(USE_DEBUG_XHAIR, "Debug Xhair");
     ImGui::NewLine();
-    
     ImGui::TextColored(ImVec4(1, 1, 1, 1), "Scene");
-    ImGui::ColorEdit3("Light Color: ", (float*)&lightcol);
-    ImGui::DragFloat3("Light position", (float*)&lightpos);
-
     ImGui::Spacing();
 
     static int selectedSphereIndex = -1;
@@ -249,6 +242,26 @@ void Game::RenderImGui(glm::vec3& lightcol, glm::vec3& lightpos){
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+//maybe abstract xhair 
+void Game::UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& XhairVBO){
+    glm::vec3 cameraPos = m_cam.GetPos() + m_cam.GetFront();
+    const float LINE_LENGTH = 0.025f;
+    // X-axis
+    XHairVertices[0] = cameraPos.x; XHairVertices[1] = cameraPos.y; XHairVertices[2] = cameraPos.z;
+    XHairVertices[3] = cameraPos.x + LINE_LENGTH; XHairVertices[4] = cameraPos.y; XHairVertices[5] = cameraPos.z;
+    // Y-axis
+    XHairVertices[6] = cameraPos.x; XHairVertices[7] = cameraPos.y; XHairVertices[8] = cameraPos.z;
+    XHairVertices[9] = cameraPos.x; XHairVertices[10] = cameraPos.y + LINE_LENGTH; XHairVertices[11] = cameraPos.z;
+    // Z-axis
+    XHairVertices[12] = cameraPos.x; XHairVertices[13] = cameraPos.y; XHairVertices[14] = cameraPos.z;
+    XHairVertices[15] = cameraPos.x; XHairVertices[16] = cameraPos.y; XHairVertices[17] = cameraPos.z + LINE_LENGTH;
+    // render
+    XhairVBO.Bind();
+    XhairVBO.UpdateBuffer(0, 18 * sizeof(float), XHairVertices);
+    XhairVBO.Unbind();
+    renderer.RenderXhair(XhairVAO, m_cam, m_proj);
 }
 
 void Game::keyPressed(const float& delta) {

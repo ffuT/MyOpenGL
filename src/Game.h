@@ -37,6 +37,8 @@ static void ImGuiSwitch(bool& input, const char* str) {
     ImGui::Text(": %s", input ? "on" : "off");
 };
 
+
+
 class Game {
 public:
     Game(const char* title);
@@ -44,8 +46,9 @@ public:
     void Run();
 
 private:
-    void Render(Renderer& renderer, glm::vec3& lightcol, glm::vec3& lightpos);
-    void RenderImGui(glm::vec3& lightcol, glm::vec3& lightpos);
+    void Render(Renderer& renderer);
+    void RenderImGui();
+    void UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& XhairVBO);
 
     void toggleFullscreen();
     void keyPressed(const float& delta);
@@ -74,6 +77,7 @@ private:
 
     float m_delta = 0.0f;
     std::vector<Shape*> m_objects;
+    std::vector<Light> m_lights;
     glm::mat4 m_proj = glm::perspective(glm::radians(75.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
 
     float XHairVertices[18] = {
