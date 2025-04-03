@@ -119,7 +119,6 @@ void Game::Run(){
     auto now = std::chrono::high_resolution_clock::now();
     glfwSetWindowTitle(m_window, TITLE);
     while (!glfwWindowShouldClose(m_window)) { // window/game loop
-        //update values
         last = now;
         now = std::chrono::high_resolution_clock::now();
         m_delta = (now - last).count();
@@ -138,13 +137,15 @@ void Game::Run(){
         skyboxShader.UnBind();
         skyboxVAO.Unbind();
 
-        Render(renderer);
+        renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
 
-        if (USE_DEBUG_XHAIR)
+        if (USE_DEBUG_XHAIR){
             UpdateXHair(renderer, XhairVAO, XhairVBO);
+            renderer.RenderXhair(XhairVAO, m_cam, m_proj);
+        }
 
         RenderImGui();
-
+        
         glfwSwapBuffers(m_window);
         glfwPollEvents();
     }
@@ -152,22 +153,14 @@ void Game::Run(){
     glfwTerminate();
 }
 
-void Game::Render(Renderer& renderer) {
-    /* 
-    m_objects[0]->SetColor(glm::vec4(lightcol, 1.0));
-    m_objects[0]->SetTransform(glm::translate(glm::mat4(1.0), lightpos));
-    */
-    renderer.RenderObjects(m_objects,m_lights , m_cam, m_proj);
-}
-
-void Game::RenderImGui(){
+void Game::RenderImGui() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
     ImGui::Begin("ImGui");
     ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    
+
     ImGui::Text("Position: ");  //pos start
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f)); // Red
@@ -183,7 +176,7 @@ void Game::RenderImGui(){
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.33f, 1.0f, 1.0f)); // Blue
     ImGui::Text(" z:%.1f", m_cam.GetPos().z);
     ImGui::PopStyleColor();     // pos end
-   
+
     ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", m_cam.GetFront().x, m_cam.GetFront().y, m_cam.GetFront().z);
     ImGui::Text("Camera Mode: %s", m_currentWindowMode ? "true" : "false");
 
@@ -194,8 +187,8 @@ void Game::RenderImGui(){
         toggleFullscreen();
     ImGui::SameLine();
     ImGui::Text(": %s", IS_FULLSCREEN ? "on" : "off");
-   
-    if (ImGui::Button("Vsync")){
+
+    if (ImGui::Button("Vsync")) {
         USE_VSYNC = !USE_VSYNC;
         glfwSwapInterval(USE_VSYNC);
     }
@@ -208,7 +201,7 @@ void Game::RenderImGui(){
     ImGui::Spacing();
 
     static int selectedSphereIndex = -1;
-    if (ImGui::BeginCombo("Object", selectedSphereIndex >= 0 ? ("Object " + std::to_string(selectedSphereIndex) + ": " + m_objects[selectedSphereIndex]->GetTextID()).c_str()  : "Objects")) {
+    if (ImGui::BeginCombo("Object", selectedSphereIndex >= 0 ? ("Object " + std::to_string(selectedSphereIndex) + ": " + m_objects[selectedSphereIndex]->GetTextID()).c_str() : "Objects")) {
         for (int i = 1; i < m_objects.size(); i++) { // Skip light sphere at index 0
             std::string itemLabel = "Index " + std::to_string(i) + ": " + m_objects[i]->GetTextID();
             bool isSelected = (selectedSphereIndex == i);
@@ -221,7 +214,7 @@ void Game::RenderImGui(){
     }
 
     if (selectedSphereIndex >= 0 && selectedSphereIndex < m_objects.size()) {
-        Sphere* selectedSphere = static_cast<Sphere*>(m_objects[selectedSphereIndex]);
+        Shape* selectedSphere = m_objects[selectedSphereIndex];
 
         float specular = selectedSphere->GetSpecular();
         glm::vec4 color = selectedSphere->GetColor();
@@ -261,7 +254,6 @@ void Game::UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& 
     XhairVBO.Bind();
     XhairVBO.UpdateBuffer(0, 18 * sizeof(float), XHairVertices);
     XhairVBO.Unbind();
-    renderer.RenderXhair(XhairVAO, m_cam, m_proj);
 }
 
 void Game::keyPressed(const float& delta) {

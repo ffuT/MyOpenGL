@@ -37,8 +37,6 @@ static void ImGuiSwitch(bool& input, const char* str) {
     ImGui::Text(": %s", input ? "on" : "off");
 };
 
-
-
 class Game {
 public:
     Game(const char* title);
@@ -46,7 +44,6 @@ public:
     void Run();
 
 private:
-    void Render(Renderer& renderer);
     void RenderImGui();
     void UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& XhairVBO);
 
