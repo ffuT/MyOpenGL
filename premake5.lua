@@ -24,7 +24,17 @@ project "MyOpenGl"
 
     cppdialect "C++20" -- Choose C++17, or C++20
 
-    includedirs { "include", "Dependencies/glfw/include", "Dependencies/glew/include", "src/vendor", "res/**" }
+    includedirs { 
+        "include", 
+        "src", 
+        "src/core",
+        "src/graphics",
+        "src/buffers",
+        "src/utils",
+        "Dependencies/glfw/include", 
+        "Dependencies/glew/include", 
+        "src/vendor"
+    }
 
     -- Link GLFW and GLEW libraries
     filter "system:windows"                             
