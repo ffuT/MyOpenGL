@@ -4,7 +4,6 @@
 class Sphere : public Shape{
 public:
     Sphere(const float& radius, const int& pointAmount);
-    Sphere(const float& radius, const int& pointAmount, ShaderProgram shadername);
     ~Sphere();
     
     const float m_Radius;

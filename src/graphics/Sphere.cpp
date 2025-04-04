@@ -70,17 +70,8 @@ Sphere::Sphere(const float& radius, const int& pointAmount)
 	: m_Radius(1), m_PointAmount(pointAmount),
 	Shape(CreateSphere(1, pointAmount),
 		  CreateSphereNormals(CreateSphere(1, pointAmount), pointAmount),
-		  CreateSphereIndices(pointAmount),
-		  NewShader){
-    m_Scale = glm::scale(m_Scale, glm::vec3(5.0));
-}
-
-Sphere::Sphere(const float& radius, const int& pointAmount, ShaderProgram shadername)
-    : m_Radius(radius), m_PointAmount(pointAmount),
-    Shape(CreateSphere(radius, pointAmount),
-        CreateSphereNormals(CreateSphere(radius, pointAmount), pointAmount),
-        CreateSphereIndices(pointAmount),
-        shadername) {
+		  CreateSphereIndices(pointAmount)){
+    m_Scale = glm::scale(m_Scale, glm::vec3(radius));
 }
 
 Sphere::~Sphere(){
