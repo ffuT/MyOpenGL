@@ -2,7 +2,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "skybox.h"
+#include "Skybox.h"
 #include "Shape.h"
 #include "Camera.h"
 #include "Extras.h"

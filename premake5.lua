@@ -19,14 +19,10 @@ project "MyOpenGl"
     kind "ConsoleApp"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}"
-
-    files { "src/**.cpp", "src/**.h", "src/**.hpp", "res/**" }  -- Source and header files
-
+    
     cppdialect "C++20" -- Choose C++17, or C++20
-
+    
     includedirs { 
-        "include", 
-        "src", 
         "src/buffers",
         "src/core",
         "src/graphics",
@@ -35,6 +31,8 @@ project "MyOpenGl"
         "Dependencies/glew/include", 
         "src/vendor"
     }
+
+    files { "src/**.cpp", "src/**.h", "src/**.hpp", "res/**" }  -- Source and header files
 
     -- Link GLFW and GLEW libraries
     filter "system:windows"                             

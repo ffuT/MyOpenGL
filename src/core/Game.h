@@ -15,6 +15,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include "Skybox.h"
 #include "Renderer.h"
 #include "Shader.h"
 #include "VertexArray.h"
@@ -23,7 +24,6 @@
 #include "Camera.h"
 #include "ShaderManager.h"
 #include "Sphere.h"
-#include "Skybox.h"
 #include "Extras.h" 
 
 enum MouseInputMode {
