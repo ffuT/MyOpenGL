@@ -105,16 +105,8 @@ void Game::Run(){
     XhairVAO.Unbind();
     XhairVBO.Unbind();
 
-    //skybox needs abstraction
-    VertexArray skyboxVAO;
-    VertexBuffer skyboxVBO(108 * sizeof(float), skyboxes::skyboxVertices);
-    skyboxVAO.Bind();
-    skyboxVAO.AddVertexBuffer(skyboxVBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    Shader skyboxShader("res/shaders/Skybox.shader");
-    skyboxVAO.Unbind();
-    skyboxVBO.Unbind();
-    GLuint cubemapTexture = skyboxes::loadCubemap(skyboxes::Space);
-    
+    Skybox skybox = Skybox();
+
     auto last = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
     glfwSetWindowTitle(m_window, TITLE);
@@ -127,15 +119,7 @@ void Game::Run(){
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // skybox here
-        glDepthFunc(GL_LEQUAL);
-        skyboxVAO.Bind();
-        skyboxShader.Bind();
-        skyboxShader.SetUniformMat4f("u_view", glm::mat4(glm::mat3(m_cam.GetViewMatrix())));
-        skyboxShader.SetUniformMat4f("u_proj", m_proj);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        skyboxShader.UnBind();
-        skyboxVAO.Unbind();
+        renderer.RenderSkybox(skybox, m_cam, m_proj);
 
         renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
 

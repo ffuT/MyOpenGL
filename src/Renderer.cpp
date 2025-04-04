@@ -7,6 +7,18 @@ Renderer::Renderer() {
 Renderer::~Renderer(){
 }
 
+void Renderer::RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj){
+	glDepthFunc(GL_LEQUAL);
+	skybox.Bind();
+	Shader* currentShader = m_ShaderManager.GetShader(SkyboxShader);
+	currentShader->Bind();
+	currentShader->SetUniformMat4f("u_view", glm::mat4(glm::mat3(cam.GetViewMatrix())));
+	currentShader->SetUniformMat4f("u_proj", proj);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	currentShader->UnBind();
+	skybox.UnBind();
+}
+
 void Renderer::RenderObjects(std::vector<Shape*>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj) {
 	glDepthFunc(GL_LESS);
 	for (Shape* obj: objects){

@@ -23,6 +23,7 @@
 #include "Camera.h"
 #include "ShaderManager.h"
 #include "Sphere.h"
+#include "Skybox.h"
 #include "Extras.h" 
 
 enum MouseInputMode {
