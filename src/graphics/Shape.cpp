@@ -3,13 +3,11 @@
 
 Shape::Shape(const std::vector<float>& vertices,
 	const std::vector<float>& normals,
-	const std::vector<unsigned int>& indices,
-	const ShaderProgram& shaderName) :	
+	const std::vector<unsigned int>& indices) :	
 	m_Vertices(vertices), m_Normals(normals), m_Indices(indices),
 	m_VBOPos(vertices.size() * sizeof(float), vertices.data()),
 	m_VBONorm(normals.size() * sizeof(float), normals.data()),
-	m_EBO(indices.size() * sizeof(unsigned int), indices.data()),
-	m_ShaderName(shaderName) {
+	m_EBO(indices.size() * sizeof(unsigned int), indices.data()) {
 
 	m_VAO.Bind();
 	m_EBO.Bind();
@@ -25,13 +23,12 @@ Shape::Shape(
 	const std::vector<float>& vertices,
 	const std::vector<float>& normals,
 	const std::vector<unsigned int>& indices,
-	const ShaderProgram& shaderName,
 	const glm::vec4& color) :
 	m_Vertices(vertices), m_Normals(normals), m_Indices(indices),
 	m_VBOPos(vertices.size() * sizeof(float), vertices.data()),
 	m_VBONorm(normals.size() * sizeof(float), normals.data()),
 	m_EBO(indices.size() * sizeof(unsigned int), indices.data()),
-	m_ShaderName(shaderName), m_Color(color) {
+	m_Color(color) {
 
 	m_VAO.Bind();
 	m_EBO.Bind();
@@ -50,10 +47,6 @@ void Shape::Render() const {
 	m_VAO.Bind();
 	glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);
 	m_VAO.Unbind();
-}
-
-ShaderProgram Shape::GetShader() const {
-	return m_ShaderName;
 }
 
 glm::vec4 Shape::GetColor() const {
@@ -108,6 +101,3 @@ glm::mat4 Shape::GetRotation() const{
 	return m_Rotation;
 }
 
-ShaderProgram Shape::GetShaderName() const {
-	return m_ShaderName;
-}

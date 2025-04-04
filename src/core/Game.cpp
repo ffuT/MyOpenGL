@@ -62,8 +62,9 @@ Game::~Game(){
 
 void Game::Run(){
     Renderer renderer = Renderer();
+    renderer.SetRenderShader(ShaderProgram::WireframeShader);
 
-    Sphere pointLight = Sphere(1, 12, ShaderProgram::UnlitShader);
+    Sphere pointLight = Sphere(1, 12);
     pointLight.SetTextID("PointLight");
     m_objects.push_back(&pointLight);
     

@@ -11,13 +11,11 @@ class Shape{
 public:
 	Shape(const std::vector<float>& vertices,
 		const std::vector<float>& normals, 
-		const std::vector<unsigned int>& indices,
-		const ShaderProgram& shaderName);
+		const std::vector<unsigned int>& indices);
 
 	Shape(const std::vector<float>& vertices,
 		const std::vector<float>& normals, 
 		const std::vector<unsigned int>& indices,
-		const ShaderProgram& shaderName,
 		const glm::vec4& color);
 	
 	virtual ~Shape();
@@ -32,8 +30,6 @@ public:
 	virtual void SetTextID(const char* name);
 	
 	virtual float GetSpecular() const;
-	virtual ShaderProgram GetShader() const;
-	virtual ShaderProgram GetShaderName() const;
 	virtual glm::mat4 GetModelMatrix() const;
 	virtual glm::mat4 GetTransform() const;
 	virtual glm::mat4 GetScale() const;
@@ -48,8 +44,6 @@ protected:
 	std::vector<unsigned int> m_Indices;
 	glm::vec4 m_Color = glm::vec4(1.0);
 	float m_SpecularStrenght = 0.5;
-
-	ShaderProgram m_ShaderName;
 
 	VertexArray m_VAO;
 	VertexBuffer m_VBOPos;
