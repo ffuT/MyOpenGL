@@ -62,7 +62,7 @@ Game::~Game(){
 
 void Game::Run(){
     Renderer renderer = Renderer();
-    renderer.SetRenderShader(ShaderProgram::WireframeShader);
+    renderer.SetRenderShader(ShaderProgram::NewShader);
 
     Sphere pointLight = Sphere(1, 12);
     pointLight.SetTextID("PointLight");
@@ -129,7 +129,7 @@ void Game::Run(){
             renderer.RenderXhair(XhairVAO, m_cam, m_proj);
         }
 
-        RenderImGui();
+        RenderImGui(renderer);
         
         glfwSwapBuffers(m_window);
         glfwPollEvents();
@@ -138,7 +138,7 @@ void Game::Run(){
     glfwTerminate();
 }
 
-void Game::RenderImGui() {
+void Game::RenderImGui(Renderer& renderer) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -181,6 +181,18 @@ void Game::RenderImGui() {
     ImGui::Text(": %s", USE_VSYNC ? "on" : "off");
 
     ImGuiSwitch(USE_DEBUG_XHAIR, "Debug Xhair");
+    ImGui::Spacing();
+
+    ImGui::Text("Shader Program ");
+    if (ImGui::Button("NewShader"))
+        renderer.SetRenderShader(ShaderProgram::NewShader);
+    ImGui::SameLine();
+    if (ImGui::Button("Wireframe"))
+        renderer.SetRenderShader(ShaderProgram::WireframeShader);
+    ImGui::SameLine();
+    if (ImGui::Button("unlit"))
+        renderer.SetRenderShader(ShaderProgram::UnlitShader);
+
     ImGui::NewLine();
     ImGui::TextColored(ImVec4(1, 1, 1, 1), "Scene");
     ImGui::Spacing();
@@ -211,6 +223,7 @@ void Game::RenderImGui() {
         ImGui::DragFloat("Specular", &specular, 0.001f, 0, 1);
         ImGui::ColorEdit3("Color", (float*)&color);
         ImGui::DragFloat3("Position", (float*)&position, 0.1f);
+        ImGui::DragFloat3("Scale", (float*)&scale, 0.1f);
 
         scaleMatrix = glm::scale(glm::mat4(1.0), scale); // Create a new scale matrix
 
@@ -244,8 +257,6 @@ void Game::RenderImGui() {
         ImGui::DragFloat("Intensity ", &selectedLight.intensity, 0.01f, 0.0f, 10.0f);
         ImGui::DragFloat3("Position ", (float*)&selectedLight.position, 0.1f);
     }
-
-
 
     ImGui::NewLine();
 

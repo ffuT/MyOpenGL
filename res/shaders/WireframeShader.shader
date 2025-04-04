@@ -24,7 +24,7 @@ layout(line_strip, max_vertices = 6) out; // Output: lines (edges)
 in vec2 TexCoords[]; // Texture coordinates from vertex shader
 out vec2 fragTexCoords; // Pass texture coordinates to fragment shader
 
-uniform float u_wireframeWidth;
+float u_wireframeWidth = 0.5;
 
 void main() {
     // Loop over the triangle's edges and output lines

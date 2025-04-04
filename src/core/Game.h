@@ -45,7 +45,7 @@ public:
     void Run();
 
 private:
-    void RenderImGui();
+    void RenderImGui(Renderer& renderer);
     void UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& XhairVBO);
 
     void toggleFullscreen();
