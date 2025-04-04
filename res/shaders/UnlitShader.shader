@@ -11,10 +11,7 @@ uniform mat4 u_view;
 uniform mat4 u_proj;
 
 void main() {
-    // Transform vertex position
     gl_Position = u_proj * u_view * u_model * vec4(aPos, 1.0);
-
-    // Pass texture coordinates
     TexCoords = aTexCoords;
 }
 
@@ -25,8 +22,8 @@ in vec2 TexCoords; // Interpolated texture coordinates
 out vec4 FragColor; // Output color
 
 uniform sampler2D texture1;     // Texture sampler
-uniform vec3 u_color;           // Optional solid color
+uniform vec4 u_color;           // Optional solid color
 
 void main() {
-    FragColor = vec4(u_color, 1.0);
+    FragColor = vec4(u_color.rgb, 1.0);
 }

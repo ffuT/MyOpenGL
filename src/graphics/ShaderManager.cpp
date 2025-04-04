@@ -25,5 +25,7 @@ Shader* ShaderManger::GetShader(const ShaderProgram& ShaderName) {
 
 		case ShaderProgram::CrosshairShader:
 			return &m_CrosshairShader;
+		case ShaderProgram::WireframeShader:
+			return &m_WireframeShader;
 	}
 }

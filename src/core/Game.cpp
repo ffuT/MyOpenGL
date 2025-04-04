@@ -204,14 +204,47 @@ void Game::RenderImGui() {
         glm::vec4 color = selectedSphere->GetColor();
         glm::vec3 position = glm::vec3(selectedSphere->GetTransform()[3]); // Get translation from matrix
 
-        ImGui::DragFloat("Specular", (float*)&specular, 0.001f, 0, 1);
+        glm::mat4 scaleMatrix = selectedSphere->GetScale(); // Get scale matrix
+        glm::vec3 scale = glm::vec3(glm::length(scaleMatrix[0]), glm::length(scaleMatrix[1]), glm::length(scaleMatrix[2]));
+
+        ImGui::DragFloat("Specular", &specular, 0.001f, 0, 1);
         ImGui::ColorEdit3("Color", (float*)&color);
         ImGui::DragFloat3("Position", (float*)&position, 0.1f);
 
+        scaleMatrix = glm::scale(glm::mat4(1.0), scale); // Create a new scale matrix
+
         selectedSphere->SetColor(color);
-        selectedSphere->SetTransform(glm::translate(glm::mat4(1.0), position));
         selectedSphere->SetSpecular(specular);
+
+        glm::mat4 transform = glm::translate(glm::mat4(1.0), position);
+        selectedSphere->SetTransform(transform);
+        selectedSphere->SetScale(scaleMatrix);
     }
+
+    ImGui::NewLine();
+
+    static int selectedLightIndex = -1;  // Currently selected light
+    if (ImGui::BeginCombo("Light Source", selectedLightIndex >= 0 ? ("Light " + std::to_string(selectedLightIndex)).c_str() : "Lights")) {
+        for (int i = 0; i < m_lights.size(); i++) {
+            std::string itemLabel = "Light " + std::to_string(i);
+            bool isSelected = (selectedLightIndex == i);
+            if (ImGui::Selectable(itemLabel.c_str(), isSelected))
+                selectedLightIndex = i;
+            if (isSelected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+
+    if (selectedLightIndex >= 0 && selectedLightIndex < m_lights.size()) {
+        Light& selectedLight = m_lights[selectedLightIndex];
+
+        ImGui::ColorEdit3("Color ", (float*)&selectedLight.color);
+        ImGui::DragFloat("Intensity ", &selectedLight.intensity, 0.01f, 0.0f, 10.0f);
+        ImGui::DragFloat3("Position ", (float*)&selectedLight.position, 0.1f);
+    }
+
+
 
     ImGui::NewLine();
 

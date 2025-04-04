@@ -45,7 +45,7 @@ void Renderer::RenderObjects(std::vector<Shape*>& objects, std::vector<Light>& l
 					for (int i = 0; i < lights.size(); i++) {	//very inefficient
 						obj->SetTransform(glm::translate(glm::mat4(1.0), lights[i].position));
 						currentshader->SetUniformMat4f("u_model", obj->GetModelMatrix());
-						currentshader->SetUniform3f("u_color", lights[i].color);
+						currentshader->SetUniform4f("u_color", glm::vec4(lights[i].color, 1.0));
 						obj->Render();
 					}
 				} else {

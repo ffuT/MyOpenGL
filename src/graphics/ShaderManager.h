@@ -7,7 +7,8 @@ enum ShaderProgram {
     NewShader,
     BasicShader,
     UnlitShader,
-    CrosshairShader
+    CrosshairShader,
+    WireframeShader
 };
 
 class ShaderManger {
@@ -23,4 +24,5 @@ private:
     Shader m_BasicShader = Shader("res/shaders/BasicShader.shader");
     Shader m_UnlitShader = Shader("res/shaders/UnlitShader.shader");
     Shader m_CrosshairShader = Shader("res/shaders/Crosshair.shader");
+    Shader m_WireframeShader = Shader("res/shaders/Wireframeshader.shader");
 };

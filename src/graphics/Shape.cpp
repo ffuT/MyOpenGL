@@ -72,6 +72,14 @@ void Shape::SetTransform(glm::mat4 transform){
 	m_Transform = transform;
 }
 
+void Shape::SetScale(const glm::mat4 scale){
+	m_Scale = scale;
+}
+
+void Shape::SetRotation(const glm::mat4 rotation){
+	m_Rotation = rotation;
+}
+
 void Shape::SetColor(const glm::vec4 color){
 	m_Color = color;
 }
@@ -90,6 +98,14 @@ glm::mat4 Shape::GetModelMatrix() const {
 
 glm::mat4 Shape::GetTransform() const {
 	return m_Transform;
+}
+
+glm::mat4 Shape::GetScale() const{
+	return m_Scale;
+}
+
+glm::mat4 Shape::GetRotation() const{
+	return m_Rotation;
 }
 
 ShaderProgram Shape::GetShaderName() const {
