@@ -82,25 +82,25 @@ void Game::Run(){
     );
     m_lights.push_back(pointlight2);
 
-    Sphere sphere = Sphere(5, 32);
+    Sphere sphere = Sphere(10, 32);
     sphere.SetTextID("sphere 1");
-    sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-25.0, -5.0, -50.0)));
+    sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-30.0, -5.0, -50.0)));
     sphere.SetColor(glm::vec4(1, 0, 0, 1));
     m_objects.push_back(&sphere);
 
-    Sphere sphere2 = Sphere(5, 32);
+    Sphere sphere2 = Sphere(10, 32);
     sphere2.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(0.0, -5.0, -50.0)));
     sphere2.SetColor(glm::vec4(0, 1, 0, 1));
     m_objects.push_back(&sphere2);
 
-    Sphere sphere3 = Sphere(5, 32);
-    sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(25.0, -5.0, -50.0)));
+    Sphere sphere3 = Sphere(10, 32);
+    sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(30.0, -5.0, -50.0)));
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     m_objects.push_back(&sphere3);
 
     //debug crosshair
     VertexArray XhairVAO;
-    VertexBuffer XhairVBO(18*sizeof(float), XHairVertices);
+    VertexBuffer XhairVBO(18*sizeof(float), m_xHairVertices);
     XhairVAO.Bind();
     XhairVAO.AddVertexBuffer(XhairVBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     XhairVAO.Unbind();
@@ -180,17 +180,17 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::SameLine();
     ImGui::Text(": %s", USE_VSYNC ? "on" : "off");
 
-    ImGuiSwitch(USE_DEBUG_XHAIR, "Debug Xhair");
+    ImGuiSwitch(USE_DEBUG_XHAIR, "Debug Xhair");    //use debug xhair
     ImGui::Spacing();
 
-    ImGui::Text("Shader Program ");
+    ImGui::Text("Shader Program ");     //Shader Program change
     if (ImGui::Button("NewShader"))
         renderer.SetRenderShader(ShaderProgram::NewShader);
     ImGui::SameLine();
     if (ImGui::Button("Wireframe"))
         renderer.SetRenderShader(ShaderProgram::WireframeShader);
     ImGui::SameLine();
-    if (ImGui::Button("unlit"))
+    if (ImGui::Button("Unlit"))
         renderer.SetRenderShader(ShaderProgram::UnlitShader);
 
     ImGui::NewLine();
@@ -271,17 +271,17 @@ void Game::UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& 
     glm::vec3 cameraPos = m_cam.GetPos() + m_cam.GetFront();
     const float LINE_LENGTH = 0.025f;
     // X-axis
-    XHairVertices[0] = cameraPos.x; XHairVertices[1] = cameraPos.y; XHairVertices[2] = cameraPos.z;
-    XHairVertices[3] = cameraPos.x + LINE_LENGTH; XHairVertices[4] = cameraPos.y; XHairVertices[5] = cameraPos.z;
+    m_xHairVertices[0] = cameraPos.x; m_xHairVertices[1] = cameraPos.y; m_xHairVertices[2] = cameraPos.z;
+    m_xHairVertices[3] = cameraPos.x + LINE_LENGTH; m_xHairVertices[4] = cameraPos.y; m_xHairVertices[5] = cameraPos.z;
     // Y-axis
-    XHairVertices[6] = cameraPos.x; XHairVertices[7] = cameraPos.y; XHairVertices[8] = cameraPos.z;
-    XHairVertices[9] = cameraPos.x; XHairVertices[10] = cameraPos.y + LINE_LENGTH; XHairVertices[11] = cameraPos.z;
+    m_xHairVertices[6] = cameraPos.x; m_xHairVertices[7] = cameraPos.y; m_xHairVertices[8] = cameraPos.z;
+    m_xHairVertices[9] = cameraPos.x; m_xHairVertices[10] = cameraPos.y + LINE_LENGTH; m_xHairVertices[11] = cameraPos.z;
     // Z-axis
-    XHairVertices[12] = cameraPos.x; XHairVertices[13] = cameraPos.y; XHairVertices[14] = cameraPos.z;
-    XHairVertices[15] = cameraPos.x; XHairVertices[16] = cameraPos.y; XHairVertices[17] = cameraPos.z + LINE_LENGTH;
+    m_xHairVertices[12] = cameraPos.x; m_xHairVertices[13] = cameraPos.y; m_xHairVertices[14] = cameraPos.z;
+    m_xHairVertices[15] = cameraPos.x; m_xHairVertices[16] = cameraPos.y; m_xHairVertices[17] = cameraPos.z + LINE_LENGTH;
     // render
     XhairVBO.Bind();
-    XhairVBO.UpdateBuffer(0, 18 * sizeof(float), XHairVertices);
+    XhairVBO.UpdateBuffer(0, 18 * sizeof(float), m_xHairVertices);
     XhairVBO.Unbind();
 }
 

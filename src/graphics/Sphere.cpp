@@ -2,7 +2,7 @@
 #include <iostream>
 
 constexpr float PI = 3.14159265358979323846f;
-static std::vector<float> CreateSphere(const float radius, const int PointAmount) {
+constexpr static std::vector<float> CreateSphere(const float radius, const int PointAmount) {
     const int totalelements = 3 * PointAmount * PointAmount; // Adjusted for more points
 
     std::vector<float> points;
@@ -22,7 +22,7 @@ static std::vector<float> CreateSphere(const float radius, const int PointAmount
     return points;
 };
 
-static std::vector<unsigned int> CreateSphereIndices(const int PointAmount) {
+constexpr static std::vector<unsigned int> CreateSphereIndices(const int PointAmount) {
     const int totalIndices = 6 * (PointAmount - 1) * (PointAmount - 1);
 
     std::vector<unsigned int> indices;
