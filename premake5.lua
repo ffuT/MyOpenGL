@@ -27,9 +27,9 @@ project "MyOpenGl"
     includedirs { 
         "include", 
         "src", 
+        "src/buffers",
         "src/core",
         "src/graphics",
-        "src/buffers",
         "src/utils",
         "Dependencies/glfw/include", 
         "Dependencies/glew/include", 

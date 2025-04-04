@@ -32,16 +32,16 @@ Game::Game(const  char* title) : TITLE(title) {
     glfwSetWindowUserPointer(m_window, this);
     glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int mods) {
         static_cast<Game*>(glfwGetWindowUserPointer(window))->MouseCallBack(window, button, action, mods);
-        });
+    });
     glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double xpos, double ypos) {
         static_cast<Game*>(glfwGetWindowUserPointer(window))->MousePosCallBack(window, xpos, ypos);
-        });
+    });
     glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
         static_cast<Game*>(glfwGetWindowUserPointer(window))->keyCallback(window, key, scancode, action, mods);
-        });
+    });
     glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
         static_cast<Game*>(glfwGetWindowUserPointer(window))->FramebufferSizeCallBack(window, width, height);
-        });
+    });
 
     glViewport(0, 0, WIDTH, HEIGHT);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
