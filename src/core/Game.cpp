@@ -64,7 +64,11 @@ void Game::Run(){
     Renderer renderer = Renderer();
     renderer.SetRenderShader(ShaderProgram::NewShader);
 
-    Sphere pointLight = Sphere(1, 12);
+    Mesh spheremesh = Mesh(CreateSphere(1, 32), CreateSphereNormals(CreateSphere(1, 32), 32), CreateSphereIndices(32));
+
+    m_meshes.push_back(spheremesh);
+
+    Sphere pointLight = Sphere(5, &m_meshes[0]);
     pointLight.SetTextID("PointLight");
     m_objects.push_back(&pointLight);
     
@@ -82,26 +86,26 @@ void Game::Run(){
     );
     m_lights.push_back(pointlight2);
 
-    Sphere sphere = Sphere(10, 32);
+    Sphere sphere = Sphere(10, &m_meshes[0]);
     sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-30.0, -5.0, -50.0)));
     sphere.SetColor(glm::vec4(1, 0, 0, 1));
     m_objects.push_back(&sphere);
 
-    Sphere sphere2 = Sphere(10, 32);
+    Sphere sphere2 = Sphere(10, &m_meshes[0]);
     sphere2.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(0.0, -5.0, -50.0)));
     sphere2.SetColor(glm::vec4(0, 1, 0, 1));
     m_objects.push_back(&sphere2);
 
-    Sphere sphere3 = Sphere(10, 32);
+    Sphere sphere3 = Sphere(10, &m_meshes[0]);
     sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(30.0, -5.0, -50.0)));
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     m_objects.push_back(&sphere3);
 
-    for (int i = 0; i < 1000; i++) { //bunch of random spheres
+    for (int i = 0; i < 2000; i++) { //bunch of random spheres
         std::chrono::nanoseconds now = std::chrono::high_resolution_clock::now().time_since_epoch();
         std::srand(now.count());
 
-        m_objects.push_back(new Sphere(2 + std::rand() % 15, 32));
+        m_objects.push_back(new Sphere(2 + std::rand() % 15, &m_meshes[0]));
         
         float f1 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         float f2 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
@@ -214,7 +218,7 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::Spacing();
 
     if (ImGui::Button("Add Sphere")) {
-        m_objects.push_back(new Sphere(1, 32));
+        m_objects.push_back(new Sphere(1, &m_meshes[0]));
     }
     ImGui::Spacing();
 

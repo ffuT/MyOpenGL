@@ -6,17 +6,11 @@
 #include "VertexBuffer.h"
 #include "ElementArrayBuffer.h"
 #include "ShaderManager.h"
+#include "Mesh.h"
 
 class Shape{
 public:
-	Shape(const std::vector<float>& vertices,
-		const std::vector<float>& normals, 
-		const std::vector<unsigned int>& indices);
-
-	Shape(const std::vector<float>& vertices,
-		const std::vector<float>& normals, 
-		const std::vector<unsigned int>& indices,
-		const glm::vec4& color);
+	Shape(Mesh* mesh);
 	
 	virtual ~Shape();
 
@@ -39,16 +33,9 @@ public:
 
 	std::string m_ObjectTextID;
 protected:
-	std::vector<float> m_Vertices;
-	std::vector<float> m_Normals;
-	std::vector<unsigned int> m_Indices;
+	Mesh* m_mesh;
 	glm::vec4 m_Color = glm::vec4(1.0);
 	float m_SpecularStrenght = 0.5;
-
-	VertexArray m_VAO;
-	VertexBuffer m_VBOPos;
-	VertexBuffer m_VBONorm;
-	ElementArrayBuffer m_EBO;
 
 	glm::mat4 m_Scale = glm::mat4(1.0);
 	glm::mat4 m_Rotation = glm::mat4(1.0);

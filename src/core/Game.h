@@ -75,6 +75,7 @@ private:
 
     float m_delta = 0.0f;
     std::vector<Shape*> m_objects;
+    std::vector<Mesh> m_meshes;
     std::vector<Light> m_lights;
     glm::mat4 m_proj = glm::perspective(glm::radians(80.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100000.0f);
 
