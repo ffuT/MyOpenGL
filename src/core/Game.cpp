@@ -77,14 +77,14 @@ void Game::Run(){
         glm::vec3(1.0),
         1.0f
     );
-    m_lights.push_back(pointlight1);
+    m_lights.push_back(&pointlight1);
 
     Light pointlight2 = Light(
         glm::vec3(0, -92, 25),
         glm::vec3(1.0),
         0.25f
     );
-    m_lights.push_back(pointlight2);
+    m_lights.push_back(&pointlight2);
 
     Sphere sphere = Sphere(10, &m_meshes[0]);
     sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-30.0, -5.0, -50.0)));
@@ -101,7 +101,7 @@ void Game::Run(){
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     m_objects.push_back(&sphere3);
 
-    for (int i = 0; i < 2000; i++) { //bunch of random spheres
+    for (int i = 0; i < 5000; i++) { //bunch of random spheres
         std::chrono::nanoseconds now = std::chrono::high_resolution_clock::now().time_since_epoch();
         std::srand(now.count());
 
@@ -200,7 +200,11 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::SameLine();
     ImGui::Text(": %s", USE_VSYNC ? "on" : "off");
 
-    ImGuiSwitch(USE_DEBUG_XHAIR, "Debug Xhair");    //use debug xhair
+    if (ImGui::Button("Debug Xhair")) {
+        USE_DEBUG_XHAIR = !USE_DEBUG_XHAIR;
+    }
+    ImGui::SameLine();
+    ImGui::Text(": %s", USE_DEBUG_XHAIR ? "on" : "off");
     ImGui::Spacing();
 
     ImGui::Text("Shader Program ");     //Shader Program change
@@ -267,10 +271,21 @@ void Game::RenderImGui(Renderer& renderer) {
         selectedSphere->SetTransform(transform);
         selectedSphere->SetScale(scaleMatrix);
     }
-
     ImGui::NewLine();
 
+    if (ImGui::Button("Add Light")) {
+        m_lights.push_back(new Light(glm::vec3(0.0), glm::vec3(1.0), 0.5));
+    }
+    ImGui::Spacing();
     static int selectedLightIndex = -1;  // Currently selected light
+    if (ImGui::Button("Delete Light")) {   //delete selected light
+        if (selectedLightIndex > 1) {
+            delete m_lights[selectedLightIndex];
+            m_lights.erase(m_lights.begin() + selectedLightIndex);
+            selectedLightIndex--;
+        }
+    }
+
     if (ImGui::BeginCombo("Light Source", selectedLightIndex >= 0 ? ("Light " + std::to_string(selectedLightIndex)).c_str() : "Lights")) {
         for (int i = 0; i < m_lights.size(); i++) {
             std::string itemLabel = "Light " + std::to_string(i);
@@ -284,11 +299,11 @@ void Game::RenderImGui(Renderer& renderer) {
     }
 
     if (selectedLightIndex >= 0 && selectedLightIndex < m_lights.size()) {
-        Light& selectedLight = m_lights[selectedLightIndex];
+        Light* selectedLight = m_lights[selectedLightIndex];
 
-        ImGui::ColorEdit3("Color ", (float*)&selectedLight.color);
-        ImGui::DragFloat("Intensity ", &selectedLight.intensity, 0.01f, 0.0f, 10.0f);
-        ImGui::DragFloat3("Position ", (float*)&selectedLight.position, 0.1f);
+        ImGui::ColorEdit3("Color ", (float*)&selectedLight->color);
+        ImGui::DragFloat("Intensity ", &selectedLight->intensity, 0.01f, 0.0f, 10.0f);
+        ImGui::DragFloat3("Position ", (float*)&selectedLight->position, 0.1f);
     }
 
     ImGui::NewLine();
@@ -312,7 +327,6 @@ void Game::UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& 
     // Z-axis
     m_xHairVertices[12] = cameraPos.x; m_xHairVertices[13] = cameraPos.y; m_xHairVertices[14] = cameraPos.z;
     m_xHairVertices[15] = cameraPos.x; m_xHairVertices[16] = cameraPos.y; m_xHairVertices[17] = cameraPos.z + LINE_LENGTH;
-    // render
     XhairVBO.Bind();
     XhairVBO.UpdateBuffer(0, 18 * sizeof(float), m_xHairVertices);
     XhairVBO.Unbind();

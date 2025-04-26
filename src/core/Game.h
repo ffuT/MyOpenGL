@@ -31,13 +31,6 @@ enum MouseInputMode {
 	CAMERA_MODE
 };
 
-static void ImGuiSwitch(bool& input, const char* str) {
-    if (ImGui::Button(str)) 
-        input = !input;
-    ImGui::SameLine();
-    ImGui::Text(": %s", input ? "on" : "off");
-};
-
 class Game {
 public:
     Game(const char* title);
@@ -76,8 +69,8 @@ private:
     float m_delta = 0.0f;
     std::vector<Shape*> m_objects;
     std::vector<Mesh> m_meshes;
-    std::vector<Light> m_lights;
-    glm::mat4 m_proj = glm::perspective(glm::radians(80.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100000.0f);
+    std::vector<Light*> m_lights;
+    glm::mat4 m_proj = glm::perspective(glm::radians(70.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100000.0f);
 
     float m_xHairVertices[18] = {
         -0.02f, 0.0f,  0.0f,  0.02f, 0.0f,  0.0f,

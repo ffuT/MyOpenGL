@@ -43,7 +43,7 @@ struct Light {
     float intensity;
 };
 
-uniform Light lights[16];  
+uniform Light lights[32];  
 uniform int numLights;
 
 void main() {
