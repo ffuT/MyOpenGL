@@ -1,52 +1,17 @@
 #include "Shape.h"
 #include <iostream>
 
-Shape::Shape(const std::vector<float>& vertices,
-	const std::vector<float>& normals,
-	const std::vector<unsigned int>& indices) :	
-	m_Vertices(vertices), m_Normals(normals), m_Indices(indices),
-	m_VBOPos(vertices.size() * sizeof(float), vertices.data()),
-	m_VBONorm(normals.size() * sizeof(float), normals.data()),
-	m_EBO(indices.size() * sizeof(unsigned int), indices.data()) {
+Shape::Shape(Mesh* mesh) : m_mesh(mesh) {
 
-	m_VAO.Bind();
-	m_EBO.Bind();
-	m_VAO.AddVertexBuffer(m_VBOPos, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	m_VAO.AddVertexBuffer(m_VBONorm, 2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	m_VAO.BindElementArrayBuffer(m_EBO);
-
-	m_VAO.Unbind();
-	m_EBO.Unbind();
-}
-
-Shape::Shape(
-	const std::vector<float>& vertices,
-	const std::vector<float>& normals,
-	const std::vector<unsigned int>& indices,
-	const glm::vec4& color) :
-	m_Vertices(vertices), m_Normals(normals), m_Indices(indices),
-	m_VBOPos(vertices.size() * sizeof(float), vertices.data()),
-	m_VBONorm(normals.size() * sizeof(float), normals.data()),
-	m_EBO(indices.size() * sizeof(unsigned int), indices.data()),
-	m_Color(color) {
-
-	m_VAO.Bind();
-	m_EBO.Bind();
-	m_VAO.AddVertexBuffer(m_VBOPos, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	m_VAO.AddVertexBuffer(m_VBONorm, 2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	m_VAO.BindElementArrayBuffer(m_EBO);
-
-	m_VAO.Unbind();
-	m_EBO.Unbind();
 }
 
 Shape::~Shape(){
 }
 
 void Shape::Render() const {
-	m_VAO.Bind();
-	glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);
-	m_VAO.Unbind();
+	m_mesh->Bind();
+	m_mesh->Render();
+	m_mesh->Unbind();
 }
 
 glm::vec4 Shape::GetColor() const {
