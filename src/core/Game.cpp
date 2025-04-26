@@ -101,7 +101,7 @@ void Game::Run(){
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     m_objects.push_back(&sphere3);
 
-    for (int i = 0; i < 1000; i++) { //bunch of random spheres
+    for (int i = 0; i < 2000; i++) { //bunch of random spheres
         std::chrono::nanoseconds now = std::chrono::high_resolution_clock::now().time_since_epoch();
         std::srand(now.count());
 
