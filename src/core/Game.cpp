@@ -83,7 +83,6 @@ void Game::Run(){
     m_lights.push_back(pointlight2);
 
     Sphere sphere = Sphere(10, 32);
-    sphere.SetTextID("sphere 1");
     sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-30.0, -5.0, -50.0)));
     sphere.SetColor(glm::vec4(1, 0, 0, 1));
     m_objects.push_back(&sphere);
@@ -97,6 +96,23 @@ void Game::Run(){
     sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(30.0, -5.0, -50.0)));
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     m_objects.push_back(&sphere3);
+
+    for (int i = 0; i < 1000; i++) { //bunch of random spheres
+        std::chrono::nanoseconds now = std::chrono::high_resolution_clock::now().time_since_epoch();
+        std::srand(now.count());
+
+        m_objects.push_back(new Sphere(2 + std::rand() % 15, 32));
+        
+        float f1 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        float f2 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        float f3 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        
+        m_objects[i + 4]->SetColor(glm::vec4(f1, f2, f3,1));
+
+        int max = 1000;
+        int min = -1000;
+        m_objects[i + 4]->SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(min + (std::rand() % (max - min + 1)), min + (std::rand() % (max - min + 1)), min + (std::rand() % (max - min + 1)))));
+    }
 
     //debug crosshair
     VertexArray XhairVAO;
@@ -197,7 +213,20 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::TextColored(ImVec4(1, 1, 1, 1), "Scene");
     ImGui::Spacing();
 
+    if (ImGui::Button("Add Sphere")) {
+        m_objects.push_back(new Sphere(1, 32));
+    }
+    ImGui::Spacing();
+
     static int selectedSphereIndex = -1;
+    if (ImGui::Button("Delete Sphere")) {   //delete selected Sphere
+        if (selectedSphereIndex > 3) {
+            delete m_objects[selectedSphereIndex];
+            m_objects.erase(m_objects.begin() + selectedSphereIndex);
+            selectedSphereIndex--;
+        }
+    }
+    ImGui::Spacing();
     if (ImGui::BeginCombo("Object", selectedSphereIndex >= 0 ? ("Object " + std::to_string(selectedSphereIndex) + ": " + m_objects[selectedSphereIndex]->GetTextID()).c_str() : "Objects")) {
         for (int i = 1; i < m_objects.size(); i++) { // Skip light sphere at index 0
             std::string itemLabel = "Index " + std::to_string(i) + ": " + m_objects[i]->GetTextID();
@@ -305,6 +334,11 @@ void Game::keyPressed(const float& delta) {
             m_cam.ProcessKeyboard(ROLLLEFT, delta);
         if (glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS)
             m_cam.ProcessKeyboard(ROLLRIGHT, delta);
+        if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
+            m_cam.m_sprint = true;
+        } else {
+            m_cam.m_sprint = false;
+        }
     }
 }
 

@@ -25,7 +25,7 @@ glm::mat4 Camera::GetViewMatrix() const {
 }
 
 void Camera::ProcessKeyboard(const Camera_Movement& direction, const float& delta) {
-    float moveSpeed = m_movementSpeed / 1000000;
+    float moveSpeed = m_movementSpeed / 1000000 * (2 * m_sprint + 1);
     glm::vec3 MovementDir = glm::vec3(0.0);
 
     // Calculate local front, right, and up vectors based on the current orientation
@@ -47,7 +47,7 @@ void Camera::ProcessKeyboard(const Camera_Movement& direction, const float& delt
         MovementDir -= up;
 
     if (direction == ROLLLEFT || direction == ROLLRIGHT) {
-        float rollSpeed = moveSpeed * 1.25; // adjust roll speed
+        float rollSpeed = m_rollSpeed / 1000000; // adjust roll speed
         float rollAngle = rollSpeed * delta;
 
         if (direction == ROLLLEFT)

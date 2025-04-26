@@ -76,7 +76,7 @@ private:
     float m_delta = 0.0f;
     std::vector<Shape*> m_objects;
     std::vector<Light> m_lights;
-    glm::mat4 m_proj = glm::perspective(glm::radians(75.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
+    glm::mat4 m_proj = glm::perspective(glm::radians(80.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100000.0f);
 
     float m_xHairVertices[18] = {
         -0.02f, 0.0f,  0.0f,  0.02f, 0.0f,  0.0f,

@@ -29,8 +29,10 @@ public:
     void ProcessKeyboard(const Camera_Movement& direction, const float& delta);
     void ProcessMouse(const float& xOffset, const float& yOffset);
 
+    bool m_sprint = false;
 private:
-    const float m_movementSpeed = 0.1;  // x speed * 1000 = movement in 3d space a second
+    const float m_movementSpeed = 0.25;  // x speed * 1000 = movement in 3d space a second
+    const float m_rollSpeed = 0.125;  // x speed * 1000 = movement in 3d space a second
     const float m_mouseSensitivity = 3.09; //s1mple sens
 
     glm::vec3 m_position = glm::vec3(0.0);

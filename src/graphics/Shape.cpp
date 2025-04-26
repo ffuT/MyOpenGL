@@ -61,7 +61,7 @@ float Shape::GetSpecular() const {
 	return m_SpecularStrenght;
 }
 
-void Shape::SetTransform(glm::mat4 transform){
+void Shape::SetTransform(const glm::mat4 transform){
 	m_Transform = transform;
 }
 
