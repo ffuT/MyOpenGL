@@ -416,8 +416,7 @@ void Game::MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
             ToggleMouseInputMode(window, m_currentWindowMode);
             FIRST_MOUSE = true;
         }
-    }
-    else { //cameramode
+    } else { // cameramode
 
     }
 }

@@ -42,12 +42,12 @@ private:
     void UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& XhairVBO);
 
     void toggleFullscreen();
-    void keyPressed(const float& delta);
-    void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode);
+    void keyPressed(const float& delta); // update camera pos
+    void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode); // for camera movment and ui control
     void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     void MouseCallBack(GLFWwindow* window, int button, int action, int mods);
     void MousePosCallBack(GLFWwindow* window, double xpos, double ypos);
-    void FramebufferSizeCallBack(GLFWwindow* window, int width, int height);
+    void FramebufferSizeCallBack(GLFWwindow* window, int width, int height); // update window variables on rezise
 
     const char* TITLE;
     float YAW = 0.022f, PITCH = 0.022f; // camera turn speed, same as CS2, UE5 default = 0.07

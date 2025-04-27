@@ -32,11 +32,11 @@ public:
 	virtual const char* GetTextID() const;
 
 	std::string m_ObjectTextID;
-protected:
+protected: // object variables
 	Mesh* m_mesh;
 	glm::vec4 m_Color = glm::vec4(1.0);
 	float m_SpecularStrenght = 0.5;
-
+	
 	glm::mat4 m_Scale = glm::mat4(1.0);
 	glm::mat4 m_Rotation = glm::mat4(1.0);
 	glm::mat4 m_Transform = glm::mat4(1.0);
