@@ -50,7 +50,7 @@ private:
     void FramebufferSizeCallBack(GLFWwindow* window, int width, int height);
 
     const char* TITLE;
-    float YAW = 0.022f, PITCH = 0.022f; //same turn speed as CS2, UE5 default = 0.07
+    float YAW = 0.022f, PITCH = 0.022f; // camera turn speed, same as CS2, UE5 default = 0.07
     unsigned int WIDTH = 1280, HEIGHT = 720;
 
     bool USE_VSYNC = false;
@@ -68,11 +68,11 @@ private:
 
     float m_delta = 0.0f;
     std::vector<Shape*> m_objects;
-    std::vector<Mesh> m_meshes;
     std::vector<Light*> m_lights;
+    std::vector<Mesh> m_meshes;
     glm::mat4 m_proj = glm::perspective(glm::radians(70.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100000.0f);
 
-    float m_xHairVertices[18] = {
+    float m_xHairVertices[18] = { //for debug crosshair render
         -0.02f, 0.0f,  0.0f,  0.02f, 0.0f,  0.0f,
          0.0f, -0.02f, 0.0f,  0.0f,  0.02f, 0.0f,
          0.0f,  0.0f, -0.02f, 0.0f,  0.0f,  0.02f

@@ -28,7 +28,7 @@ void Camera::ProcessKeyboard(const Camera_Movement& direction, const float& delt
     float moveSpeed = m_movementSpeed / 1000000 * (2 * m_sprint + 1);
     glm::vec3 MovementDir = glm::vec3(0.0);
 
-    // Calculate local front, right, and up vectors based on the current orientation
+    // Calculate local vectors
     glm::vec3 front = m_orientation * glm::vec3(0.0, 0.0, -1.0);
     glm::vec3 right = m_orientation * glm::vec3(1.0, 0.0, 0.0);
     glm::vec3 up = m_orientation * glm::vec3(0.0, 1.0, 0.0);

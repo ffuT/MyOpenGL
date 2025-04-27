@@ -74,7 +74,7 @@ void Renderer::RenderObjects(std::vector<Shape*>& objects, std::vector<Light*>& 
 }
 
 void Renderer::RenderXhair(const VertexArray &vao, const Camera& cam, const glm::mat4& proj) {
-	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST); // xhair rendered on top
 	vao.Bind();
 	Shader* currentshader = m_ShaderManager.GetShader(ShaderProgram::CrosshairShader);
 	currentshader->Bind();

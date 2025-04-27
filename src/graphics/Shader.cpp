@@ -57,7 +57,7 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
 
     int result;
     glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-    if (result == GL_FALSE) {
+    if (result == GL_FALSE) {   // If compilation fails 
         int lenght;
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &lenght);
         char* message = (char*)malloc(lenght * sizeof(char));

@@ -2,11 +2,11 @@
 #include "Shader.h"
 
 enum ShaderProgram {
-    NewShader,
-    UnlitShader,
-    WireframeShader,
-    SkyboxShader,
-    CrosshairShader
+    NewShader,          // basic lighting
+    UnlitShader,        // full bright
+    WireframeShader,    // triangle lines
+    SkyboxShader,       // skybox
+    CrosshairShader     // crosshair
 };
 
 class ShaderManger {

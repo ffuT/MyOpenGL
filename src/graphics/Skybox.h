@@ -9,7 +9,8 @@
 #include "VertexBuffer.h"
 #include "Camera.h"
 
-inline GLuint loadCubemap(std::vector<std::string> faces) {
+inline GLuint loadCubemap(std::vector<std::string> faces) { 
+    // cubemap sides order: right, left, top, bottom, front, back
     GLuint textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);

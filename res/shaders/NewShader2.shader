@@ -1,13 +1,13 @@
 #shader vertex
 #version 330 core
 
-layout (location = 0) in vec3 aPos;       // Position
-layout (location = 1) in vec2 aTexCoords; // Texture Coordinates
-layout (location = 2) in vec3 aNormal;    // Normal
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoords;
+layout (location = 2) in vec3 aNormal;
 
-out vec2 TexCoords;   // Pass to fragment shader
-out vec3 FragPos;     // World-space position
-out vec3 Normal;      // Normal vector
+out vec2 TexCoords;
+out vec3 FragPos;
+out vec3 Normal;
 
 uniform mat4 u_model;
 uniform mat4 u_view;

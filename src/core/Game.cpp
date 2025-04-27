@@ -101,7 +101,7 @@ void Game::Run(){
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
     m_objects.push_back(&sphere3);
 
-    for (int i = 0; i < 5000; i++) { //bunch of random spheres
+    for (int i = 0; i < 5000; i++) { // bunch of random spheres for visualitation and performance check
         std::chrono::nanoseconds now = std::chrono::high_resolution_clock::now().time_since_epoch();
         std::srand(now.count());
 
@@ -166,7 +166,7 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::Begin("ImGui");
     ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-    ImGui::Text("Position: ");  //pos start
+    ImGui::Text("Position: ");  //Camerea position display 
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f)); // Red
     ImGui::Text("x:%.3f", m_cam.GetPos().x);
@@ -180,7 +180,7 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.33f, 1.0f, 1.0f)); // Blue
     ImGui::Text(" z:%.1f", m_cam.GetPos().z);
-    ImGui::PopStyleColor();     // pos end
+    ImGui::PopStyleColor();     // cam pos end
 
     ImGui::Text("Look Dir: x:%.3f y:%.3f z:%.3f", m_cam.GetFront().x, m_cam.GetFront().y, m_cam.GetFront().z);
     ImGui::Text("Camera Mode: %s", m_currentWindowMode ? "true" : "false");
@@ -375,14 +375,12 @@ void Game::toggleFullscreen() {
     static GLFWmonitor* monitor = glfwGetPrimaryMonitor(); // Get the primary monitor
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);   // Get monitor resolution
 
-    if (IS_FULLSCREEN) {
-        glfwSetWindowMonitor(m_window, nullptr, m_windowedX, m_windowedY, m_windowedWidth, m_windowedHeight, 0);
-    }
-    else {
+    if (!IS_FULLSCREEN) { // save pos and size when not fullscreen
         glfwGetWindowPos(m_window, &m_windowedX, &m_windowedY);
         glfwGetWindowSize(m_window, &m_windowedWidth, &m_windowedHeight);
-
         glfwSetWindowMonitor(m_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    } else { // set to saved pos
+        glfwSetWindowMonitor(m_window, nullptr, m_windowedX, m_windowedY, m_windowedWidth, m_windowedHeight, 0);
     }
     IS_FULLSCREEN = !IS_FULLSCREEN;
 }
@@ -391,12 +389,10 @@ void Game::keyCallback(GLFWwindow* window, int key, int scancode, int action, in
     if (action == GLFW_PRESS) {
         switch (key) {
         case GLFW_KEY_ESCAPE:
-            if (m_currentWindowMode == MouseInputMode::WINDOW_MODE) {    //close
-                //break; //comment out to close on esc
+            if (m_currentWindowMode == MouseInputMode::WINDOW_MODE) {
                 std::cout << "Escape key pressed, closing m_window." << std::endl;
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
-            }
-            else {    //leave cameramode
+            } else {
                 ToggleMouseInputMode(window, m_currentWindowMode);
             }
             break;
