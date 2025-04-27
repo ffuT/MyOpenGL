@@ -22,19 +22,20 @@ void Renderer::RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj) {
 void Renderer::RenderObjects(std::vector<Shape*>& objects, std::vector<Light*>& lights, Camera& cam, glm::mat4& proj) {
     glDepthFunc(GL_LESS);
     //unlit shader for lights, for full brightness
-    Shader* lightShader = m_ShaderManager.GetShader(ShaderProgram::UnlitShader);
-    lightShader->Bind();
-    lightShader->SetUniformMat4f("u_view", cam.GetViewMatrix());
-    lightShader->SetUniformMat4f("u_proj", proj);
+    if (m_currentShader == ShaderProgram::NewShader){
+        Shader* lightShader = m_ShaderManager.GetShader(ShaderProgram::UnlitShader);
+        lightShader->Bind();
+        lightShader->SetUniformMat4f("u_view", cam.GetViewMatrix());
+        lightShader->SetUniformMat4f("u_proj", proj);
 
-    for (Light* light : lights) { // set per light specific uniforms
-        objects[0]->SetTransform(glm::translate(glm::mat4(1.0f), light->position));
-        lightShader->SetUniformMat4f("u_model", objects[0]->GetModelMatrix());
-        lightShader->SetUniform4f("u_color", glm::vec4(light->color, 1.0f));
-        objects[0]->Render();
+        for (Light* light : lights) { // set per light specific uniforms
+            objects[0]->SetTransform(glm::translate(glm::mat4(1.0f), light->position));
+            lightShader->SetUniformMat4f("u_model", objects[0]->GetModelMatrix());
+            lightShader->SetUniform4f("u_color", glm::vec4(light->color, 1.0f));
+            objects[0]->Render();
+        }
+        lightShader->UnBind();
     }
-    lightShader->UnBind();
-
     //render objects using the selected shader
     Shader* objectShader = m_ShaderManager.GetShader(m_currentShader);
     objectShader->Bind();
