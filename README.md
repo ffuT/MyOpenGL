@@ -13,8 +13,7 @@ then to get the visual studio project files run `premake5 vs2022` (or whatever v
 
 #### Linux
 For Linux it depends what distribution you use, but for arch its simple. <br>
-first install dependacies `sudo pacman -S glew glfw` <br>
-then install premake run `sudo pacman -S premake` <br>
+first install dependacies `sudo pacman -S glew glfw premake` <br>
 then to create the project run `premake5 gmake` <br> 
 finally to compile the code run `make -C Build/` <br>
 
