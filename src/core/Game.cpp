@@ -251,7 +251,7 @@ void Game::RenderImGui(Renderer& renderer) {
     }
 
     if (selectedSphereIndex >= 0 && selectedSphereIndex < m_objects.size()) {
-        Shape selectedSphere = m_objects[selectedSphereIndex];
+        Shape& selectedSphere = m_objects[selectedSphereIndex];
 
         float specular = selectedSphere.GetSpecular();
         glm::vec4 color = selectedSphere.GetColor();
@@ -262,7 +262,7 @@ void Game::RenderImGui(Renderer& renderer) {
 
         ImGui::DragFloat("Specular", &specular, 0.001f, 0, 1);
         ImGui::ColorEdit3("Color", (float*)&color);
-        ImGui::DragFloat3("Position", (float*)&position, 0.1f);
+        ImGui::DragFloat3("Position", (float*)&position, 0.5f);
         ImGui::DragFloat3("Scale", (float*)&scale, 0.1f);
 
         scaleMatrix = glm::scale(glm::mat4(1.0), scale); // Create a new scale matrix
@@ -301,11 +301,11 @@ void Game::RenderImGui(Renderer& renderer) {
     }
 
     if (selectedLightIndex >= 0 && selectedLightIndex < m_lights.size()) {
-        Light selectedLight = m_lights[selectedLightIndex];
+        Light& selectedLight = m_lights[selectedLightIndex];
 
         ImGui::ColorEdit3("Color ", (float*)&selectedLight.color);
         ImGui::DragFloat("Intensity ", &selectedLight.intensity, 0.01f, 0.0f, 10.0f);
-        ImGui::DragFloat3("Position ", (float*)&selectedLight.position, 0.1f);
+        ImGui::DragFloat3("Position ", (float*)&selectedLight.position, 0.5f);
     }
 
     ImGui::NewLine();

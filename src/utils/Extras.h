@@ -28,7 +28,7 @@ constexpr static std::vector<float> CreateSphere(const float radius, const int P
 };
 
 constexpr static std::vector<unsigned int> CreateSphereIndices(const int PointAmount) {
-    const int totalIndices = 6 * (PointAmount - 1) * (PointAmount - 1);
+    const int totalIndices = 2 * (PointAmount - 1) * (PointAmount - 1) * 3;
 
     std::vector<unsigned int> indices;
     indices.reserve(totalIndices); // Reserve memory for efficiency

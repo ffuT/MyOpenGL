@@ -8,7 +8,8 @@
 #include "ShaderManager.h"
 #include "Mesh.h"
 
-struct Shape{
+class Shape{
+public:
 	Shape(Mesh* mesh);
 	~Shape();
 
@@ -41,4 +42,7 @@ private:
 	glm::mat4 m_Scale = glm::mat4(1.0);
 	glm::mat4 m_Rotation = glm::mat4(1.0);
 	glm::mat4 m_Transform = glm::mat4(1.0);
+
+	mutable glm::mat4 m_cachedModelMatrix;
+	mutable bool m_dirty = true;
 };
