@@ -68,54 +68,58 @@ void Game::Run(){
 
     m_meshes.push_back(spheremesh);
 
-    Sphere pointLight = Sphere(5, &m_meshes[0]);
+    Shape pointLight = Shape(&m_meshes[0]);
     pointLight.SetTextID("PointLight");
-    m_objects.push_back(&pointLight);
+    m_objects.push_back(pointLight);
     
     Light pointlight1 = Light(
         glm::vec3(0, 92, -25),
         glm::vec3(1.0),
         1.0f
     );
-    m_lights.push_back(&pointlight1);
+    m_lights.push_back(pointlight1);
 
     Light pointlight2 = Light(
         glm::vec3(0, -92, 25),
         glm::vec3(1.0),
         0.25f
     );
-    m_lights.push_back(&pointlight2);
+    m_lights.push_back(pointlight2);
 
-    Sphere sphere = Sphere(10, &m_meshes[0]);
+    Shape sphere = Shape(&m_meshes[0]);
     sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-30.0, -5.0, -50.0)));
+    sphere.SetScale(10);
     sphere.SetColor(glm::vec4(1, 0, 0, 1));
-    m_objects.push_back(&sphere);
+    m_objects.push_back(sphere);
 
-    Sphere sphere2 = Sphere(10, &m_meshes[0]);
+    Shape sphere2 = Shape(&m_meshes[0]);
     sphere2.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(0.0, -5.0, -50.0)));
+    sphere2.SetScale(10);
     sphere2.SetColor(glm::vec4(0, 1, 0, 1));
-    m_objects.push_back(&sphere2);
+    m_objects.push_back(sphere2);
 
-    Sphere sphere3 = Sphere(10, &m_meshes[0]);
+    Shape sphere3 = Shape(&m_meshes[0]);
     sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(30.0, -5.0, -50.0)));
+    sphere3.SetScale(10);
     sphere3.SetColor(glm::vec4(0, 0, 1, 1));
-    m_objects.push_back(&sphere3);
+    m_objects.push_back(sphere3);
 
     for (int i = 0; i < 5000; i++) { // bunch of random spheres for visualitation and performance check
         std::chrono::nanoseconds now = std::chrono::high_resolution_clock::now().time_since_epoch();
         std::srand(now.count());
 
-        m_objects.push_back(new Sphere(2 + std::rand() % 15, &m_meshes[0]));
+        m_objects.push_back(Shape(&m_meshes[0]));
+        m_objects[i + 4].SetScale(2 + std::rand() % 15);
         
-        float f1 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         float f2 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+        float f1 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         float f3 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         
-        m_objects[i + 4]->SetColor(glm::vec4(f1, f2, f3,1));
+        m_objects[i + 4].SetColor(glm::vec4(f1, f2, f3,1));
 
         int max = 1000;
         int min = -1000;
-        m_objects[i + 4]->SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(min + (std::rand() % (max - min + 1)), min + (std::rand() % (max - min + 1)), min + (std::rand() % (max - min + 1)))));
+        m_objects[i + 4].SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(min + (std::rand() % (max - min + 1)), min + (std::rand() % (max - min + 1)), min + (std::rand() % (max - min + 1)))));
     }
 
     //debug crosshair
@@ -222,22 +226,21 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::Spacing();
 
     if (ImGui::Button("Add Sphere")) {
-        m_objects.push_back(new Sphere(1, &m_meshes[0]));
+        m_objects.push_back(Shape(&m_meshes[0]));
     }
     ImGui::Spacing();
 
     static int selectedSphereIndex = -1;
     if (ImGui::Button("Delete Sphere")) {   //delete selected Sphere
         if (selectedSphereIndex > 3) {
-            delete m_objects[selectedSphereIndex];
             m_objects.erase(m_objects.begin() + selectedSphereIndex);
             selectedSphereIndex--;
         }
     }
     ImGui::Spacing();
-    if (ImGui::BeginCombo("Object", selectedSphereIndex >= 0 ? ("Object " + std::to_string(selectedSphereIndex) + ": " + m_objects[selectedSphereIndex]->GetTextID()).c_str() : "Objects")) {
+    if (ImGui::BeginCombo("Object", selectedSphereIndex >= 0 ? ("Object " + std::to_string(selectedSphereIndex) + ": " + m_objects[selectedSphereIndex].GetTextID()).c_str() : "Objects")) {
         for (int i = 1; i < m_objects.size(); i++) { // Skip light sphere at index 0
-            std::string itemLabel = "Index " + std::to_string(i) + ": " + m_objects[i]->GetTextID();
+            std::string itemLabel = "Index " + std::to_string(i) + ": " + m_objects[i].GetTextID();
             bool isSelected = (selectedSphereIndex == i);
             if (ImGui::Selectable(itemLabel.c_str(), isSelected))
                 selectedSphereIndex = i;
@@ -248,13 +251,13 @@ void Game::RenderImGui(Renderer& renderer) {
     }
 
     if (selectedSphereIndex >= 0 && selectedSphereIndex < m_objects.size()) {
-        Shape* selectedSphere = m_objects[selectedSphereIndex];
+        Shape selectedSphere = m_objects[selectedSphereIndex];
 
-        float specular = selectedSphere->GetSpecular();
-        glm::vec4 color = selectedSphere->GetColor();
-        glm::vec3 position = glm::vec3(selectedSphere->GetTransform()[3]); // Get translation from matrix
+        float specular = selectedSphere.GetSpecular();
+        glm::vec4 color = selectedSphere.GetColor();
+        glm::vec3 position = glm::vec3(selectedSphere.GetTransform()[3]); // Get translation from matrix
 
-        glm::mat4 scaleMatrix = selectedSphere->GetScale(); // Get scale matrix
+        glm::mat4 scaleMatrix = selectedSphere.GetScale(); // Get scale matrix
         glm::vec3 scale = glm::vec3(glm::length(scaleMatrix[0]), glm::length(scaleMatrix[1]), glm::length(scaleMatrix[2]));
 
         ImGui::DragFloat("Specular", &specular, 0.001f, 0, 1);
@@ -264,23 +267,22 @@ void Game::RenderImGui(Renderer& renderer) {
 
         scaleMatrix = glm::scale(glm::mat4(1.0), scale); // Create a new scale matrix
 
-        selectedSphere->SetColor(color);
-        selectedSphere->SetSpecular(specular);
+        selectedSphere.SetColor(color);
+        selectedSphere.SetSpecular(specular);
 
         glm::mat4 transform = glm::translate(glm::mat4(1.0), position);
-        selectedSphere->SetTransform(transform);
-        selectedSphere->SetScale(scaleMatrix);
+        selectedSphere.SetTransform(transform);
+        selectedSphere.SetScale(scaleMatrix);
     }
     ImGui::NewLine();
 
     if (ImGui::Button("Add Light")) {
-        m_lights.push_back(new Light(glm::vec3(0.0), glm::vec3(1.0), 0.5));
+        m_lights.push_back(Light(glm::vec3(0.0), glm::vec3(1.0), 0.5));
     }
     ImGui::Spacing();
     static int selectedLightIndex = -1;  // Currently selected light
     if (ImGui::Button("Delete Light")) {   //delete selected light
         if (selectedLightIndex > 1) {
-            delete m_lights[selectedLightIndex];
             m_lights.erase(m_lights.begin() + selectedLightIndex);
             selectedLightIndex--;
         }
@@ -299,11 +301,11 @@ void Game::RenderImGui(Renderer& renderer) {
     }
 
     if (selectedLightIndex >= 0 && selectedLightIndex < m_lights.size()) {
-        Light* selectedLight = m_lights[selectedLightIndex];
+        Light selectedLight = m_lights[selectedLightIndex];
 
-        ImGui::ColorEdit3("Color ", (float*)&selectedLight->color);
-        ImGui::DragFloat("Intensity ", &selectedLight->intensity, 0.01f, 0.0f, 10.0f);
-        ImGui::DragFloat3("Position ", (float*)&selectedLight->position, 0.1f);
+        ImGui::ColorEdit3("Color ", (float*)&selectedLight.color);
+        ImGui::DragFloat("Intensity ", &selectedLight.intensity, 0.01f, 0.0f, 10.0f);
+        ImGui::DragFloat3("Position ", (float*)&selectedLight.position, 0.1f);
     }
 
     ImGui::NewLine();

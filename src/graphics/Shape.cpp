@@ -34,6 +34,10 @@ void Shape::SetScale(const glm::mat4 scale){
 	m_Scale = scale;
 }
 
+void Shape::SetScale(const float scale){
+	m_Scale = glm::scale(glm::mat4(1.0), glm::vec3(scale));
+}
+
 void Shape::SetRotation(const glm::mat4 rotation){
 	m_Rotation = rotation;
 }

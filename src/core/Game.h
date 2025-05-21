@@ -23,7 +23,6 @@
 #include "ElementArrayBuffer.h"
 #include "Camera.h"
 #include "ShaderManager.h"
-#include "Sphere.h"
 #include "Extras.h" 
 
 enum MouseInputMode {
@@ -67,8 +66,8 @@ private:
     Camera m_cam;
 
     float m_delta = 0.0f;
-    std::vector<Shape*> m_objects;
-    std::vector<Light*> m_lights;
+    std::vector<Shape> m_objects;
+    std::vector<Light> m_lights;
     std::vector<Mesh> m_meshes;
     glm::mat4 m_proj = glm::perspective(glm::radians(70.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100000.0f);
 

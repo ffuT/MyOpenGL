@@ -19,56 +19,56 @@ void Renderer::RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj) {
 	skybox.UnBind();
 }
 
-void Renderer::RenderObjects(std::vector<Shape*>& objects, std::vector<Light*>& lights, Camera& cam, glm::mat4& proj) {
+void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj) {
     glDepthFunc(GL_LESS);
     //unlit shader for lights, for full brightness
-    if (m_currentShader == ShaderProgram::NewShader){
-        Shader* lightShader = m_ShaderManager.GetShader(ShaderProgram::UnlitShader);
-        lightShader->Bind();
-        lightShader->SetUniformMat4f("u_view", cam.GetViewMatrix());
-        lightShader->SetUniformMat4f("u_proj", proj);
+    Shader* lightShader = m_ShaderManager.GetShader(ShaderProgram::UnlitShader);
+    lightShader->Bind();
+    lightShader->SetUniformMat4f("u_view", cam.GetViewMatrix());
+    lightShader->SetUniformMat4f("u_proj", proj);
 
-        for (Light* light : lights) { // set per light specific uniforms
-            objects[0]->SetTransform(glm::translate(glm::mat4(1.0f), light->position));
-            lightShader->SetUniformMat4f("u_model", objects[0]->GetModelMatrix());
-            lightShader->SetUniform4f("u_color", glm::vec4(light->color, 1.0f));
-            objects[0]->Render();
-        }
-        lightShader->UnBind();
+    for (Light& light : lights) { // set per light specific uniforms
+        objects[0].SetTransform(glm::translate(glm::mat4(1.0f), light.position));
+        lightShader->SetUniformMat4f("u_model", objects[0].GetModelMatrix());
+        lightShader->SetUniform4f("u_color", glm::vec4(light.color, 1.0f));
+        objects[0].Render();
     }
+    lightShader->UnBind();
+    
     //render objects using the selected shader
     Shader* objectShader = m_ShaderManager.GetShader(m_currentShader);
     objectShader->Bind();
     objectShader->SetUniformMat4f("u_view", cam.GetViewMatrix());
     objectShader->SetUniformMat4f("u_proj", proj);
 
-    switch (m_currentShader) { // set current shader uniforms
+    switch (m_currentShader) { // set currentshader specific uniforms
     case NewShader:
         objectShader->SetUniform3f("u_viewPos", cam.GetPos());
         objectShader->SetUniform1i("numLights", lights.size());
         for (int j = 0; j < lights.size(); j++) {
             std::string lightName = "lights[" + std::to_string(j) + "].";
-            objectShader->SetUniform3f(lightName + "position", lights[j]->position);
-            objectShader->SetUniform3f(lightName + "color", lights[j]->color);
-            objectShader->SetUniform1f(lightName + "intensity", lights[j]->intensity);
+            objectShader->SetUniform3f(lightName + "position", lights[j].position);
+            objectShader->SetUniform3f(lightName + "color", lights[j].color);
+            objectShader->SetUniform1f(lightName + "intensity", lights[j].intensity);
         }
         break;
+        //more shaders in future
     }
 
-    for (int i = 1; i < objects.size(); i++) { // set per object specific uniforms
-        objectShader->SetUniformMat4f("u_model", objects[i]->GetModelMatrix());
+    for (int i = 1; i < objects.size(); i++) { // set per object uniforms
+        objectShader->SetUniformMat4f("u_model", objects[i].GetModelMatrix());
 
         switch (m_currentShader) {
         case NewShader:
-            objectShader->SetUniform4f("u_color", objects[i]->GetColor());
-            objectShader->SetUniform1f("u_specularStrength", objects[i]->GetSpecular());
+            objectShader->SetUniform4f("u_color", objects[i].GetColor());
+            objectShader->SetUniform1f("u_specularStrength", objects[i].GetSpecular());
             break;
         case UnlitShader:
         case WireframeShader:
-            objectShader->SetUniform4f("u_color", objects[i]->GetColor());
+            objectShader->SetUniform4f("u_color", objects[i].GetColor());
             break;
         }
-        objects[i]->Render();
+        objects[i].Render();
     }
     objectShader->UnBind();
 }
