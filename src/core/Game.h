@@ -71,7 +71,7 @@ private:
     std::vector<Mesh> m_meshes;
     glm::mat4 m_proj = glm::perspective(glm::radians(70.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100000.0f);
 
-    float m_xHairVertices[18] = { //for debug crosshair render
+    float m_xHairVertices[18] = { // for debug crosshair render
         -0.02f, 0.0f,  0.0f,  0.02f, 0.0f,  0.0f,
          0.0f, -0.02f, 0.0f,  0.0f,  0.02f, 0.0f,
          0.0f,  0.0f, -0.02f, 0.0f,  0.0f,  0.02f

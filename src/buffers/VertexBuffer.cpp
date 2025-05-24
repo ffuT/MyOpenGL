@@ -22,4 +22,3 @@ void VertexBuffer::Unbind() const {
 void VertexBuffer::UpdateBuffer(unsigned int offset, unsigned int size, const void* data) const {
     glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 }
-

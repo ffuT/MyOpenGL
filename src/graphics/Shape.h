@@ -43,6 +43,6 @@ private:
 	glm::mat4 m_Rotation = glm::mat4(1.0);
 	glm::mat4 m_Transform = glm::mat4(1.0);
 
-	mutable glm::mat4 m_cachedModelMatrix;
+	mutable glm::mat4 m_cachedModelMatrix = glm::mat4(1.0);
 	mutable bool m_dirty = true;
 };

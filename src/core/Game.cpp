@@ -22,13 +22,13 @@ Game::Game(const  char* title) : TITLE(title) {
     glfwMakeContextCurrent(m_window);
 
     glfwSetWindowAttrib(m_window, GLFW_RESIZABLE, GLFW_FALSE);
-    glfwSwapInterval(USE_VSYNC); //vsyncs
+    glfwSwapInterval(USE_VSYNC); // vsyncs
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glfwSwapBuffers(m_window); // Clear to black while initializing
 
-    //glfw callbacks
+    // glfw callbacks
     glfwSetWindowUserPointer(m_window, this);
     glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int mods) {
         static_cast<Game*>(glfwGetWindowUserPointer(window))->MouseCallBack(window, button, action, mods);
@@ -64,73 +64,57 @@ void Game::Run(){
     Renderer renderer = Renderer();
     renderer.SetRenderShader(ShaderProgram::NewShader);
 
-    Mesh spheremesh = Mesh(CreateSphere(1, 32), CreateSphereNormals(CreateSphere(1, 32), 32), CreateSphereIndices(32));
-
+    m_meshes.reserve(10); // IMPORTANT!!!, to avoid vector move shenanigans very bandaid fix
+    
+    Mesh spheremesh = Mesh(CreateSphere(1, 32), CreateSphere(1, 32), CreateSphereNormals(CreateSphere(1, 32), 32), CreateSphereIndices(32));
     m_meshes.push_back(spheremesh);
+    
+    Mesh Bananmesh = Mesh::LoadMeshFromFile("res/meshes/banana.obj");
+    m_meshes.push_back(Bananmesh);
 
+    Skybox skybox = Skybox();
+
+    // sphere for rendering lights
     Shape pointLight = Shape(&m_meshes[0]);
     pointLight.SetTextID("PointLight");
     m_objects.push_back(pointLight);
     
-    Light pointlight1 = Light(
-        glm::vec3(0, 92, -25),
-        glm::vec3(1.0),
-        1.0f
-    );
+    // constant light sources
+    Light pointlight1 = Light(glm::vec3(0, 92, -25), glm::vec3(1.0), 1.0f);
+    Light pointlight2 = Light(glm::vec3(0, -92, 25), glm::vec3(1.0), 0.25f);
     m_lights.push_back(pointlight1);
-
-    Light pointlight2 = Light(
-        glm::vec3(0, -92, 25),
-        glm::vec3(1.0),
-        0.25f
-    );
     m_lights.push_back(pointlight2);
 
-    Shape sphere = Shape(&m_meshes[0]);
-    sphere.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(-30.0, -5.0, -50.0)));
-    sphere.SetScale(10);
-    sphere.SetColor(glm::vec4(1, 0, 0, 1));
-    m_objects.push_back(sphere);
-
-    Shape sphere2 = Shape(&m_meshes[0]);
-    sphere2.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(0.0, -5.0, -50.0)));
-    sphere2.SetScale(10);
-    sphere2.SetColor(glm::vec4(0, 1, 0, 1));
-    m_objects.push_back(sphere2);
-
-    Shape sphere3 = Shape(&m_meshes[0]);
-    sphere3.SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(30.0, -5.0, -50.0)));
-    sphere3.SetScale(10);
-    sphere3.SetColor(glm::vec4(0, 0, 1, 1));
-    m_objects.push_back(sphere3);
-
-    for (int i = 0; i < 5000; i++) { // bunch of random spheres for visualitation and performance check
+    for (int i = 0; i < 2500; i++) { // bunch of random spheres for visualitation and performance check
         std::chrono::nanoseconds now = std::chrono::high_resolution_clock::now().time_since_epoch();
         std::srand(now.count());
 
-        m_objects.push_back(Shape(&m_meshes[0]));
-        m_objects[i + 4].SetScale(2 + std::rand() % 15);
+        bool isbanana = (std::rand() % 100) < 5; // 5% chance for banana mesh
+        m_objects.push_back(Shape(&m_meshes[isbanana]));
+        m_objects[i + 1].SetScale(2 + std::rand() % 15);
         
         float f2 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         float f1 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         float f3 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         
-        m_objects[i + 4].SetColor(glm::vec4(f1, f2, f3,1));
+        m_objects[i + 1].SetColor(glm::vec4(f1, f2, f3, 1)); // random color
 
         int max = 1000;
         int min = -1000;
-        m_objects[i + 4].SetTransform(glm::translate(glm::mat4(1.0), glm::vec3(min + (std::rand() % (max - min + 1)), min + (std::rand() % (max - min + 1)), min + (std::rand() % (max - min + 1)))));
+        // random pos
+        m_objects[i + 1].SetTransform(glm::translate(glm::mat4(1.0),
+            glm::vec3(min + (std::rand() % (max - min + 1)),
+                min + (std::rand() % (max - min + 1)),
+                min + (std::rand() % (max - min + 1)))));
     }
 
-    //debug crosshair
+    // debug crosshair
     VertexArray XhairVAO;
     VertexBuffer XhairVBO(18*sizeof(float), m_xHairVertices);
     XhairVAO.Bind();
     XhairVAO.AddVertexBuffer(XhairVBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     XhairVAO.Unbind();
     XhairVBO.Unbind();
-
-    Skybox skybox = Skybox();
 
     auto last = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
@@ -140,25 +124,22 @@ void Game::Run(){
         now = std::chrono::high_resolution_clock::now();
         m_delta = (now - last).count();
 
-        keyPressed(m_delta); //keypress check
+        keyPressed(m_delta); // keypress handling
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear
 
+        // render stuff
         renderer.RenderSkybox(skybox, m_cam, m_proj);
-
         renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
-
         if (USE_DEBUG_XHAIR){
             UpdateXHair(renderer, XhairVAO, XhairVBO);
             renderer.RenderXhair(XhairVAO, m_cam, m_proj);
         }
-
         RenderImGui(renderer);
         
         glfwSwapBuffers(m_window);
         glfwPollEvents();
     }
-
     glfwTerminate();
 }
 
@@ -170,7 +151,7 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::Begin("ImGui");
     ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-    ImGui::Text("Position: ");  //Camerea position display 
+    ImGui::Text("Position: ");  // Camerea position display 
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f)); // Red
     ImGui::Text("x:%.3f", m_cam.GetPos().x);
@@ -211,7 +192,7 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::Text(": %s", USE_DEBUG_XHAIR ? "on" : "off");
     ImGui::Spacing();
 
-    ImGui::Text("Shader Program ");     //Shader Program change
+    ImGui::Text("Shader Program ");     // Shader Program change
     if (ImGui::Button("NewShader"))
         renderer.SetRenderShader(ShaderProgram::NewShader);
     ImGui::SameLine();
@@ -231,10 +212,11 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::Spacing();
 
     static int selectedSphereIndex = -1;
-    if (ImGui::Button("Delete Sphere")) {   //delete selected Sphere
-        if (selectedSphereIndex > 3) {
+    if (ImGui::Button("Delete Sphere")) {   // delete selected Sphere
+        if (selectedSphereIndex > 0) {
             m_objects.erase(m_objects.begin() + selectedSphereIndex);
-            selectedSphereIndex--;
+            if(selectedSphereIndex > 1)
+                selectedSphereIndex--;
         }
     }
     ImGui::Spacing();
@@ -281,7 +263,7 @@ void Game::RenderImGui(Renderer& renderer) {
     }
     ImGui::Spacing();
     static int selectedLightIndex = -1;  // Currently selected light
-    if (ImGui::Button("Delete Light")) {   //delete selected light
+    if (ImGui::Button("Delete Light")) {   // delete selected light
         if (selectedLightIndex > 1) {
             m_lights.erase(m_lights.begin() + selectedLightIndex);
             selectedLightIndex--;
@@ -316,7 +298,7 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-//maybe abstract xhair 
+// maybe abstract xhair 
 void Game::UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& XhairVBO){
     glm::vec3 cameraPos = m_cam.GetPos() + m_cam.GetFront();
     const float LINE_LENGTH = 0.025f;
@@ -335,7 +317,7 @@ void Game::UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& 
 }
 
 void Game::keyPressed(const float& delta) {
-    //camera movement
+    // camera movement
     if (m_currentWindowMode == MouseInputMode::CAMERA_MODE) {
         if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
             m_cam.ProcessKeyboard(FORWARD, delta);
@@ -354,11 +336,8 @@ void Game::keyPressed(const float& delta) {
             m_cam.ProcessKeyboard(ROLLLEFT, delta);
         if (glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS)
             m_cam.ProcessKeyboard(ROLLRIGHT, delta);
-        if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
-            m_cam.m_sprint = true;
-        } else {
-            m_cam.m_sprint = false;
-        }
+        (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) // faster movement
+            ? m_cam.m_sprint = true : m_cam.m_sprint = false;
     }
 }
 
@@ -366,8 +345,7 @@ void Game::ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode) {
     if (mode == MouseInputMode::WINDOW_MODE) {
         mode = CAMERA_MODE;
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
-    else {
+    } else {
         mode = MouseInputMode::WINDOW_MODE;
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
@@ -409,17 +387,16 @@ void Game::keyCallback(GLFWwindow* window, int key, int scancode, int action, in
 }
 
 void Game::MouseCallBack(GLFWwindow* window, int button, int action, int mods) {
-    if (ImGui::GetIO().WantCaptureMouse) { //ignore mouseclicks on imgui
+    if (ImGui::GetIO().WantCaptureMouse) { // ignore mouseclicks on imgui
         return;
     }
-
     if (m_currentWindowMode == MouseInputMode::WINDOW_MODE) {
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
             ToggleMouseInputMode(window, m_currentWindowMode);
             FIRST_MOUSE = true;
         }
-    } else { // cameramode
-
+    } else { 
+        // cameramode
     }
 }
 
