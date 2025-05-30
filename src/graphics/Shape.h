@@ -37,7 +37,7 @@ private:
 	Mesh* m_mesh;
 	glm::vec4 m_Color = glm::vec4(1.0);
 	
-	float m_SpecularStrenght = 0.5;
+	float m_SpecularStrength = 0.5;
 
 	glm::mat4 m_Scale = glm::mat4(1.0);
 	glm::mat4 m_Rotation = glm::mat4(1.0);

@@ -23,7 +23,7 @@ const char* Shape::GetTextID() const {
 }
 
 float Shape::GetSpecular() const {
-	return m_SpecularStrenght;
+	return m_SpecularStrength;
 }
 
 void Shape::SetTransform(const glm::mat4 transform){
@@ -51,7 +51,7 @@ void Shape::SetColor(const glm::vec4 color){
 }
 
 void Shape::SetSpecular(const float spec){
-	m_SpecularStrenght = spec;
+	m_SpecularStrength = spec;
 }
 
 void Shape::SetTextID(const char* name){

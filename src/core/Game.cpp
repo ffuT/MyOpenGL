@@ -85,9 +85,9 @@ void Game::Run(){
     m_lights.push_back(pointlight1);
     m_lights.push_back(pointlight2);
 
+    std::chrono::nanoseconds seed = std::chrono::high_resolution_clock::now().time_since_epoch();
+    std::srand(seed.count());
     for (int i = 0; i < 2500; i++) { // bunch of random spheres for visualitation and performance check
-        std::chrono::nanoseconds now = std::chrono::high_resolution_clock::now().time_since_epoch();
-        std::srand(now.count());
 
         bool isbanana = (std::rand() % 100) < 5; // 5% chance for banana mesh
         m_objects.push_back(Shape(&m_meshes[isbanana]));
@@ -108,7 +108,7 @@ void Game::Run(){
                 min + (std::rand() % (max - min + 1)))));
     }
 
-    // debug crosshair
+    // TODO abstract debug crosshair
     VertexArray XhairVAO;
     VertexBuffer XhairVBO(18*sizeof(float), m_xHairVertices);
     XhairVAO.Bind();
@@ -213,9 +213,9 @@ void Game::RenderImGui(Renderer& renderer) {
 
     static int selectedSphereIndex = -1;
     if (ImGui::Button("Delete Sphere")) {   // delete selected Sphere
-        if (selectedSphereIndex > 0) {
+        if (selectedSphereIndex > 0) { // > 0 because 0 cant be deleted
             m_objects.erase(m_objects.begin() + selectedSphereIndex);
-            if(selectedSphereIndex > 1)
+            if(selectedSphereIndex > 1) // > 1 because i dont wanna edit sphere 0
                 selectedSphereIndex--;
         }
     }
@@ -298,7 +298,7 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-// maybe abstract xhair 
+// TODO abstract debug crosshair
 void Game::UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& XhairVBO){
     glm::vec3 cameraPos = m_cam.GetPos() + m_cam.GetFront();
     const float LINE_LENGTH = 0.025f;

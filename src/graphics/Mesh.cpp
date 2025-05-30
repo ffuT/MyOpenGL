@@ -40,7 +40,6 @@ void Mesh::Render() const{
 	glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, 0);
 }
 
-// thanks for the help chatgpt... I shouldve just used a library
 struct VertexKey {
     int v, vt, vn;
     bool operator==(const VertexKey& other) const {
