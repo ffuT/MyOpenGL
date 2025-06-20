@@ -136,12 +136,14 @@ void Shader::SetUniform3f(const std::string name, glm::vec3 vec) {
 }
 
 unsigned int Shader::GetUniformLocation(const std::string& name) {
-    if (m_UniformLocationCahce.find(name) != m_UniformLocationCahce.end())
-        return m_UniformLocationCahce[name];
+    auto it = m_UniformLocationCahce.find(name);
+    if (it != m_UniformLocationCahce.end())
+        return it->second;
 
     int location = glGetUniformLocation(m_RendererID, name.c_str());
     if (location == -1)
-        std::cout << "warning: uniform " << name << " doesnt exist " << std::endl;
-    m_UniformLocationCahce[name] = location;
+        std::cout << "Warning: uniform " << name << " doesn't exist." << std::endl;
+
+    m_UniformLocationCahce.emplace(name, location);
     return location;
 }

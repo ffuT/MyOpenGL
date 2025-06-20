@@ -131,6 +131,7 @@ void Game::Run(){
         // render stuff
         renderer.RenderSkybox(skybox, m_cam, m_proj);
         renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
+
         if (USE_DEBUG_XHAIR){
             UpdateXHair(renderer, XhairVAO, XhairVBO);
             renderer.RenderXhair(XhairVAO, m_cam, m_proj);
@@ -147,7 +148,18 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    
+	RenderImGuiData();
+    RenderImGuiSettings(renderer);
+    RenderImGuiSceneControl();
+   
+    ImGui::End();
 
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void Game::RenderImGuiData() {
     ImGui::Begin("ImGui");
     ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
@@ -171,7 +183,10 @@ void Game::RenderImGui(Renderer& renderer) {
     ImGui::Text("Camera Mode: %s", m_currentWindowMode ? "true" : "false");
 
     ImGui::NewLine();
-    ImGui::TextColored(ImVec4(1, 1, 1, 1), "Settings");
+}
+
+void Game::RenderImGuiSettings(Renderer& renderer) {
+    ImGui::Text("Settings");
 
     if (ImGui::Button("Fullscreen"))
         toggleFullscreen();
@@ -203,23 +218,27 @@ void Game::RenderImGui(Renderer& renderer) {
         renderer.SetRenderShader(ShaderProgram::UnlitShader);
 
     ImGui::NewLine();
+}
+
+void Game::RenderImGuiSceneControl() {
     ImGui::TextColored(ImVec4(1, 1, 1, 1), "Scene");
     ImGui::Spacing();
 
-    if (ImGui::Button("Add Sphere")) {
+    if (ImGui::Button("Add Object")) {
         m_objects.push_back(Shape(&m_meshes[0]));
     }
     ImGui::Spacing();
 
     static int selectedSphereIndex = -1;
-    if (ImGui::Button("Delete Sphere")) {   // delete selected Sphere
+    if (ImGui::Button("Delete Object")) {   // delete selected Sphere
         if (selectedSphereIndex > 0) { // > 0 because 0 cant be deleted
             m_objects.erase(m_objects.begin() + selectedSphereIndex);
-            if(selectedSphereIndex > 1) // > 1 because i dont wanna edit sphere 0
+            if (selectedSphereIndex > 1) // > 1 because i dont wanna edit sphere 0
                 selectedSphereIndex--;
         }
     }
     ImGui::Spacing();
+    
     if (ImGui::BeginCombo("Object", selectedSphereIndex >= 0 ? ("Object " + std::to_string(selectedSphereIndex) + ": " + m_objects[selectedSphereIndex].GetTextID()).c_str() : "Objects")) {
         for (int i = 1; i < m_objects.size(); i++) { // Skip light sphere at index 0
             std::string itemLabel = "Index " + std::to_string(i) + ": " + m_objects[i].GetTextID();
@@ -262,6 +281,7 @@ void Game::RenderImGui(Renderer& renderer) {
         m_lights.push_back(Light(glm::vec3(0.0), glm::vec3(1.0), 0.5));
     }
     ImGui::Spacing();
+
     static int selectedLightIndex = -1;  // Currently selected light
     if (ImGui::Button("Delete Light")) {   // delete selected light
         if (selectedLightIndex > 1) {
@@ -289,13 +309,7 @@ void Game::RenderImGui(Renderer& renderer) {
         ImGui::DragFloat("Intensity ", &selectedLight.intensity, 0.01f, 0.0f, 10.0f);
         ImGui::DragFloat3("Position ", (float*)&selectedLight.position, 0.5f);
     }
-
     ImGui::NewLine();
-
-    ImGui::End();
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 // TODO abstract debug crosshair

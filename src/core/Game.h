@@ -25,11 +25,6 @@
 #include "ShaderManager.h"
 #include "Extras.h" 
 
-enum MouseInputMode {
-	WINDOW_MODE,
-	CAMERA_MODE
-};
-
 class Game {
 public:
     Game(const char* title);
@@ -38,11 +33,17 @@ public:
 
 private:
     void RenderImGui(Renderer& renderer);
+    void RenderImGuiData();
+    void RenderImGuiSettings(Renderer& renderer);
+    void RenderImGuiSceneControl();
+    
     void UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& XhairVBO);
 
     void toggleFullscreen();
-    void keyPressed(const float& delta); // update camera pos
     void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode); // for camera movment and ui control
+    
+    void keyPressed(const float& delta); // update camera pos
+    
     void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     void MouseCallBack(GLFWwindow* window, int button, int action, int mods);
     void MousePosCallBack(GLFWwindow* window, double xpos, double ypos);

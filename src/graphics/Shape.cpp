@@ -18,6 +18,10 @@ glm::vec4 Shape::GetColor() const {
 	return m_Color;
 }
 
+Mesh* Shape::GetMesh() const {
+	return m_mesh;
+}
+
 const char* Shape::GetTextID() const {
 	return m_ObjectTextID.c_str();
 }
@@ -54,6 +58,10 @@ void Shape::SetSpecular(const float spec){
 	m_SpecularStrength = spec;
 }
 
+void Shape::SetMesh(Mesh* mesh) {
+	m_mesh = mesh;
+}
+
 void Shape::SetTextID(const char* name){
 	m_ObjectTextID = name;
 }
@@ -64,6 +72,13 @@ glm::mat4 Shape::GetModelMatrix() const {
 		m_dirty = false;
 	} 
 	return m_cachedModelMatrix;
+}
+
+void Shape::UpdateModelMatrix() {
+	if (m_dirty) {
+		m_cachedModelMatrix = m_Transform * (m_Rotation * m_Scale);
+		m_dirty = false;
+	}
 }
 
 glm::mat4 Shape::GetTransform() const {

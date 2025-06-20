@@ -15,12 +15,15 @@ public:
 
 	void Render() const;
 
+	void UpdateModelMatrix();
+
 	void SetTransform(const glm::mat4 transform);
 	void SetScale(const glm::mat4 scale);
 	void SetScale(const float scale);
 	void SetRotation(const glm::mat4 transform);
 	void SetColor(const glm::vec4 color);
 	void SetSpecular(const float spec);
+	void SetMesh(Mesh* mesh);
 	void SetTextID(const char* name);
 	
 	float GetSpecular() const;
@@ -29,6 +32,7 @@ public:
 	glm::mat4 GetScale() const;
 	glm::mat4 GetRotation() const;
 	glm::vec4 GetColor() const;
+	Mesh* GetMesh() const;
 	const char* GetTextID() const;
 	
 	std::string m_ObjectTextID;

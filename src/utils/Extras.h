@@ -1,5 +1,10 @@
 #pragma once
 
+enum MouseInputMode {
+    WINDOW_MODE,
+    CAMERA_MODE
+};
+
 struct Light {
     glm::vec3 position;
     glm::vec3 color;
