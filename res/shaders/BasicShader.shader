@@ -1,21 +1,22 @@
 #shader vertex
 #version 330 core
+layout(location = 0) in vec2 aPos;
+layout(location = 1) in vec2 aTex;
 
-layout(location = 0) in vec3 aPos;
+out vec2 TexCoords;
 
-uniform mat4 u_model;
-uniform mat4 u_view;
-uniform mat4 u_proj;
-
-void main(){
-	gl_Position =  u_proj * u_view * u_model * vec4(aPos, 1.0);
-};
+void main() {
+    TexCoords = aTex;
+    gl_Position = vec4(aPos.xy, 0.0, 1.0);
+}
 
 #shader fragment
 #version 330 core
+in vec2 TexCoords;
+uniform sampler2D u_depthMap;
+out vec4 FragColor;
 
-out vec4 Color;
-
-void main(){
-	Color = vec4(1.0, 0.0, 0.0, 1.0);
-};
+void main() {
+    float depth = texture(u_depthMap, TexCoords).r;
+    FragColor = vec4(vec3(depth), 1.0); // visualize depth
+}

@@ -35,12 +35,13 @@ uniform vec3 u_viewPos;
 uniform vec4 u_color;
 uniform float u_specularStrength;
 
-float ambientStrength = 0.01;
+float ambientStrength = 0.025;
 
 struct Light {
     vec3 position;
     vec3 color;
     float intensity;
+    int type; // 0: point, 1: directional 
 };
 
 uniform Light lights[32];  
@@ -53,7 +54,10 @@ void main() {
         vec3 ambient = ambientStrength * lights[i].color;
 
         vec3 norm = normalize(Normal);
-        vec3 lightDir = normalize(lights[i].position - FragPos);
+        vec3 lightDir = (lights[i].type == 0)
+            ? normalize(lights[i].position - FragPos) // For point lights
+            : normalize(-lights[i].position); // For directional lights
+
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 diffuse = diff * lights[i].color * lights[i].intensity;
 

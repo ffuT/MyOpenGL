@@ -9,6 +9,7 @@ struct Light {
     glm::vec3 position;
     glm::vec3 color;
     float intensity;
+	int type = 0; // 0 = point light, 1 = directional light
 };
 
 constexpr float PI = 3.14159265358979323846f;

@@ -25,13 +25,19 @@ glm::mat4 Camera::GetViewMatrix() const {
 }
 
 void Camera::ProcessKeyboard(const Camera_Movement& direction, const float& delta) {
-    float moveSpeed = m_movementSpeed / 1000000 * (2 * m_sprint + 1);
+    float moveSpeed = m_movementSpeed / 1000000 * (1.66 * m_sprint + 1);
     glm::vec3 MovementDir = glm::vec3(0.0);
 
     // Calculate local vectors
-    glm::vec3 front = m_orientation * glm::vec3(0.0, 0.0, -1.0);
-    glm::vec3 right = m_orientation * glm::vec3(1.0, 0.0, 0.0);
-    glm::vec3 up = m_orientation * glm::vec3(0.0, 1.0, 0.0);
+	glm::vec3 front, right, up;
+    right = m_orientation * glm::vec3(1.0, 0.0, 0.0);
+    if(USE_QUAT_ROTATION){
+        front = m_orientation * glm::vec3(0.0, 0.0, -1.0);
+        up = m_orientation * glm::vec3(0.0, 1.0, 0.0);
+    } else {
+		front = glm::normalize(glm::cross(right, glm::vec3(0.0, -1.0, 0.0)));
+        up = glm::vec3(0.0, 1.0, 0.0);
+    }
 
     if (direction == FORWARD)
         MovementDir += front;
@@ -47,6 +53,9 @@ void Camera::ProcessKeyboard(const Camera_Movement& direction, const float& delt
         MovementDir -= up;
 
     if (direction == ROLLLEFT || direction == ROLLRIGHT) {
+        if(!USE_QUAT_ROTATION)
+			return;
+
         float rollSpeed = m_rollSpeed / 1000000; // adjust roll speed
         float rollAngle = rollSpeed * delta;
 
@@ -66,12 +75,31 @@ void Camera::ProcessKeyboard(const Camera_Movement& direction, const float& delt
 }
 
 void Camera::ProcessMouse(const float& xOffset, const float& yOffset) {
-    glm::vec3 localRight = m_orientation * glm::vec3(1.0, 0.0, 0.0);
-    glm::vec3 localUp = m_orientation * glm::vec3(0.0, 1.0, 0.0);
+    if (USE_QUAT_ROTATION) {
+        glm::vec3 localRight = m_orientation * glm::vec3(1.0, 0.0, 0.0);
+        glm::vec3 localUp = m_orientation * glm::vec3(0.0, 1.0, 0.0);
 
-    glm::quat yawQuat = glm::angleAxis(glm::radians(-xOffset * m_mouseSensitivity), localUp); // Rotate around local up
-    glm::quat pitchQuat = glm::angleAxis(glm::radians(yOffset * m_mouseSensitivity), localRight); // Rotate around local right
+        glm::quat yawQuat = glm::angleAxis(glm::radians(-xOffset * m_mouseSensitivity), localUp); // Rotate around local up
+        glm::quat pitchQuat = glm::angleAxis(glm::radians(yOffset * m_mouseSensitivity), localRight); // Rotate around local right
 
-    m_orientation = yawQuat * pitchQuat * m_orientation;
-    m_orientation = glm::normalize(m_orientation);
+        m_orientation = yawQuat * pitchQuat * m_orientation;
+        m_orientation = glm::normalize(m_orientation);
+    } else {
+        m_yaw -= xOffset * m_mouseSensitivity;
+        m_pitch += yOffset * m_mouseSensitivity;
+
+        // Clamp pitch
+        if (m_pitch > 89.0)
+            m_pitch = 89.0;
+        if (m_pitch < -89.0)
+            m_pitch = -89.0;
+
+        // Convert updated Euler angles to quaternion
+        glm::quat qPitch = glm::angleAxis(glm::radians(m_pitch), glm::vec3(1, 0, 0));
+        glm::quat qYaw = glm::angleAxis(glm::radians(m_yaw), glm::vec3(0, 1, 0));
+
+        // Combine yaw and pitch (no roll here)
+        m_orientation = qYaw * qPitch;
+        m_orientation = glm::normalize(m_orientation);
+    }
 }

@@ -6,7 +6,8 @@ enum ShaderProgram {
     UnlitShader,        // full bright
     WireframeShader,    // triangle lines
     SkyboxShader,       // skybox
-    CrosshairShader     // crosshair
+    CrosshairShader,    // crosshair
+	ShadowShader,       // shadow mapping
 };
 
 class ShaderManger {
@@ -22,4 +23,5 @@ private:
     Shader m_WireframeShader = Shader("res/shaders/Wireframeshader.shader");
     Shader m_SkyboxShader = Shader("res/shaders/Skybox.shader");
     Shader m_CrosshairShader = Shader("res/shaders/Crosshair.shader");
+    Shader m_ShadowShader = Shader("res/shaders/Shadow.shader");
 };

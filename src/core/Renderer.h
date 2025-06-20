@@ -15,6 +15,7 @@ public:
 	void RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj);
 	void RenderObjects(std::vector<Shape>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj);
 	void RenderXhair(const VertexArray &vao, const Camera& cam, const glm::mat4& proj);
+	void RenderShadows();
 
 	void SetRenderShader(const ShaderProgram& shader);
 

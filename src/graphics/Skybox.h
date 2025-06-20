@@ -110,5 +110,5 @@ private:
     };
 	VertexArray m_skyboxVAO;
 	VertexBuffer m_skyboxVBO = VertexBuffer(108 * sizeof(float), skyboxVertices);
-	GLuint m_cubemapTexture = loadCubemap(skyboxes::Space);
+	GLuint m_cubemapTexture = loadCubemap(skyboxes::Tutorial);
 };

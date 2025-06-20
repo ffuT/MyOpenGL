@@ -37,7 +37,7 @@ private:
     void RenderImGuiSettings(Renderer& renderer);
     void RenderImGuiSceneControl();
     
-    void UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& XhairVBO);
+    void UpdateXHair(VertexBuffer& XhairVBO);
 
     void toggleFullscreen();
     void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode); // for camera movment and ui control

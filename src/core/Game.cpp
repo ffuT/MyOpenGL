@@ -80,9 +80,9 @@ void Game::Run(){
     m_objects.push_back(pointLight);
     
     // constant light sources
-    Light pointlight1 = Light(glm::vec3(0, 92, -25), glm::vec3(1.0), 1.0f);
-    Light pointlight2 = Light(glm::vec3(0, -92, 25), glm::vec3(1.0), 0.25f);
-    m_lights.push_back(pointlight1);
+    Light directional = Light(glm::vec3(0.44, -0.46, 0.78), glm::vec3(1.0), 1.0f, 1);
+    Light pointlight2 = Light(glm::vec3(0, -92, 25), glm::vec3(1.0), 0.5f, 0);
+    m_lights.push_back(directional);
     m_lights.push_back(pointlight2);
 
     std::chrono::nanoseconds seed = std::chrono::high_resolution_clock::now().time_since_epoch();
@@ -116,6 +116,36 @@ void Game::Run(){
     XhairVAO.Unbind();
     XhairVBO.Unbind();
 
+	// shadow mapping setup temp
+	unsigned int shadowMapFBO;
+	glGenFramebuffers(1, &shadowMapFBO);
+
+	unsigned int shadowMapWidth = 1024, shadowMapHeight = 1024;
+    unsigned int shadowMap;
+	glGenTextures(1, &shadowMap);
+	glBindTexture(GL_TEXTURE_2D, shadowMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER); 
+	float clampColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clampColor);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glm::mat4 orthographicProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, 0.1f, 200.0f);
+    glm::mat4 lightView = glm::lookAt(200.0f * directional.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 lightSpaceMatrix = orthographicProjection * lightView;
+
+	Shader shadowShader = Shader("res/shaders/Shadow.shader");
+	shadowShader.Bind();
+    shadowShader.SetUniformMat4f("u_lightProjection", lightSpaceMatrix);
+
     auto last = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
     glfwSetWindowTitle(m_window, TITLE);
@@ -133,11 +163,11 @@ void Game::Run(){
         renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
 
         if (USE_DEBUG_XHAIR){
-            UpdateXHair(renderer, XhairVAO, XhairVBO);
+            UpdateXHair(XhairVBO);
             renderer.RenderXhair(XhairVAO, m_cam, m_proj);
         }
         RenderImGui(renderer);
-        
+
         glfwSwapBuffers(m_window);
         glfwPollEvents();
     }
@@ -147,15 +177,17 @@ void Game::Run(){
 void Game::RenderImGui(Renderer& renderer) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
     
-	RenderImGuiData();
+    ImGui::NewFrame();
+
+    RenderImGuiData();
     RenderImGuiSettings(renderer);
     RenderImGuiSceneControl();
-   
+
     ImGui::End();
 
     ImGui::Render();
+
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
@@ -188,26 +220,30 @@ void Game::RenderImGuiData() {
 void Game::RenderImGuiSettings(Renderer& renderer) {
     ImGui::Text("Settings");
 
-    if (ImGui::Button("Fullscreen"))
+	if (ImGui::Button("Fullscreen"))        //toggle fullscreen
         toggleFullscreen();
     ImGui::SameLine();
     ImGui::Text(": %s", IS_FULLSCREEN ? "on" : "off");
 
-    if (ImGui::Button("Vsync")) {
+	if (ImGui::Button("Vsync")) {           //toggle vsync
         USE_VSYNC = !USE_VSYNC;
         glfwSwapInterval(USE_VSYNC);
     }
     ImGui::SameLine();
     ImGui::Text(": %s", USE_VSYNC ? "on" : "off");
 
-    if (ImGui::Button("Debug Xhair")) {
+	if (ImGui::Button("Unlocked Cam"))      // toggle camera mode
+        m_cam.USE_QUAT_ROTATION = !m_cam.USE_QUAT_ROTATION;
+    ImGui::SameLine();
+    ImGui::Text(": %s", m_cam.USE_QUAT_ROTATION ? "on" : "off");
+
+	if (ImGui::Button("Debug Xhair"))       // toggle debug crosshair
         USE_DEBUG_XHAIR = !USE_DEBUG_XHAIR;
-    }
     ImGui::SameLine();
     ImGui::Text(": %s", USE_DEBUG_XHAIR ? "on" : "off");
-    ImGui::Spacing();
 
-    ImGui::Text("Shader Program ");     // Shader Program change
+    ImGui::Spacing();
+    ImGui::Text("Shader Program ");         // Shader Program changer
     if (ImGui::Button("NewShader"))
         renderer.SetRenderShader(ShaderProgram::NewShader);
     ImGui::SameLine();
@@ -313,7 +349,7 @@ void Game::RenderImGuiSceneControl() {
 }
 
 // TODO abstract debug crosshair
-void Game::UpdateXHair(Renderer& renderer, VertexArray& XhairVAO, VertexBuffer& XhairVBO){
+void Game::UpdateXHair(VertexBuffer& XhairVBO){
     glm::vec3 cameraPos = m_cam.GetPos() + m_cam.GetFront();
     const float LINE_LENGTH = 0.025f;
     // X-axis
