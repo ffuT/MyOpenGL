@@ -57,6 +57,9 @@ private:
     bool IS_FULLSCREEN = false;
     bool FIRST_MOUSE = true;
     bool USE_DEBUG_XHAIR = true;
+    bool RENDER_BUFFER = false;
+
+    float m_buffersize = 500;
 
     float m_lastX = 400.0f;
     float m_lastY = 300.0f;
@@ -77,4 +80,14 @@ private:
          0.0f, -0.02f, 0.0f,  0.0f,  0.02f, 0.0f,
          0.0f,  0.0f, -0.02f, 0.0f,  0.0f,  0.02f
     };
+    float quadVertices[24] = { // for rendering buffers to screen
+    -1.0f,  1.0f,    0.0f, 1.0f,
+    -1.0f, -1.0f,    0.0f, 0.0f,
+     1.0f, -1.0f,    1.0f, 0.0f,
+    -1.0f,  1.0f,    0.0f, 1.0f,
+     1.0f, -1.0f,    1.0f, 0.0f,
+     1.0f,  1.0f,    1.0f, 1.0f
+    };
 };
+
+

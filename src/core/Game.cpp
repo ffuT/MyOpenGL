@@ -81,14 +81,11 @@ void Game::Run(){
     
     // constant light sources
     Light directional = Light(glm::vec3(0.44, -0.46, 0.78), glm::vec3(1.0), 1.0f, 1);
-    Light pointlight2 = Light(glm::vec3(0, -92, 25), glm::vec3(1.0), 0.5f, 0);
     m_lights.push_back(directional);
-    m_lights.push_back(pointlight2);
 
     std::chrono::nanoseconds seed = std::chrono::high_resolution_clock::now().time_since_epoch();
     std::srand(seed.count());
-    for (int i = 0; i < 2500; i++) { // bunch of random spheres for visualitation and performance check
-
+    for (int i = 0; i < 50; i++) { // bunch of random spheres for visualitation and performance check
         bool isbanana = (std::rand() % 100) < 5; // 5% chance for banana mesh
         m_objects.push_back(Shape(&m_meshes[isbanana]));
         m_objects[i + 1].SetScale(2 + std::rand() % 15);
@@ -99,8 +96,8 @@ void Game::Run(){
         
         m_objects[i + 1].SetColor(glm::vec4(f1, f2, f3, 1)); // random color
 
-        int max = 1000;
-        int min = -1000;
+        int max = 100;
+        int min = -100;
         // random pos
         m_objects[i + 1].SetTransform(glm::translate(glm::mat4(1.0),
             glm::vec3(min + (std::rand() % (max - min + 1)),
@@ -120,7 +117,7 @@ void Game::Run(){
 	unsigned int shadowMapFBO;
 	glGenFramebuffers(1, &shadowMapFBO);
 
-	unsigned int shadowMapWidth = 1024, shadowMapHeight = 1024;
+	unsigned int shadowMapWidth = 2048, shadowMapHeight = 2048;
     unsigned int shadowMap;
 	glGenTextures(1, &shadowMap);
 	glBindTexture(GL_TEXTURE_2D, shadowMap);
@@ -138,13 +135,23 @@ void Game::Run(){
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glm::mat4 orthographicProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, 0.1f, 200.0f);
-    glm::mat4 lightView = glm::lookAt(200.0f * directional.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 orthographicProjection = glm::ortho(-m_buffersize, m_buffersize, -m_buffersize, m_buffersize, 0.1f, 1000.0f);
+    glm::mat4 lightView = glm::lookAt(-directional.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 lightSpaceMatrix = orthographicProjection * lightView;
 
 	Shader shadowShader = Shader("res/shaders/Shadow.shader");
 	shadowShader.Bind();
     shadowShader.SetUniformMat4f("u_lightProjection", lightSpaceMatrix);
+
+    //temp shadowmap render
+    Shader imgshader("res/shaders/BasicShader.shader");
+    VertexArray imgVAO;
+    VertexBuffer imgVBO(24 * sizeof(float), quadVertices);
+    imgVAO.Bind();
+    imgVAO.AddVertexBuffer(imgVBO, 0, 2, GL_FLOAT, GL_FALSE, 4* sizeof(float), (void*)0);
+    imgVAO.AddVertexBuffer(imgVBO, 1, 2, GL_FLOAT, GL_FALSE, 4* sizeof(float), (void*)(2 * sizeof(float)));
+    imgVAO.Unbind();
+    imgVBO.Unbind();
 
     auto last = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
@@ -156,11 +163,42 @@ void Game::Run(){
 
         keyPressed(m_delta); // keypress handling
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear
+        glViewport(0,0, shadowMapWidth, shadowMapHeight);
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowMap);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        shadowShader.Bind();
+        for(Shape& s : m_objects){
+            s.Render();
+        }
 
-        // render stuff
-        renderer.RenderSkybox(skybox, m_cam, m_proj);
-        renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
+        // render to shadowmap
+        glViewport(0,0, shadowMapWidth, shadowMapWidth);
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        shadowShader.Bind();
+        orthographicProjection = glm::ortho(-m_buffersize, m_buffersize, -m_buffersize, m_buffersize, 0.1f, 1000.0f);
+        lightSpaceMatrix = orthographicProjection * lightView;
+        shadowShader.SetUniformMat4f("u_lightProjection", lightSpaceMatrix);
+        for(Shape& obj : m_objects){
+            shadowShader.SetUniformMat4f("u_model", obj.GetModelMatrix());
+            obj.Render();
+        }
+        shadowShader.UnBind();
+
+        // render screen 
+        glViewport(0,0 ,WIDTH, HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear
+        glBindTexture(GL_TEXTURE_2D, shadowMap);
+
+        if(!RENDER_BUFFER){ // normal scene render
+            renderer.RenderSkybox(skybox, m_cam, m_proj);
+            renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
+        } else { //shadow map render - or another buffer if i want
+            imgshader.Bind();
+            imgVAO.Bind();
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
 
         if (USE_DEBUG_XHAIR){
             UpdateXHair(XhairVBO);
@@ -242,6 +280,11 @@ void Game::RenderImGuiSettings(Renderer& renderer) {
     ImGui::SameLine();
     ImGui::Text(": %s", USE_DEBUG_XHAIR ? "on" : "off");
 
+    if (ImGui::Button("Render Shadowmap"))       // toggle render buffer
+    RENDER_BUFFER = !RENDER_BUFFER;
+    ImGui::SameLine();
+    ImGui::Text(": %s", RENDER_BUFFER ? "on" : "off");
+
     ImGui::Spacing();
     ImGui::Text("Shader Program ");         // Shader Program changer
     if (ImGui::Button("NewShader"))
@@ -254,6 +297,8 @@ void Game::RenderImGuiSettings(Renderer& renderer) {
         renderer.SetRenderShader(ShaderProgram::UnlitShader);
 
     ImGui::NewLine();
+
+    ImGui::DragFloat("buffer size", &m_buffersize, 1.0f);
 }
 
 void Game::RenderImGuiSceneControl() {
@@ -320,7 +365,7 @@ void Game::RenderImGuiSceneControl() {
 
     static int selectedLightIndex = -1;  // Currently selected light
     if (ImGui::Button("Delete Light")) {   // delete selected light
-        if (selectedLightIndex > 1) {
+        if (selectedLightIndex > 0) {
             m_lights.erase(m_lights.begin() + selectedLightIndex);
             selectedLightIndex--;
         }
