@@ -86,6 +86,7 @@ void Game::Run(){
 
     std::chrono::nanoseconds seed = std::chrono::high_resolution_clock::now().time_since_epoch();
     std::srand(seed.count());
+    std::srand(22);
     for (int i = 0; i < 50; i++) { // bunch of random spheres for visualitation and performance check
         bool isbanana = (std::rand() % 100) < 5; // 5% chance for banana mesh
         m_objects.push_back(Shape(&m_meshes[isbanana]));
@@ -105,7 +106,7 @@ void Game::Run(){
                 min + (std::rand() % (max - min + 1)),
                 min + (std::rand() % (max - min + 1)))));
     }
-
+    
 	// shadow mapping setup temp
 	unsigned int shadowMapFBO;
 	glGenFramebuffers(1, &shadowMapFBO);
@@ -128,7 +129,7 @@ void Game::Run(){
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glm::mat4 orthographicProjection = glm::ortho(-m_buffersize, m_buffersize, -m_buffersize, m_buffersize, 0.1f, 1000.0f);
+    glm::mat4 orthographicProjection = glm::ortho(-m_buffersize, m_buffersize, -m_buffersize, m_buffersize, -100.0f, 1000.0f);
     glm::mat4 lightView = glm::lookAt(-directional.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 lightSpaceMatrix = orthographicProjection * lightView;
 
@@ -155,14 +156,6 @@ void Game::Run(){
         m_delta = (now - last).count();
 
         keyPressed(m_delta); // keypress handling
-
-        glViewport(0,0, shadowMapWidth, shadowMapHeight);
-        glBindFramebuffer(GL_FRAMEBUFFER, shadowMap);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        shadowShader.Bind();
-        for(Shape& s : m_objects){
-            s.Render();
-        }
 
         // render to shadowmap
         glViewport(0,0, shadowMapWidth, shadowMapWidth);

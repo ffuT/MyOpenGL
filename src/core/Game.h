@@ -38,8 +38,6 @@ private:
     void RenderImGuiSettings(Renderer& renderer);
     void RenderImGuiSceneControl();
     
-    void UpdateXHair(VertexBuffer& XhairVBO);
-
     void toggleFullscreen();
     void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode); // for camera movment and ui control
     
@@ -60,7 +58,7 @@ private:
     bool USE_DEBUG_XHAIR = true;
     bool RENDER_BUFFER = false;
 
-    float m_buffersize = 500;
+    float m_buffersize = 300;
 
     float m_lastX = 400.0f;
     float m_lastY = 300.0f;
