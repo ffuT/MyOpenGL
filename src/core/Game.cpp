@@ -73,6 +73,7 @@ void Game::Run(){
     m_meshes.push_back(Bananmesh);
 
     Skybox skybox = Skybox();
+    DebugCrosshair DebugXhair = DebugCrosshair();
 
     // sphere for rendering lights
     Shape pointLight = Shape(&m_meshes[0]);
@@ -104,14 +105,6 @@ void Game::Run(){
                 min + (std::rand() % (max - min + 1)),
                 min + (std::rand() % (max - min + 1)))));
     }
-
-    // TODO abstract debug crosshair
-    VertexArray XhairVAO;
-    VertexBuffer XhairVBO(18*sizeof(float), m_xHairVertices);
-    XhairVAO.Bind();
-    XhairVAO.AddVertexBuffer(XhairVBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    XhairVAO.Unbind();
-    XhairVBO.Unbind();
 
 	// shadow mapping setup temp
 	unsigned int shadowMapFBO;
@@ -152,7 +145,7 @@ void Game::Run(){
     imgVAO.AddVertexBuffer(imgVBO, 1, 2, GL_FLOAT, GL_FALSE, 4* sizeof(float), (void*)(2 * sizeof(float)));
     imgVAO.Unbind();
     imgVBO.Unbind();
-
+    
     auto last = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
     glfwSetWindowTitle(m_window, TITLE);
@@ -201,8 +194,8 @@ void Game::Run(){
         }
 
         if (USE_DEBUG_XHAIR){
-            UpdateXHair(XhairVBO);
-            renderer.RenderXhair(XhairVAO, m_cam, m_proj);
+            DebugXhair.Update(m_cam);
+            renderer.RenderXhair(DebugXhair, m_cam, m_proj);
         }
         RenderImGui(renderer);
 
@@ -391,24 +384,6 @@ void Game::RenderImGuiSceneControl() {
         ImGui::DragFloat3("Position ", (float*)&selectedLight.position, 0.5f);
     }
     ImGui::NewLine();
-}
-
-// TODO abstract debug crosshair
-void Game::UpdateXHair(VertexBuffer& XhairVBO){
-    glm::vec3 cameraPos = m_cam.GetPos() + m_cam.GetFront();
-    const float LINE_LENGTH = 0.025f;
-    // X-axis
-    m_xHairVertices[0] = cameraPos.x; m_xHairVertices[1] = cameraPos.y; m_xHairVertices[2] = cameraPos.z;
-    m_xHairVertices[3] = cameraPos.x + LINE_LENGTH; m_xHairVertices[4] = cameraPos.y; m_xHairVertices[5] = cameraPos.z;
-    // Y-axis
-    m_xHairVertices[6] = cameraPos.x; m_xHairVertices[7] = cameraPos.y; m_xHairVertices[8] = cameraPos.z;
-    m_xHairVertices[9] = cameraPos.x; m_xHairVertices[10] = cameraPos.y + LINE_LENGTH; m_xHairVertices[11] = cameraPos.z;
-    // Z-axis
-    m_xHairVertices[12] = cameraPos.x; m_xHairVertices[13] = cameraPos.y; m_xHairVertices[14] = cameraPos.z;
-    m_xHairVertices[15] = cameraPos.x; m_xHairVertices[16] = cameraPos.y; m_xHairVertices[17] = cameraPos.z + LINE_LENGTH;
-    XhairVBO.Bind();
-    XhairVBO.UpdateBuffer(0, 18 * sizeof(float), m_xHairVertices);
-    XhairVBO.Unbind();
 }
 
 void Game::keyPressed(const float& delta) {

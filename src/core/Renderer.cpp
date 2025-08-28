@@ -79,9 +79,9 @@ void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& li
     objectShader->UnBind();
 }
 
-void Renderer::RenderXhair(const VertexArray &vao, const Camera& cam, const glm::mat4& proj) {
+void Renderer::RenderXhair(const DebugCrosshair& xhair, const Camera& cam, const glm::mat4& proj) {
 	glDisable(GL_DEPTH_TEST); // xhair rendered on top
-	vao.Bind();
+	xhair.BindVAO();
 	Shader* currentshader = m_ShaderManager.GetShader(ShaderProgram::CrosshairShader);
 	currentshader->Bind();
 	currentshader->SetUniformMat4f("u_view", cam.GetViewMatrix());
@@ -98,7 +98,7 @@ void Renderer::RenderXhair(const VertexArray &vao, const Camera& cam, const glm:
 	currentshader->SetUniform3f("u_lineColor", glm::vec3(0.0f, 0.33f, 1.0f));
 	glDrawArrays(GL_LINES, 4, 2);
 	currentshader->UnBind();
-	vao.Unbind();
+	xhair.UnBindVAO();
 	glEnable(GL_DEPTH_TEST);
 }
 

@@ -24,6 +24,7 @@
 #include "Camera.h"
 #include "ShaderManager.h"
 #include "Extras.h" 
+#include "DebugCrosshair.h"
 
 class Game {
 public:
