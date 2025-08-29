@@ -58,7 +58,9 @@ private:
     bool USE_DEBUG_XHAIR = true;
     bool RENDER_BUFFER = false;
 
-    float m_buffersize = 300;
+    float m_imgSideLength = 400.0f;
+	float m_zNear = -500.0f, m_zFar = 1000.0f;
+
 
     float m_lastX = 400.0f;
     float m_lastY = 300.0f;

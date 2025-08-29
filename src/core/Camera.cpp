@@ -25,7 +25,7 @@ glm::mat4 Camera::GetViewMatrix() const {
 }
 
 void Camera::ProcessKeyboard(const Camera_Movement& direction, const float& delta) {
-    float moveSpeed = m_movementSpeed / 1000000 * (1.66 * m_sprint + 1);
+    float moveSpeed = m_movementSpeed / 1000000 * (1.66f * m_sprint + 1);
     glm::vec3 MovementDir = glm::vec3(0.0);
 
     // Calculate local vectors

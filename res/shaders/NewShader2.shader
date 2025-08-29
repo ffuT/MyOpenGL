@@ -52,7 +52,7 @@ struct Light {
 uniform Light lights[32];  
 uniform int numLights;
 
-float CalcShadow(vec4 fragPosLightSpace){
+float CalcShadow(vec4 fragPosLightSpace, vec3 lDir){
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     // transform to [0,1] range
@@ -61,10 +61,18 @@ float CalcShadow(vec4 fragPosLightSpace){
     float closestDepth = texture(shadowMap, projCoords.xy).r; 
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
-    // check whether current frag pos is in shadow
-    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
-
-    return shadow;
+    // calc bias (based on depth map resolution and slope)
+    float bias = max(0.003 * (1.0 - dot(Normal, lDir)), 0.0003); 
+    float shadow = 0.0;
+    // PCF
+    vec2 texelSize = 1.1 / textureSize(shadowMap, 0);
+    for(int x = -2; x <= 2; ++x){
+        for(int y = -2; y <= 2; ++y){
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+        }    
+    }
+    return shadow /= 25.0;
 }
 
 void main() {
@@ -86,9 +94,10 @@ void main() {
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
         vec3 specular = u_specularStrength * spec * lights[i].color;
 
-        float shadow = 2.0;
+        
+        float shadow = 0.0;
         if(lights[i].type == 1)
-            shadow = CalcShadow(FragPosLightSpace);
+            shadow = CalcShadow(FragPosLightSpace, lightDir);
 
         result += (ambient + (1.0 - shadow) * (diffuse + specular)) * u_color.rgb;
     }

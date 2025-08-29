@@ -46,6 +46,7 @@ Game::Game(const  char* title) : TITLE(title) {
     glViewport(0, 0, WIDTH, HEIGHT);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
     glEnable(GL_DEPTH_TEST);
+	glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -86,7 +87,6 @@ void Game::Run(){
 
     std::chrono::nanoseconds seed = std::chrono::high_resolution_clock::now().time_since_epoch();
     std::srand(seed.count());
-    std::srand(22);
     for (int i = 0; i < 50; i++) { // bunch of random spheres for visualitation and performance check
         bool isbanana = (std::rand() % 100) < 5; // 5% chance for banana mesh
         m_objects.push_back(Shape(&m_meshes[isbanana]));
@@ -111,7 +111,7 @@ void Game::Run(){
 	unsigned int shadowMapFBO;
 	glGenFramebuffers(1, &shadowMapFBO);
 
-	unsigned int shadowMapWidth = 2048, shadowMapHeight = 2048;
+	unsigned int shadowMapWidth = 2048*2, shadowMapHeight = shadowMapWidth;
     unsigned int shadowMap;
 	glGenTextures(1, &shadowMap);
 	glBindTexture(GL_TEXTURE_2D, shadowMap);
@@ -129,7 +129,7 @@ void Game::Run(){
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glm::mat4 orthographicProjection = glm::ortho(-m_buffersize, m_buffersize, -m_buffersize, m_buffersize, -100.0f, 1000.0f);
+    glm::mat4 orthographicProjection = glm::ortho(-m_imgSideLength, m_imgSideLength, -m_imgSideLength, m_imgSideLength, -100.0f, 1000.0f);
     glm::mat4 lightView = glm::lookAt(-directional.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 lightSpaceMatrix = orthographicProjection * lightView;
 
@@ -161,8 +161,9 @@ void Game::Run(){
         glViewport(0,0, shadowMapWidth, shadowMapWidth);
         glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
+        glCullFace(GL_FRONT);
         shadowShader.Bind();
-        orthographicProjection = glm::ortho(-m_buffersize, m_buffersize, -m_buffersize, m_buffersize, 0.1f, 1000.0f);
+        orthographicProjection = glm::ortho(-m_imgSideLength, m_imgSideLength, -m_imgSideLength, m_imgSideLength, m_zNear, m_zFar);
         lightSpaceMatrix = orthographicProjection * lightView;
         shadowShader.SetUniformMat4f("u_lightProjection", lightSpaceMatrix);
         for(Shape& obj : m_objects){
@@ -170,6 +171,7 @@ void Game::Run(){
             obj.Render();
         }
         shadowShader.UnBind();
+        glCullFace(GL_BACK);
 
         // render screen 
         glViewport(0,0 ,WIDTH, HEIGHT);
@@ -217,7 +219,7 @@ void Game::RenderImGui(Renderer& renderer) {
 
 void Game::RenderImGuiData() {
     ImGui::Begin("ImGui");
-    ImGui::Text("Application Delta %.3f ms/frame (%.1f ms)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Text("Application Delta %.3f ms/frame (%.1f)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
     ImGui::Text("Position: ");  // Camerea position display 
     ImGui::SameLine();
@@ -281,10 +283,13 @@ void Game::RenderImGuiSettings(Renderer& renderer) {
     ImGui::SameLine();
     if (ImGui::Button("Unlit"))
         renderer.SetRenderShader(ShaderProgram::UnlitShader);
-
     ImGui::NewLine();
 
-    ImGui::DragFloat("buffer size", &m_buffersize, 1.0f);
+	// shadow map settings
+	ImGui::Text("Shadowmap Settings");
+    ImGui::DragFloat("img sides", &m_imgSideLength, 1.0f);
+    ImGui::DragFloat("near plane", &m_zNear, 1.0f);
+    ImGui::DragFloat("far plane", &m_zFar, 1.0f);
 }
 
 void Game::RenderImGuiSceneControl() {

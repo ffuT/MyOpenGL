@@ -119,7 +119,6 @@ Mesh Mesh::LoadMeshFromFile(std::string Path) {
 
                 VertexKey key{ v, vt, vn };
 
-                // OBJ indices are 1-based; convert to 0-based
                 if (uniqueVertices.count(key) == 0) {
                     uniqueVertices[key] = static_cast<unsigned int>(vertices.size() / 3);
                     // Add position
