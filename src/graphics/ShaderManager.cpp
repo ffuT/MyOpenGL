@@ -24,4 +24,5 @@ Shader* ShaderManger::GetShader(const ShaderProgram& ShaderName) {
 		case ShaderProgram:: ShadowShader:
 			return &m_ShadowShader;
 	}
+	return nullptr; //cant happen
 }

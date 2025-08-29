@@ -19,7 +19,7 @@ void Renderer::RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj) {
 	skybox.UnBind();
 }
 
-void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj) {
+void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj, glm::mat4& lightSpaceMatrix) {
     glDepthFunc(GL_LESS);
 
 	const glm::mat4 view = cam.GetViewMatrix(); // cache cus used multiple times
@@ -45,6 +45,7 @@ void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& li
     objectShader->Bind();
     objectShader->SetUniformMat4f("u_view", view);
     objectShader->SetUniformMat4f("u_proj", proj);
+    objectShader->SetUniformMat4f("u_lightSpace", lightSpaceMatrix);
 
     switch (m_currentShader) { // set currentshader specific uniforms
     case NewShader:

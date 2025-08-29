@@ -23,13 +23,10 @@ project "MyOpenGl"
     cppdialect "C++20" -- Choose C++17, or C++20
     
     includedirs { 
-        "src/buffers",
-        "src/core",
-        "src/graphics",
-        "src/utils",
+        "src/**",
         "Dependencies/glfw/include", 
         "Dependencies/glew/include", 
-        "src/vendor"
+        "src/vendor**"
     }
 
     files { "src/**.cpp", "src/**.h", "src/**.hpp", "res/**" }  -- Source and header files

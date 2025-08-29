@@ -179,7 +179,7 @@ void Game::Run(){
 
         if(!RENDER_BUFFER){ // normal scene render
             renderer.RenderSkybox(skybox, m_cam, m_proj);
-            renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
+            renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj, lightSpaceMatrix);
         } else { //shadow map render - or another buffer if i want
             imgshader.Bind();
             imgVAO.Bind();
