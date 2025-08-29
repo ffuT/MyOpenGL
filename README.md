@@ -1,6 +1,6 @@
 # MyOpenGL
 
-This is my personal OpenGL playground. The project is inspired by TheCherno’s OpenGL YouTube playlist, but I’ve made lots of changes based on my own preferences and learning goals. There’s no grand vision, im just experimenting, learning, and having fun with graphics programming.
+This is my personal OpenGL playground. The project is inspired by TheCherno’s OpenGL YouTube playlist and LearnOpenGL.com, but I’ve made lots of changes based on my own preferences and learning goals. There’s no grand vision, im just experimenting, learning, and having fun with graphics programming.
 
 ## Features
 - Uses GLFW, GLEW, ImGui, and GLM
