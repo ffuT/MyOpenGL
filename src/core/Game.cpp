@@ -58,7 +58,6 @@ Game::Game(const  char* title) : TITLE(title) {
 }
 
 Game::~Game(){
-
 }
 
 void Game::Run(){
@@ -76,12 +75,12 @@ void Game::Run(){
     Skybox skybox = Skybox();
     DebugCrosshair DebugXhair = DebugCrosshair();
 
-    // sphere for rendering lights
+    // sphere obejct for rendering lights
     Shape pointLight = Shape(&m_meshes[0]);
     pointLight.SetTextID("PointLight");
     m_objects.push_back(pointLight);
     
-    // constant light sources
+    // constant light source(s)
     Light directional = Light(glm::vec3(0.44, -0.46, 0.78), glm::vec3(1.0), 1.0f, 1);
     m_lights.push_back(directional);
 
@@ -90,7 +89,7 @@ void Game::Run(){
     for (int i = 0; i < 50; i++) { // bunch of random spheres for visualitation and performance check
         bool isbanana = (std::rand() % 100) < 5; // 5% chance for banana mesh
         m_objects.push_back(Shape(&m_meshes[isbanana]));
-        m_objects[i + 1].SetScale(2 + std::rand() % 15);
+        m_objects[i + 1].SetScale(2.5 + std::rand() % 15);
         
         float f2 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         float f1 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
@@ -107,46 +106,6 @@ void Game::Run(){
                 min + (std::rand() % (max - min + 1)))));
     }
     
-	// shadow mapping setup temp
-	unsigned int shadowMapFBO;
-	glGenFramebuffers(1, &shadowMapFBO);
-
-	unsigned int shadowMapWidth = 2048*2, shadowMapHeight = shadowMapWidth;
-    unsigned int shadowMap;
-	glGenTextures(1, &shadowMap);
-	glBindTexture(GL_TEXTURE_2D, shadowMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER); 
-	float clampColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clampColor);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    glm::mat4 orthographicProjection = glm::ortho(-m_imgSideLength, m_imgSideLength, -m_imgSideLength, m_imgSideLength, -100.0f, 1000.0f);
-    glm::mat4 lightView = glm::lookAt(-directional.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 lightSpaceMatrix = orthographicProjection * lightView;
-
-	Shader shadowShader = Shader("res/shaders/Shadow.shader");
-	shadowShader.Bind();
-    shadowShader.SetUniformMat4f("u_lightProjection", lightSpaceMatrix);
-
-    //temp shadowmap render
-    Shader imgshader("res/shaders/BasicShader.shader");
-    VertexArray imgVAO;
-    VertexBuffer imgVBO(24 * sizeof(float), quadVertices);
-    imgVAO.Bind();
-    imgVAO.AddVertexBuffer(imgVBO, 0, 2, GL_FLOAT, GL_FALSE, 4* sizeof(float), (void*)0);
-    imgVAO.AddVertexBuffer(imgVBO, 1, 2, GL_FLOAT, GL_FALSE, 4* sizeof(float), (void*)(2 * sizeof(float)));
-    imgVAO.Unbind();
-    imgVBO.Unbind();
-    
     auto last = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
     glfwSetWindowTitle(m_window, TITLE);
@@ -157,40 +116,20 @@ void Game::Run(){
 
         keyPressed(m_delta); // keypress handling
 
-        // render to shadowmap
-        glViewport(0,0, shadowMapWidth, shadowMapWidth);
-        glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glCullFace(GL_FRONT);
-        shadowShader.Bind();
-        orthographicProjection = glm::ortho(-m_imgSideLength, m_imgSideLength, -m_imgSideLength, m_imgSideLength, m_zNear, m_zFar);
-        lightSpaceMatrix = orthographicProjection * lightView;
-        shadowShader.SetUniformMat4f("u_lightProjection", lightSpaceMatrix);
-        for(Shape& obj : m_objects){
-            shadowShader.SetUniformMat4f("u_model", obj.GetModelMatrix());
-            obj.Render();
-        }
-        shadowShader.UnBind();
-        glCullFace(GL_BACK);
+		// render to shadowmap + update shadowmap matrix
+        renderer.RenderShadowMap(m_objects, m_lights);
 
         // render screen 
         glViewport(0,0 ,WIDTH, HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear
-        glBindTexture(GL_TEXTURE_2D, shadowMap);
+        renderer.RenderSkybox(skybox, m_cam, m_proj);
+        renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
+        
 
-        if(!RENDER_BUFFER){ // normal scene render
-            renderer.RenderSkybox(skybox, m_cam, m_proj);
-            renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj, lightSpaceMatrix);
-        } else { //shadow map render - or another buffer if i want
-            imgshader.Bind();
-            imgVAO.Bind();
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-        }
-
-        if (USE_DEBUG_XHAIR){
+		if (USE_DEBUG_XHAIR) { // render crosshair
             DebugXhair.Update(m_cam);
-            renderer.RenderXhair(DebugXhair, m_cam, m_proj);
+            renderer.RenderCrosshair(DebugXhair, m_cam, m_proj);
         }
         RenderImGui(renderer);
 
@@ -268,11 +207,6 @@ void Game::RenderImGuiSettings(Renderer& renderer) {
     ImGui::SameLine();
     ImGui::Text(": %s", USE_DEBUG_XHAIR ? "on" : "off");
 
-    if (ImGui::Button("Render Shadowmap"))       // toggle render buffer
-    RENDER_BUFFER = !RENDER_BUFFER;
-    ImGui::SameLine();
-    ImGui::Text(": %s", RENDER_BUFFER ? "on" : "off");
-
     ImGui::Spacing();
     ImGui::Text("Shader Program ");         // Shader Program changer
     if (ImGui::Button("NewShader"))
@@ -284,12 +218,6 @@ void Game::RenderImGuiSettings(Renderer& renderer) {
     if (ImGui::Button("Unlit"))
         renderer.SetRenderShader(ShaderProgram::UnlitShader);
     ImGui::NewLine();
-
-	// shadow map settings
-	ImGui::Text("Shadowmap Settings");
-    ImGui::DragFloat("img sides", &m_imgSideLength, 1.0f);
-    ImGui::DragFloat("near plane", &m_zNear, 1.0f);
-    ImGui::DragFloat("far plane", &m_zFar, 1.0f);
 }
 
 void Game::RenderImGuiSceneControl() {

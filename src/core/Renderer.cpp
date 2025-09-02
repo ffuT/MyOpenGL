@@ -7,6 +7,26 @@ Renderer::Renderer() {
 Renderer::~Renderer(){
 }
 
+void Renderer::RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& lights) {
+    glViewport(0, 0, m_shadowMap.getHeight(), m_shadowMap.getWidth());
+    m_shadowMap.Bind();
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glCullFace(GL_FRONT);
+    Shader* currentShader = m_ShaderManager.GetShader(ShadowShader);
+    currentShader->Bind();
+	Light directional = lights[0]; // only first light used for shadowmap
+    m_lightView = glm::lookAt(-directional.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    m_lightSpaceMatrix = m_orthographicProjection * m_lightView;
+
+    currentShader->SetUniformMat4f("u_lightProjection", m_lightSpaceMatrix);
+    for (Shape& obj : objects) {
+        currentShader->SetUniformMat4f("u_model", obj.GetModelMatrix());
+        obj.Render();
+    }
+    currentShader->UnBind();
+    glCullFace(GL_BACK);
+}
+
 void Renderer::RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj) {
 	glDepthFunc(GL_LEQUAL);
 	skybox.Bind();
@@ -19,7 +39,7 @@ void Renderer::RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj) {
 	skybox.UnBind();
 }
 
-void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj, glm::mat4& lightSpaceMatrix) {
+void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj) {
     glDepthFunc(GL_LESS);
 
 	const glm::mat4 view = cam.GetViewMatrix(); // cache cus used multiple times
@@ -45,7 +65,7 @@ void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& li
     objectShader->Bind();
     objectShader->SetUniformMat4f("u_view", view);
     objectShader->SetUniformMat4f("u_proj", proj);
-    objectShader->SetUniformMat4f("u_lightSpace", lightSpaceMatrix);
+    objectShader->SetUniformMat4f("u_lightSpace", m_lightSpaceMatrix);
 
     switch (m_currentShader) { // set currentshader specific uniforms
     case NewShader:
@@ -80,7 +100,7 @@ void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& li
     objectShader->UnBind();
 }
 
-void Renderer::RenderXhair(const DebugCrosshair& xhair, const Camera& cam, const glm::mat4& proj) {
+void Renderer::RenderCrosshair(const DebugCrosshair& xhair, const Camera& cam, const glm::mat4& proj) {
 	glDisable(GL_DEPTH_TEST); // xhair rendered on top
 	xhair.BindVAO();
 	Shader* currentshader = m_ShaderManager.GetShader(ShaderProgram::CrosshairShader);

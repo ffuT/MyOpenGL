@@ -15,16 +15,18 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#include "Skybox.h"
 #include "Renderer.h"
-#include "Shader.h"
-#include "VertexArray.h"
-#include "VertexBuffer.h"
-#include "ElementArrayBuffer.h"
 #include "Camera.h"
+
 #include "ShaderManager.h"
+#include "Shader.h"
+#include "Skybox.h"
+
 #include "Extras.h" 
 #include "DebugCrosshair.h"
+
+#include "FrameBuffer.h"
+#include "Texture.h"
 
 class Game {
 public:
@@ -57,10 +59,6 @@ private:
     bool FIRST_MOUSE = true;
     bool USE_DEBUG_XHAIR = true;
     bool RENDER_BUFFER = false;
-
-    float m_imgSideLength = 400.0f;
-	float m_zNear = -500.0f, m_zFar = 1000.0f;
-
 
     float m_lastX = 400.0f;
     float m_lastY = 300.0f;
