@@ -15,8 +15,7 @@ void Renderer::RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& 
     Shader* currentShader = m_ShaderManager.GetShader(ShadowShader);
     currentShader->Bind();
 	Light directional = lights[0]; // only first light used for shadowmap
-    m_lightView = glm::lookAt(-directional.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    m_lightSpaceMatrix = m_orthographicProjection * m_lightView;
+	updateLightSpaceMatrix(directional);
 
     currentShader->SetUniformMat4f("u_lightProjection", m_lightSpaceMatrix);
     for (Shape& obj : objects) {
@@ -65,10 +64,10 @@ void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& li
     objectShader->Bind();
     objectShader->SetUniformMat4f("u_view", view);
     objectShader->SetUniformMat4f("u_proj", proj);
-    objectShader->SetUniformMat4f("u_lightSpace", m_lightSpaceMatrix);
 
     switch (m_currentShader) { // set currentshader specific uniforms
     case NewShader:
+        objectShader->SetUniformMat4f("u_lightSpace", m_lightSpaceMatrix);
         objectShader->SetUniform3f("u_viewPos", cam.GetPos());
         objectShader->SetUniform1i("numLights", lights.size());
         for (size_t j = 0; j < lights.size(); j++) {
@@ -123,6 +122,36 @@ void Renderer::RenderCrosshair(const DebugCrosshair& xhair, const Camera& cam, c
 	glEnable(GL_DEPTH_TEST);
 }
 
+void Renderer::RenderTerrain(const Mesh& quad, const glm::mat4& model, const Camera& cam, const glm::mat4& proj, std::vector<Light>& lights) {
+    Shader* currentshader = m_ShaderManager.GetShader(ShaderProgram::NewShader);
+	currentshader->Bind();
+
+    currentshader->SetUniformMat4f("u_lightSpace", m_lightSpaceMatrix);
+    currentshader->SetUniform3f("u_viewPos", cam.GetPos());
+    currentshader->SetUniform1i("numLights", lights.size());
+    for (size_t j = 0; j < lights.size(); j++) {
+        std::string lightName = "lights[" + std::to_string(j) + "].";
+        currentshader->SetUniform3f(lightName + "position", lights[j].position);
+        currentshader->SetUniform3f(lightName + "color", lights[j].color);
+        currentshader->SetUniform1f(lightName + "intensity", lights[j].intensity);
+        currentshader->SetUniform1i(lightName + "type", lights[j].type);
+    }
+
+	currentshader->SetUniformMat4f("u_model", model);
+    currentshader->SetUniformMat4f("u_view", cam.GetViewMatrix());
+    currentshader->SetUniformMat4f("u_proj", proj);
+    currentshader->SetUniform4f("u_color", glm::vec4(1.0));
+	quad.Bind();
+	quad.Render();
+	quad.Unbind();
+    currentshader->UnBind();
+}
+
 void Renderer::SetRenderShader(const ShaderProgram& shader){
 	m_currentShader = shader;
+}
+
+void Renderer::updateLightSpaceMatrix(Light light) {
+    m_lightView = glm::lookAt(-light.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    m_lightSpaceMatrix = m_orthographicProjection * m_lightView;
 }

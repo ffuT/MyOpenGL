@@ -19,10 +19,12 @@ public:
 	void RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj);
 	void RenderObjects(std::vector<Shape>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj);
 	void RenderCrosshair(const DebugCrosshair& xhair, const Camera& cam, const glm::mat4& proj);
+	void RenderTerrain(const Mesh& quad, const glm::mat4& model, const Camera& cam, const glm::mat4& proj, std::vector<Light>& lights);
 
 	void SetRenderShader(const ShaderProgram& shader);
 
 private:
+	void updateLightSpaceMatrix(Light light);
 
 	// shadow map 
 	unsigned int shadowMapWidth = 4096, shadowMapHeight = shadowMapWidth;

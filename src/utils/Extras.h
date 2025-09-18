@@ -76,3 +76,56 @@ static std::vector<float> CreateSphereNormals(const std::vector<float>& points, 
     }
     return normals;
 };
+
+constexpr static std::vector<float> CreateQuadGrid(const int gridPoints) {
+    std::vector<float> points;
+    points.reserve(gridPoints * gridPoints * 3);
+
+    for (int i = 0; i < gridPoints; ++i) {
+        float z = (float)i / (gridPoints - 1); // 0 -> 1
+
+        for (int j = 0; j < gridPoints; ++j) {
+            float x = (float)j / (gridPoints - 1); // 0 -> 1
+            float y = 0.0f; // flat height initially
+            points.push_back(x);
+            points.push_back(y);
+            points.push_back(z);
+        }
+    }
+    return points;
+}
+
+constexpr static std::vector<unsigned int> CreateQuadGridIndices(const int gridPoints) {
+    std::vector<unsigned int> indices;
+    indices.reserve(6 * (gridPoints - 1) * (gridPoints - 1));
+
+    for (int i = 0; i < gridPoints - 1; ++i) {
+        for (int j = 0; j < gridPoints - 1; ++j) {
+            int current = i * gridPoints + j;
+            int next = current + gridPoints;
+
+            // First triangle
+            indices.push_back(current);
+            indices.push_back(next);
+            indices.push_back(current + 1);
+
+            // Second triangle
+            indices.push_back(current + 1);
+            indices.push_back(next);
+            indices.push_back(next + 1);
+        }
+    }
+    return indices;
+}
+
+static std::vector<float> CreateQuadGridNormals(const int gridPoints) {
+    std::vector<float> normals;
+    normals.reserve(gridPoints * gridPoints * 3);
+
+    for (int i = 0; i < gridPoints * gridPoints; ++i) {
+        normals.push_back(0.0f);
+        normals.push_back(1.0f);
+        normals.push_back(0.0f);
+    }
+    return normals;
+}

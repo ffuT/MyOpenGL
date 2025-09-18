@@ -57,7 +57,7 @@ namespace skyboxes {
 
 class Skybox{
 public:
-	Skybox();
+    Skybox(std::vector<std::string> skybox);
 	~Skybox();
 
     void Bind();
@@ -110,5 +110,5 @@ private:
     };
 	VertexArray m_skyboxVAO;
 	VertexBuffer m_skyboxVBO = VertexBuffer(108 * sizeof(float), skyboxVertices);
-	GLuint m_cubemapTexture = loadCubemap(skyboxes::Tutorial);
+    GLuint m_cubemapTexture; 
 };

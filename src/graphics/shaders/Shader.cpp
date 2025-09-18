@@ -12,7 +12,6 @@ Shader::Shader(const std::string& filepath) :
     m_RendererID = CreateShader(source.VertexSource, source.FragmentSource, source.GeometrySource);  // Pass geometry shader source
 }
 
-
 Shader::~Shader() {
     glDeleteProgram(m_RendererID);
 }

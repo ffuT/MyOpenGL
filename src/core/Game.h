@@ -33,6 +33,7 @@ public:
     Game(const char* title);
     ~Game();
     void Run();
+	double GetLifetime() const { return m_lifetime / 1000000000.0; } // in seconds
 
 private:
     void RenderImGui(Renderer& renderer);
@@ -58,7 +59,9 @@ private:
     bool IS_FULLSCREEN = false;
     bool FIRST_MOUSE = true;
     bool USE_DEBUG_XHAIR = true;
-    bool RENDER_BUFFER = false;
+	bool DYNAMIC_LIGHT_CYCLE = false; // rotating directional light
+
+	float m_LightRotationSpeed = 5.0f; // degrees per second
 
     float m_lastX = 400.0f;
     float m_lastY = 300.0f;
@@ -68,7 +71,9 @@ private:
     GLFWwindow* m_window;
     Camera m_cam;
 
-    float m_delta = 0.0f;
+    double m_delta = 0.0;
+	double m_lifetime = 0.0;
+
     std::vector<Shape> m_objects;
     std::vector<Light> m_lights;
     std::vector<Mesh> m_meshes;

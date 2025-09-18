@@ -14,6 +14,7 @@ uniform mat4 u_model;
 uniform mat4 u_view;
 uniform mat4 u_proj;
 uniform mat4 u_lightSpace;
+uniform float u_tileFactor = 1.0;
 
 void main() {
     FragPos = vec3(u_model * vec4(aPos, 1.0)); // World-space position
@@ -21,7 +22,7 @@ void main() {
     FragPosLightSpace = u_lightSpace * vec4(FragPos, 1.0);
 
     Normal = mat3(transpose(inverse(u_model))) * aNormal; // Correct normals
-    TexCoords = aTexCoords;
+     TexCoords = aTexCoords * u_tileFactor;
 }
 
 #shader fragment
@@ -53,15 +54,10 @@ uniform Light lights[32];
 uniform int numLights;
 
 float CalcShadow(vec4 fragPosLightSpace, vec3 lDir){
-    // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
-    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
     float closestDepth = texture(shadowMap, projCoords.xy).r; 
-    // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
-    // calc bias (based on depth map resolution and slope)
     float bias = max(0.003 * (1.0 - dot(Normal, lDir)), 0.0003); 
     float shadow = 0.0;
     // PCF
@@ -93,7 +89,6 @@ void main() {
         vec3 reflectDir = reflect(-lightDir, norm);
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
         vec3 specular = u_specularStrength * spec * lights[i].color;
-
         
         float shadow = 0.0;
         if(lights[i].type == 1)

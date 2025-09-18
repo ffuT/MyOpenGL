@@ -35,7 +35,7 @@ public:
 private:
     const float m_movementSpeed = 0.25f;  // x speed * 1000 = movement in 3d space a second
     const float m_rollSpeed = 0.125f;
-    const float m_mouseSensitivity = 3.09f; //s1mple sens
+    const float m_mouseSensitivity = 2.5f;
 
     float m_yaw = 0.0f;
     float m_pitch = 0.0f;

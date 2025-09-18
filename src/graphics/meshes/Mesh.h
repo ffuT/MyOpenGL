@@ -7,7 +7,6 @@
 
 class Mesh {
 public:
-    
     Mesh(const std::vector<float>& vertices,
         const std::vector<float>& texCoords,
         const std::vector<float>& normals,

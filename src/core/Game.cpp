@@ -65,18 +65,22 @@ void Game::Run(){
     renderer.SetRenderShader(ShaderProgram::NewShader);
 
     m_meshes.reserve(10); // IMPORTANT!!!, to avoid vector move shenanigans very bandaid fix
-    
     Mesh spheremesh = Mesh(CreateSphere(1, 32), CreateSphere(1, 32), CreateSphereNormals(CreateSphere(1, 32), 32), CreateSphereIndices(32));
-    m_meshes.push_back(spheremesh);
-    
     Mesh Bananmesh = Mesh::LoadMeshFromFile("res/meshes/banana.obj");
-    m_meshes.push_back(Bananmesh);
+    Mesh Quadmesh = Mesh(CreateQuadGrid(10), CreateQuadGrid(10), CreateQuadGridNormals(10), CreateQuadGridIndices(10));
+    glm::mat4 terrainmodel = glm::mat4(1.0f);
+	terrainmodel = glm::scale(terrainmodel, glm::vec3(200.0f, 1.0f, 200.0f));
+	terrainmodel = glm::translate(terrainmodel, glm::vec3(-0.5f, -150.0f, -0.5f)); // center terrain at origin
 
-    Skybox skybox = Skybox();
+	m_meshes.push_back(Quadmesh);   // index 0 terrain
+    m_meshes.push_back(spheremesh); // index 1 sphere
+	m_meshes.push_back(Bananmesh);  // index 2 banana
+
+    Skybox skybox = Skybox(skyboxes::Space);
     DebugCrosshair DebugXhair = DebugCrosshair();
 
-    // sphere obejct for rendering lights
-    Shape pointLight = Shape(&m_meshes[0]);
+    // sphere obejct for rendering lights always index 0
+    Shape pointLight = Shape(&m_meshes[1]);
     pointLight.SetTextID("PointLight");
     m_objects.push_back(pointLight);
     
@@ -88,7 +92,7 @@ void Game::Run(){
     std::srand(seed.count());
     for (int i = 0; i < 50; i++) { // bunch of random spheres for visualitation and performance check
         bool isbanana = (std::rand() % 100) < 5; // 5% chance for banana mesh
-        m_objects.push_back(Shape(&m_meshes[isbanana]));
+        m_objects.push_back(Shape(&m_meshes[isbanana+1]));
         m_objects[i + 1].SetScale(2.5 + std::rand() % 15);
         
         float f2 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
@@ -113,19 +117,29 @@ void Game::Run(){
         last = now;
         now = std::chrono::high_resolution_clock::now();
         m_delta = (now - last).count();
+        m_lifetime += m_delta;
 
         keyPressed(m_delta); // keypress handling
 
 		// render to shadowmap + update shadowmap matrix
+        if (DYNAMIC_LIGHT_CYCLE) {
+			float speed = glm::radians(m_LightRotationSpeed); // degrees per second
+			float angle = speed * (float)m_delta / 1000000000;
+			glm::mat4 rot = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1.0f, 0.0f, 0.0f));
+			m_lights[0].position = glm::vec3(rot * glm::vec4(m_lights[0].position, 1.0f));
+			m_lights[0].position = glm::normalize(m_lights[0].position); // keep directional light at infinity
+        }
         renderer.RenderShadowMap(m_objects, m_lights);
 
         // render screen 
         glViewport(0,0 ,WIDTH, HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear
+        renderer.RenderTerrain(m_meshes[0], terrainmodel, m_cam, m_proj, m_lights);
         renderer.RenderSkybox(skybox, m_cam, m_proj);
         renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
-        
+
+		//maybe move skybox and crosshair renderer
 
 		if (USE_DEBUG_XHAIR) { // render crosshair
             DebugXhair.Update(m_cam);
@@ -207,6 +221,13 @@ void Game::RenderImGuiSettings(Renderer& renderer) {
     ImGui::SameLine();
     ImGui::Text(": %s", USE_DEBUG_XHAIR ? "on" : "off");
 
+	if (ImGui::Button("Dynamic Light cycle"))       // toggle dynamic light cycle
+        DYNAMIC_LIGHT_CYCLE = !DYNAMIC_LIGHT_CYCLE;
+    ImGui::SameLine();
+    ImGui::Text(": %s", DYNAMIC_LIGHT_CYCLE ? "on" : "off");
+
+	ImGui::SliderFloat("Rotation Speed", &m_LightRotationSpeed, -180.0f, 180.0f);
+
     ImGui::Spacing();
     ImGui::Text("Shader Program ");         // Shader Program changer
     if (ImGui::Button("NewShader"))
@@ -225,7 +246,7 @@ void Game::RenderImGuiSceneControl() {
     ImGui::Spacing();
 
     if (ImGui::Button("Add Object")) {
-        m_objects.push_back(Shape(&m_meshes[0]));
+        m_objects.push_back(Shape(&m_meshes[1]));
     }
     ImGui::Spacing();
 

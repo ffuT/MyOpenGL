@@ -1,6 +1,7 @@
 #include "Skybox.h"
 
-Skybox::Skybox(){
+Skybox::Skybox(std::vector<std::string> skybox){
+	m_cubemapTexture = loadCubemap(skybox); // change skybox here
     m_skyboxVAO.Bind();
     m_skyboxVBO.Bind();
     m_skyboxVAO.AddVertexBuffer(m_skyboxVBO, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
