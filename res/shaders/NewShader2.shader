@@ -14,7 +14,6 @@ uniform mat4 u_model;
 uniform mat4 u_view;
 uniform mat4 u_proj;
 uniform mat4 u_lightSpace;
-uniform float u_tileFactor = 1.0;
 
 void main() {
     FragPos = vec3(u_model * vec4(aPos, 1.0)); // World-space position
@@ -22,7 +21,7 @@ void main() {
     FragPosLightSpace = u_lightSpace * vec4(FragPos, 1.0);
 
     Normal = mat3(transpose(inverse(u_model))) * aNormal; // Correct normals
-     TexCoords = aTexCoords * u_tileFactor;
+    TexCoords = aTexCoords;
 }
 
 #shader fragment
@@ -68,6 +67,8 @@ float CalcShadow(vec4 fragPosLightSpace, vec3 lDir){
             shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
         }    
     }
+    if(projCoords.z > 1.0)
+        shadow = 0.0;
     return shadow /= 25.0;
 }
 
@@ -80,7 +81,7 @@ void main() {
         vec3 norm = normalize(Normal);
         vec3 lightDir = (lights[i].type == 0)
             ? normalize(lights[i].position - FragPos) // For point lights
-            : normalize(-lights[i].position); // For directional lights
+            : normalize(lights[i].position); // For directional lights
 
         float diff = max(dot(norm, lightDir), 0.0);
         vec3 diffuse = diff * lights[i].color * lights[i].intensity;

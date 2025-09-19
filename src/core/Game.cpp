@@ -67,9 +67,10 @@ void Game::Run(){
     m_meshes.reserve(10); // IMPORTANT!!!, to avoid vector move shenanigans very bandaid fix
     Mesh spheremesh = Mesh(CreateSphere(1, 32), CreateSphere(1, 32), CreateSphereNormals(CreateSphere(1, 32), 32), CreateSphereIndices(32));
     Mesh Bananmesh = Mesh::LoadMeshFromFile("res/meshes/banana.obj");
-    Mesh Quadmesh = Mesh(CreateQuadGrid(10), CreateQuadGrid(10), CreateQuadGridNormals(10), CreateQuadGridIndices(10));
+	int gridSize = 1000;
+    Mesh Quadmesh = Mesh(CreateQuadGrid(gridSize), CreateQuadGrid(gridSize), CreateQuadGridNormals(gridSize), CreateQuadGridIndices(gridSize));
     glm::mat4 terrainmodel = glm::mat4(1.0f);
-	terrainmodel = glm::scale(terrainmodel, glm::vec3(200.0f, 1.0f, 200.0f));
+	terrainmodel = glm::scale(terrainmodel, glm::vec3(20000.0f, 1.0f, 20000.0f));
 	terrainmodel = glm::translate(terrainmodel, glm::vec3(-0.5f, -150.0f, -0.5f)); // center terrain at origin
 
 	m_meshes.push_back(Quadmesh);   // index 0 terrain
@@ -85,8 +86,9 @@ void Game::Run(){
     m_objects.push_back(pointLight);
     
     // constant light source(s)
-    Light directional = Light(glm::vec3(0.44, -0.46, 0.78), glm::vec3(1.0), 1.0f, 1);
+    Light directional = Light(glm::vec3(-0.44, 0.46, -0.78), glm::vec3(1.0), 1.0f, 1);
     m_lights.push_back(directional);
+    m_lights[0].position = glm::normalize(m_lights[0].position);
 
     std::chrono::nanoseconds seed = std::chrono::high_resolution_clock::now().time_since_epoch();
     std::srand(seed.count());
@@ -136,7 +138,7 @@ void Game::Run(){
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear
         renderer.RenderTerrain(m_meshes[0], terrainmodel, m_cam, m_proj, m_lights);
-        renderer.RenderSkybox(skybox, m_cam, m_proj);
+        renderer.RenderSkybox(skybox, m_cam, m_proj, m_lights[0]);
         renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
 
 		//maybe move skybox and crosshair renderer

@@ -16,7 +16,7 @@ public:
 	~Renderer();
 
 	void RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& lights);
-	void RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj);
+	void RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj, const Light& dir);
 	void RenderObjects(std::vector<Shape>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj);
 	void RenderCrosshair(const DebugCrosshair& xhair, const Camera& cam, const glm::mat4& proj);
 	void RenderTerrain(const Mesh& quad, const glm::mat4& model, const Camera& cam, const glm::mat4& proj, std::vector<Light>& lights);
