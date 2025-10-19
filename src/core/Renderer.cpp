@@ -58,7 +58,7 @@ void Renderer::RenderObjects(std::vector<Shape>& objects, std::vector<Light>& li
     for (const Light& light : lights) { // set per light specific uniforms
         if (light.type > 0)
 			continue; // skip non-point lights, since they arent rendered
-        objects[0].SetTransform(glm::translate(glm::mat4(1.0f), light.position));
+        objects[0].SetPosition(light.position);
         lightShader->SetUniformMat4f("u_model", objects[0].GetModelMatrix());
         lightShader->SetUniform4f("u_color", glm::vec4(light.color, 1.0f));
         objects[0].Render();

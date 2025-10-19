@@ -14,6 +14,21 @@ void Shape::Render() const {
 	m_mesh->Unbind();
 }
 
+const RigidBody& Shape::GetRigidBody() const {
+	return m_RigidBody;
+}
+
+void Shape::syncPhysicsToTransform() {
+
+}
+
+void Shape::syncTransformToPhysics() {
+	if (!m_RigidBody.isStatic) {
+		const glm::mat4 translate = glm::translate(glm::mat4(1.0f), m_RigidBody.position);
+		m_dirty = false;
+	}
+}
+
 glm::vec4 Shape::GetColor() const {
 	return m_Color;
 }
@@ -30,18 +45,18 @@ float Shape::GetSpecular() const {
 	return m_SpecularStrength;
 }
 
-void Shape::SetTransform(const glm::mat4 transform){
-	m_Transform = transform;
+void Shape::SetPosition(const glm::vec3 pos){
+	m_RigidBody.position = pos;
 	m_dirty = true;
 }
 
-void Shape::SetScale(const glm::mat4 scale){
+void Shape::SetScale(const glm::vec3 scale){
 	m_Scale = scale;
 	m_dirty = true;
 }
 
 void Shape::SetScale(const float scale){
-	m_Scale = glm::scale(glm::mat4(1.0), glm::vec3(scale));
+	m_Scale = glm::vec3(scale);
 	m_dirty = true;
 }
 
@@ -68,25 +83,22 @@ void Shape::SetTextID(const char* name){
 
 glm::mat4 Shape::GetModelMatrix() const {
 	if (m_dirty) {
-		m_cachedModelMatrix = m_Transform * (m_Rotation * m_Scale);
+		UpdateModelMatrix();
 		m_dirty = false;
 	} 
 	return m_cachedModelMatrix;
 }
 
-void Shape::UpdateModelMatrix() {
-	if (m_dirty) {
-		m_cachedModelMatrix = m_Transform * (m_Rotation * m_Scale);
-		m_dirty = false;
-	}
+void Shape::UpdateModelMatrix() const{
+	m_cachedModelMatrix = GetTransform() * (GetRotation() *  GetScale());
 }
 
 glm::mat4 Shape::GetTransform() const {
-	return m_Transform;
+	return glm::translate(glm::mat4(1.0f), m_RigidBody.position);
 }
 
 glm::mat4 Shape::GetScale() const{
-	return m_Scale;
+	return glm::scale(glm::mat4(1.0f), m_Scale);
 }
 
 glm::mat4 Shape::GetRotation() const{

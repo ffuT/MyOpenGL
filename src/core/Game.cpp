@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "PhysicsWorld.h"
 
 Game::Game(const  char* title) : TITLE(title) {
     if (!glfwInit()) {
@@ -21,7 +22,7 @@ Game::Game(const  char* title) : TITLE(title) {
 
     glfwMakeContextCurrent(m_window);
 
-    glfwSetWindowAttrib(m_window, GLFW_RESIZABLE, GLFW_FALSE);
+    glfwSetWindowAttrib(m_window, GLFW_RESIZABLE, GLFW_TRUE);
     glfwSwapInterval(USE_VSYNC); // vsyncs
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -61,6 +62,7 @@ Game::~Game(){
 }
 
 void Game::Run(){
+    PhysicsWorld physicsWorld;
     Renderer renderer = Renderer();
     renderer.SetRenderShader(ShaderProgram::NewShader);
 
@@ -89,7 +91,7 @@ void Game::Run(){
     Light directional = Light(glm::vec3(-0.44, 0.46, -0.78), glm::vec3(1.0), 1.0f, 1);
     m_lights.push_back(directional);
     m_lights[0].position = glm::normalize(m_lights[0].position);
-
+    
     std::chrono::nanoseconds seed = std::chrono::high_resolution_clock::now().time_since_epoch();
     std::srand(seed.count());
     for (int i = 0; i < 50; i++) { // bunch of random spheres for visualitation and performance check
@@ -106,12 +108,17 @@ void Game::Run(){
         int max = 100;
         int min = -100;
         // random pos
-        m_objects[i + 1].SetTransform(glm::translate(glm::mat4(1.0),
-            glm::vec3(min + (std::rand() % (max - min + 1)),
-                min + (std::rand() % (max - min + 1)),
-                min + (std::rand() % (max - min + 1)))));
+        m_objects[i + 1].SetPosition(glm::vec3(
+            min + (std::rand() % (max - min + 1)),
+            min + (std::rand() % (max - min + 1)),
+            min + (std::rand() % (max - min + 1))));
     }
     
+    for (Shape& s : m_objects) {
+		s.GetRigidBody().AddForce(glm::vec3(0.0f, -9.81f, 0.0f));
+        physicsWorld.AddBody(&s.GetRigidBody());
+    }
+
     auto last = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
     glfwSetWindowTitle(m_window, TITLE);
@@ -123,17 +130,23 @@ void Game::Run(){
 
         keyPressed(m_delta); // keypress handling
 
-		// render to shadowmap + update shadowmap matrix
-        if (DYNAMIC_LIGHT_CYCLE) {
-			float speed = glm::radians(m_LightRotationSpeed); // degrees per second
+        if(USE_PHYSICS){
+		    physicsWorld.Step((float) m_delta);
+            for (auto& shape : m_objects){
+                shape.syncTransformToPhysics();
+            }
+        }
+
+        if (DYNAMIC_LIGHT_CYCLE) { 
+            float speed = glm::radians(m_LightRotationSpeed); // degrees per second
 			float angle = speed * (float)m_delta / 1000000000;
 			glm::mat4 rot = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1.0f, 0.0f, 0.0f));
 			m_lights[0].position = glm::vec3(rot * glm::vec4(m_lights[0].position, 1.0f));
 			m_lights[0].position = glm::normalize(m_lights[0].position); // keep directional light at infinity
         }
-        renderer.RenderShadowMap(m_objects, m_lights);
 
         // render screen 
+        renderer.RenderShadowMap(m_objects, m_lights);
         glViewport(0,0 ,WIDTH, HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear
@@ -141,7 +154,7 @@ void Game::Run(){
         renderer.RenderSkybox(skybox, m_cam, m_proj, m_lights[0]);
         renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
 
-		//maybe move skybox and crosshair renderer
+		//maybe move skybox and crosshair to renderer
 
 		if (USE_DEBUG_XHAIR) { // render crosshair
             DebugXhair.Update(m_cam);
@@ -212,6 +225,13 @@ void Game::RenderImGuiSettings(Renderer& renderer) {
     }
     ImGui::SameLine();
     ImGui::Text(": %s", USE_VSYNC ? "on" : "off");
+
+    if (ImGui::Button("Physics")) {          // toggle physics
+        USE_PHYSICS = !USE_PHYSICS;
+    }
+    ImGui::SameLine();
+    ImGui::Text(": %s", USE_PHYSICS ? "on" : "off");
+
 
 	if (ImGui::Button("Unlocked Cam"))      // toggle camera mode
         m_cam.USE_QUAT_ROTATION = !m_cam.USE_QUAT_ROTATION;
@@ -289,14 +309,11 @@ void Game::RenderImGuiSceneControl() {
         ImGui::DragFloat3("Position", (float*)&position, 0.5f);
         ImGui::DragFloat3("Scale", (float*)&scale, 0.1f);
 
-        scaleMatrix = glm::scale(glm::mat4(1.0), scale); // Create a new scale matrix
-
         selectedSphere.SetColor(color);
         selectedSphere.SetSpecular(specular);
 
-        glm::mat4 transform = glm::translate(glm::mat4(1.0), position);
-        selectedSphere.SetTransform(transform);
-        selectedSphere.SetScale(scaleMatrix);
+        selectedSphere.SetPosition(position);
+        selectedSphere.SetScale(scale);
     }
     ImGui::NewLine();
 

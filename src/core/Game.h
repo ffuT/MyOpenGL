@@ -55,7 +55,8 @@ private:
     float YAW = 0.022f, PITCH = 0.022f; // camera turn speed, same as CS2, UE5 default = 0.07
     unsigned int WIDTH = 1280, HEIGHT = 720;
 
-    bool USE_VSYNC = false;
+    bool USE_VSYNC = true;
+    bool USE_PHYSICS = false;
     bool IS_FULLSCREEN = false;
     bool FIRST_MOUSE = true;
     bool USE_DEBUG_XHAIR = true;
