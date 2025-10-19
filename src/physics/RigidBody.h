@@ -10,11 +10,4 @@ struct RigidBody {
 
 	void AddForce(const glm::vec3& f) { forces += f; };
 	void ClearForces() { forces = glm::vec3(0.0f); };
-	void Integrate(float dt) {
-		if (isStatic) return;
-		glm::vec3 acceleration = forces / mass;
-		velocity += acceleration * dt;
-		position += velocity * dt;
-		ClearForces();
-	};
 };

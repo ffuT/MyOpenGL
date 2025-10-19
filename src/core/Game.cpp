@@ -72,7 +72,7 @@ void Game::Run(){
 	int gridSize = 1000;
     Mesh Quadmesh = Mesh(CreateQuadGrid(gridSize), CreateQuadGrid(gridSize), CreateQuadGridNormals(gridSize), CreateQuadGridIndices(gridSize));
     glm::mat4 terrainmodel = glm::mat4(1.0f);
-	terrainmodel = glm::scale(terrainmodel, glm::vec3(20000.0f, 1.0f, 20000.0f));
+	terrainmodel = glm::scale(terrainmodel, glm::vec3(10000.0f, 1.0f, 10000.0f));
 	terrainmodel = glm::translate(terrainmodel, glm::vec3(-0.5f, -150.0f, -0.5f)); // center terrain at origin
 
 	m_meshes.push_back(Quadmesh);   // index 0 terrain
@@ -115,7 +115,7 @@ void Game::Run(){
     }
     
     for (Shape& s : m_objects) {
-		s.GetRigidBody().AddForce(glm::vec3(0.0f, -9.81f, 0.0f));
+        if(!s.GetRigidBody().isStatic)
         physicsWorld.AddBody(&s.GetRigidBody());
     }
 
@@ -131,7 +131,7 @@ void Game::Run(){
         keyPressed(m_delta); // keypress handling
 
         if(USE_PHYSICS){
-		    physicsWorld.Step((float) m_delta);
+		    physicsWorld.Step((float) m_delta / 100000000);
             for (auto& shape : m_objects){
                 shape.syncTransformToPhysics();
             }
