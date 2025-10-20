@@ -12,6 +12,7 @@
 class Shape{
 public:
 	Shape(Mesh* mesh);
+	Shape(Mesh* mesh, const RigidBody Rbody);
 	~Shape();
 
 	void Render() const;

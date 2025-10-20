@@ -28,6 +28,8 @@
 #include "FrameBuffer.h"
 #include "Texture.h"
 
+#include "PhysicsWorld.h"
+
 class Game {
 public:
     Game(const char* title);
@@ -52,10 +54,11 @@ private:
     void FramebufferSizeCallBack(GLFWwindow* window, int width, int height); // update window variables on rezise
 
     const char* TITLE;
+	const int MAX_OBJECTS = 4096;
     float YAW = 0.022f, PITCH = 0.022f; // camera turn speed, same as CS2, UE5 default = 0.07
     unsigned int WIDTH = 1280, HEIGHT = 720;
 
-    bool USE_VSYNC = true;
+    bool USE_VSYNC = false;
     bool USE_PHYSICS = false;
     bool IS_FULLSCREEN = false;
     bool FIRST_MOUSE = true;
@@ -75,6 +78,7 @@ private:
     double m_delta = 0.0;
 	double m_lifetime = 0.0;
 
+    PhysicsWorld m_physicsWorld;
     std::vector<Shape> m_objects;
     std::vector<Light> m_lights;
     std::vector<Mesh> m_meshes;

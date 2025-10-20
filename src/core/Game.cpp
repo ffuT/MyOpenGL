@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "PhysicsWorld.h"
 
 Game::Game(const  char* title) : TITLE(title) {
     if (!glfwInit()) {
@@ -62,7 +61,6 @@ Game::~Game(){
 }
 
 void Game::Run(){
-    PhysicsWorld physicsWorld;
     Renderer renderer = Renderer();
     renderer.SetRenderShader(ShaderProgram::NewShader);
 
@@ -82,9 +80,11 @@ void Game::Run(){
     Skybox skybox = Skybox(skyboxes::Space);
     DebugCrosshair DebugXhair = DebugCrosshair();
 
+	m_objects.reserve(MAX_OBJECTS); // max object count
     // sphere obejct for rendering lights always index 0
     Shape pointLight = Shape(&m_meshes[1]);
     pointLight.SetTextID("PointLight");
+	pointLight.GetRigidBody().isStatic = true;
     m_objects.push_back(pointLight);
     
     // constant light source(s)
@@ -94,11 +94,15 @@ void Game::Run(){
     
     std::chrono::nanoseconds seed = std::chrono::high_resolution_clock::now().time_since_epoch();
     std::srand(seed.count());
-    for (int i = 0; i < 50; i++) { // bunch of random spheres for visualitation and performance check
+    for (int i = 0; i < 500; i++) { // bunch of random spheres for visualitation and performance check
         bool isbanana = (std::rand() % 100) < 5; // 5% chance for banana mesh
         m_objects.push_back(Shape(&m_meshes[isbanana+1]));
-        m_objects[i + 1].SetScale(2.5 + std::rand() % 15);
         
+        int scale = 2.5 + std::rand() % 10;
+        m_objects[i + 1].SetScale(scale);
+		m_objects[i + 1].GetRigidBody().mass = scale;
+		m_objects[i + 1].GetRigidBody().radius = scale;
+
         float f2 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         float f1 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
         float f3 = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
@@ -114,9 +118,8 @@ void Game::Run(){
             min + (std::rand() % (max - min + 1))));
     }
     
-    for (Shape& s : m_objects) {
-        if(!s.GetRigidBody().isStatic)
-        physicsWorld.AddBody(&s.GetRigidBody());
+    for (size_t i = 1; i < m_objects.size(); i++) {
+        m_physicsWorld.AddBody(&m_objects[i].GetRigidBody());
     }
 
     auto last = std::chrono::high_resolution_clock::now();
@@ -131,7 +134,7 @@ void Game::Run(){
         keyPressed(m_delta); // keypress handling
 
         if(USE_PHYSICS){
-		    physicsWorld.Step((float) m_delta / 100000000);
+		    m_physicsWorld.Step((float) m_delta / 100000000);
             for (auto& shape : m_objects){
                 shape.syncTransformToPhysics();
             }
@@ -268,20 +271,26 @@ void Game::RenderImGuiSceneControl() {
     ImGui::Spacing();
 
     if (ImGui::Button("Add Object")) {
-        m_objects.push_back(Shape(&m_meshes[1]));
+        if(m_objects.size() < MAX_OBJECTS){
+			m_objects.push_back(Shape(&m_meshes[1]));   // add sphere
+		    m_physicsWorld.AddBody(&m_objects.back().GetRigidBody()); // add to physics
+        }
     }
     ImGui::Spacing();
 
     static int selectedSphereIndex = -1;
     if (ImGui::Button("Delete Object")) {   // delete selected Sphere
         if (selectedSphereIndex > 0) { // > 0 because 0 cant be deleted
-            m_objects.erase(m_objects.begin() + selectedSphereIndex);
-            if (selectedSphereIndex > 1) // > 1 because i dont wanna edit sphere 0
-                selectedSphereIndex--;
+			m_physicsWorld.RemoveBody(&m_objects[selectedSphereIndex].GetRigidBody());  //remove from physics
+			m_objects.erase(m_objects.begin() + selectedSphereIndex);   // remove from objects
+            // Adjust selection
+            if (selectedSphereIndex >= m_objects.size()) {
+                selectedSphereIndex = m_objects.empty() ? -1 : m_objects.size() - 1;
+            }
         }
     }
     ImGui::Spacing();
-    
+
     if (ImGui::BeginCombo("Object", selectedSphereIndex >= 0 ? ("Object " + std::to_string(selectedSphereIndex) + ": " + m_objects[selectedSphereIndex].GetTextID()).c_str() : "Objects")) {
         for (int i = 1; i < m_objects.size(); i++) { // Skip light sphere at index 0
             std::string itemLabel = "Index " + std::to_string(i) + ": " + m_objects[i].GetTextID();

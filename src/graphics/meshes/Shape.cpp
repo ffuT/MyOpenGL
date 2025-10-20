@@ -5,6 +5,10 @@ Shape::Shape(Mesh* mesh) : m_mesh(mesh) {
 
 }
 
+Shape::Shape(Mesh* mesh, const RigidBody Rbody) : m_mesh(mesh) {
+	m_RigidBody = Rbody;
+}
+
 Shape::~Shape(){
 }
 

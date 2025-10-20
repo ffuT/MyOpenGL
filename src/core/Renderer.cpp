@@ -18,10 +18,11 @@ void Renderer::RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& 
 	updateLightSpaceMatrix(directional);
 
     currentShader->SetUniformMat4f("u_lightProjection", m_lightSpaceMatrix);
-    for (Shape& obj : objects) {
-        currentShader->SetUniformMat4f("u_model", obj.GetModelMatrix());
-        obj.Render();
+	for (size_t i = 1; i < objects.size(); i++) { // start at 1 to skip light sphere at index 0
+        currentShader->SetUniformMat4f("u_model", objects[i].GetModelMatrix());
+        objects[i].Render();
     }
+
     currentShader->UnBind();
     glCullFace(GL_BACK);
 }
