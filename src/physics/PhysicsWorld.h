@@ -11,8 +11,12 @@ public:
 
 private:
 	void Intergrate(RigidBody* body, float delta);
-	void ResolveCollision(RigidBody& a, RigidBody& b);
-	bool IsColliding(RigidBody& a, RigidBody& b);
+	void ResolveCollision(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration);
+	bool IsColliding(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration);
+
+	bool SphereSphereCol(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration);
+	bool SpherePlaneCol(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration);
+	bool MeshMeshCol(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration);
 
 	std::vector<RigidBody*> m_bodies;
 };

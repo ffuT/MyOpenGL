@@ -3,6 +3,7 @@
 
 enum class ColliderType {
 	Sphere,
+	Plane,
 	Mesh,
 };
 
@@ -13,7 +14,7 @@ struct RigidBody {
 	glm::vec3 velocity = glm::vec3(0.0);
 	glm::vec3 forces = glm::vec3(0.0);
 
-	float restitution = 1.0f; // bounciness
+	float restitution = 0.5f; // bounciness
 	ColliderType colliderType = ColliderType::Sphere;
 	float radius = 1.0f;
 	glm::vec3 halfExtents = glm::vec3(1.0f);

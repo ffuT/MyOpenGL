@@ -58,8 +58,10 @@ void PhysicsWorld::Step(float deltaTime) {
 		for (size_t j = i + 1; j < m_bodies.size(); ++j) {
 			RigidBody* A = m_bodies[i];
 			RigidBody* B = m_bodies[j];
-			if (IsColliding(*A, *B))
-				ResolveCollision(*A, *B);
+			glm::vec3 normal;
+			float penetration;
+			if (IsColliding(*A, *B, normal, penetration))
+				ResolveCollision(*A, *B, normal, penetration);
 		}
 	}
 }
@@ -70,11 +72,7 @@ void PhysicsWorld::Intergrate(RigidBody* body, float delta) {
 	body->position += body->velocity * delta;
 }
 
-void PhysicsWorld::ResolveCollision(RigidBody& a, RigidBody& b) {
-	glm::vec3 normal = glm::normalize(b.position - a.position);
-	float distance = glm::length(b.position - a.position);
-	float penetration = (a.radius + b.radius) - distance;
-
+void PhysicsWorld::ResolveCollision(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration) {
 	// position correction
 	if (penetration > 0.0f) {
 		float totalMass = (a.isStatic ? 0.0f : a.mass) + (b.isStatic ? 0.0f : b.mass);
@@ -104,17 +102,38 @@ void PhysicsWorld::ResolveCollision(RigidBody& a, RigidBody& b) {
 		b.velocity += (1.0f / b.mass) * impulse;
 }
 
-bool PhysicsWorld::IsColliding(RigidBody& a, RigidBody& b) {
+bool PhysicsWorld::IsColliding(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration) {
 	if (a.isStatic == true && b.isStatic == true)
 		return false;
 
 	if (a.colliderType == ColliderType::Sphere && b.colliderType == ColliderType::Sphere) {
-		float dist = glm::length(a.position - b.position);
-		float minDist = a.radius + b.radius;
-		if (dist < minDist)
-			return true;
+		return SphereSphereCol(a, b, normal, penetration);
+
 	} 
-	// later add more stuff
+	// later add more 
 		
+	return false;
+}
+
+bool PhysicsWorld::SphereSphereCol(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration){
+	float dist = glm::length(a.position - b.position);
+	float minDist = a.radius + b.radius;
+
+	normal = glm::normalize(b.position - a.position);
+	float distance = glm::length(b.position - a.position);
+	penetration = (a.radius + b.radius) - distance;
+
+	if (dist < minDist)
+		return true;
+	return false;
+}
+
+bool PhysicsWorld::SpherePlaneCol(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration){
+
+	return false;
+}
+
+bool PhysicsWorld::MeshMeshCol(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration){
+
 	return false;
 }
