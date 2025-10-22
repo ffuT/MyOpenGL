@@ -1,5 +1,6 @@
 #include "PhysicsWorld.h"
 #include <iostream>
+#include <algorithm>
 
 void PhysicsWorld::AddBody(RigidBody* body) {
 	m_bodies.push_back(body);
@@ -18,7 +19,7 @@ void PhysicsWorld::Step(float deltaTime) {
 		body->AddForce(glm::vec3(0.0f, -9.81f * body->mass, 0.0f)); // gravity
 
 		// euler integration
-		Intergrate(body, deltaTime);
+		Integrate(body, deltaTime);
 
 		// collision detection + roslution ground
 		float groundY = -150.0f; // ground level
@@ -26,7 +27,7 @@ void PhysicsWorld::Step(float deltaTime) {
 			body->position.y = groundY + body->radius;
 
 			// bounce
-			if (body->velocity.y < 0.0f){
+			if (body->velocity.y < 0.0f) {
 				body->velocity.y *= -body->restitution;
 				if (std::abs(body->velocity.y) < 0.5f) {
 					body->velocity.y = 0.0f;
@@ -66,7 +67,7 @@ void PhysicsWorld::Step(float deltaTime) {
 	}
 }
 
-void PhysicsWorld::Intergrate(RigidBody* body, float delta) {
+void PhysicsWorld::Integrate(RigidBody* body, float delta) {
 	glm::vec3 acceleration = body->forces / body->mass;
 	body->velocity += acceleration * delta;
 	body->position += body->velocity * delta;
@@ -108,7 +109,6 @@ bool PhysicsWorld::IsColliding(RigidBody& a, RigidBody& b, glm::vec3& normal, fl
 
 	if (a.colliderType == ColliderType::Sphere && b.colliderType == ColliderType::Sphere) {
 		return SphereSphereCol(a, b, normal, penetration);
-
 	} 
 	// later add more 
 		
@@ -120,9 +120,10 @@ bool PhysicsWorld::SphereSphereCol(RigidBody& a, RigidBody& b, glm::vec3& normal
 	float minDist = a.radius + b.radius;
 
 	normal = glm::normalize(b.position - a.position);
-	float distance = glm::length(b.position - a.position);
-	penetration = (a.radius + b.radius) - distance;
+	penetration = (a.radius + b.radius) - dist;
 
+	if(dist == 0.0f)
+		return false;
 	if (dist < minDist)
 		return true;
 	return false;

@@ -10,7 +10,7 @@ public:
 
 
 private:
-	void Intergrate(RigidBody* body, float delta);
+	void Integrate(RigidBody* body, float delta);
 	void ResolveCollision(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration);
 	bool IsColliding(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration);
 

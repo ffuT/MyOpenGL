@@ -27,7 +27,7 @@ void Shape::syncPhysicsToTransform() {
 }
 
 void Shape::syncTransformToPhysics() {
-	if (!m_RigidBody.isStatic) {
+	if (!m_RigidBody.isStatic && !m_dirty) {
 		const glm::mat4 translate = glm::translate(glm::mat4(1.0f), m_RigidBody.position);
 		m_cachedModelMatrix = translate * (GetRotation() * GetScale());
 		m_dirty = false;
