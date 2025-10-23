@@ -94,7 +94,7 @@ void Game::Run(){
     
     std::chrono::nanoseconds seed = std::chrono::high_resolution_clock::now().time_since_epoch();
     std::srand(seed.count());
-    for (int i = 0; i < 500; i++) { // bunch of random spheres for visualitation and performance check
+    for (int i = 0; i < 100; i++) { // bunch of random spheres for visualitation and performance check
         bool isbanana = (std::rand() % 100) < 5; // 5% chance for banana mesh
         m_objects.push_back(Shape(&m_meshes[isbanana+1]));
         
@@ -149,15 +149,13 @@ void Game::Run(){
         }
 
         // render screen 
-        renderer.RenderShadowMap(m_objects, m_lights);
+        renderer.RenderShadowMap(m_objects, m_lights, m_cam.GetPos());
         glViewport(0,0 ,WIDTH, HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear
         renderer.RenderTerrain(m_meshes[0], terrainmodel, m_cam, m_proj, m_lights);
         renderer.RenderSkybox(skybox, m_cam, m_proj, m_lights[0]);
         renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
-
-		//maybe move skybox and crosshair to renderer
 
 		if (USE_DEBUG_XHAIR) { // render crosshair
             DebugXhair.Update(m_cam);

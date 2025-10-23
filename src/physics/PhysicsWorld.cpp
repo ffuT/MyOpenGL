@@ -1,5 +1,6 @@
 #include "PhysicsWorld.h"
 #include <iostream>
+#include <algorithm>
 
 void PhysicsWorld::AddBody(RigidBody* body) {
 	m_bodies.push_back(body);
