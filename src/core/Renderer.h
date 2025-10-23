@@ -15,7 +15,7 @@ public:
 	Renderer();
 	~Renderer();
 
-	void RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& lights);
+	void RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& lights, glm::vec3 campos);
 	void RenderSkybox(Skybox& skybox, Camera& cam, glm::mat4& proj, const Light& dir);
 	void RenderObjects(std::vector<Shape>& objects, std::vector<Light>& lights, Camera& cam, glm::mat4& proj);
 	void RenderCrosshair(const DebugCrosshair& xhair, const Camera& cam, const glm::mat4& proj);
@@ -24,13 +24,13 @@ public:
 	void SetRenderShader(const ShaderProgram& shader);
 
 private:
-	void updateLightSpaceMatrix(Light light);
+	void updateLightSpaceMatrix(Light light, glm::vec3 campos);
 
 	// shadow map 
 	unsigned int shadowMapWidth = 4096, shadowMapHeight = shadowMapWidth;
 	ShadowMap m_shadowMap = ShadowMap(shadowMapWidth, shadowMapHeight);
 	// shadow map matrices
-	glm::mat4 m_orthographicProjection = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f, -500.0f, 1000.0f);
+	glm::mat4 m_orthographicProjection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, -600.0f, 2000.0f); //TODO find good values
 	glm::mat4 m_lightView = glm::mat4(1.0);
 	glm::mat4 m_lightSpaceMatrix = glm::mat4(1.0);
 

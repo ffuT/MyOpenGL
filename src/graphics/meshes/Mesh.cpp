@@ -3,10 +3,8 @@
 #include <sstream>
 #include <vector>
 #include <string>
-#include <algorithm>
 #include <iostream>
 #include <unordered_map>
-#include <tuple>
 
 Mesh::Mesh(const std::vector<float>& vertices,
 	const std::vector<float>& texCoords,

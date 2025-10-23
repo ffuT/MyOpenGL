@@ -7,6 +7,7 @@ workspace "MyOpenGl"
     filter "system:windows"
         buildoptions { "/MP" }
         architecture "x64"
+        buildoptions { "/MP" }
         systemversion "latest"
         debugdir ""
 

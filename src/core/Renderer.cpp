@@ -7,7 +7,7 @@ Renderer::Renderer() {
 Renderer::~Renderer(){
 }
 
-void Renderer::RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& lights) {
+void Renderer::RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& lights, glm::vec3 campos) {
     glViewport(0, 0, m_shadowMap.getHeight(), m_shadowMap.getWidth());
     m_shadowMap.Bind();
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -15,7 +15,7 @@ void Renderer::RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& 
     Shader* currentShader = m_ShaderManager.GetShader(ShadowShader);
     currentShader->Bind();
 	Light directional = lights[0]; // only first light used for shadowmap
-	updateLightSpaceMatrix(directional);
+	updateLightSpaceMatrix(directional, campos);
 
     currentShader->SetUniformMat4f("u_lightProjection", m_lightSpaceMatrix);
 	for (size_t i = 1; i < objects.size(); i++) { // start at 1 to skip light sphere at index 0
@@ -161,7 +161,9 @@ void Renderer::SetRenderShader(const ShaderProgram& shader){
 	m_currentShader = shader;
 }
 
-void Renderer::updateLightSpaceMatrix(Light light) {
-    m_lightView = glm::lookAt(light.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+void Renderer::updateLightSpaceMatrix(Light light, glm::vec3 campos) {
+    glm::vec3 pos = campos + light.position*0.5f; // shadowmap following camera
+    // TODO also make it rotate proper according to cam viewangle
+    m_lightView = glm::lookAt(pos, campos, glm::vec3(0.0f, 1.0f, 0.0f));
     m_lightSpaceMatrix = m_orthographicProjection * m_lightView;
 }
