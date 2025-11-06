@@ -7,7 +7,7 @@ Renderer::Renderer() {
 Renderer::~Renderer(){
 }
 
-void Renderer::RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& lights, glm::vec3 campos) {
+void Renderer::RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& lights, Camera& cam) {
     glViewport(0, 0, m_shadowMap.getHeight(), m_shadowMap.getWidth());
     m_shadowMap.Bind();
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -15,7 +15,7 @@ void Renderer::RenderShadowMap(std::vector<Shape>& objects, std::vector<Light>& 
     Shader* currentShader = m_ShaderManager.GetShader(ShadowShader);
     currentShader->Bind();
 	Light directional = lights[0]; // only first light used for shadowmap
-	updateLightSpaceMatrix(directional, campos);
+	updateLightSpaceMatrix(directional, cam);
 
     currentShader->SetUniformMat4f("u_lightProjection", m_lightSpaceMatrix);
 	for (size_t i = 1; i < objects.size(); i++) { // start at 1 to skip light sphere at index 0
@@ -157,13 +157,32 @@ void Renderer::RenderTerrain(const Mesh& quad, const glm::mat4& model, const Cam
     currentshader->UnBind();
 }
 
+void Renderer::RenderBufferToScreen(VertexArray& vao) {
+    glDisable(GL_DEPTH_TEST);
+	Shader* shader = m_ShaderManager.GetShader(ShaderProgram::BasicShader);
+    
+    shader->Bind();
+	vao.Bind();
+    m_shadowMap.getShadowTexture().Bind();
+    shader->SetUniform1i("u_depthMap", 0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	vao.Unbind();
+	shader->UnBind();
+    glEnable(GL_DEPTH_TEST);
+}
+
 void Renderer::SetRenderShader(const ShaderProgram& shader){
 	m_currentShader = shader;
 }
 
-void Renderer::updateLightSpaceMatrix(Light light, glm::vec3 campos) {
-    glm::vec3 pos = campos + light.position*0.5f; // shadowmap following camera
-    // TODO also make it rotate proper according to cam viewangle
+void Renderer::updateLightSpaceMatrix(Light light, Camera& cam) {
+	/**** TODO make the orthographic projection follow the camera
+    * 
+    glm::vec3 campos = cam.GetPos();
+    glm::vec3 pos = campos + light.position * 0.5f; // shadowmap following camera
     m_lightView = glm::lookAt(pos, campos, glm::vec3(0.0f, 1.0f, 0.0f));
+    */
+    m_lightView = glm::lookAt(light.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     m_lightSpaceMatrix = m_orthographicProjection * m_lightView;
 }

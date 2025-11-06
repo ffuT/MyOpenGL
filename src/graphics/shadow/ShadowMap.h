@@ -14,6 +14,7 @@ public:
 
 	inline unsigned int getWidth() const { return shadowMapWidth; }
 	inline unsigned int getHeight() const { return shadowMapHeight; }	
+	inline const Texture& getShadowTexture() const { return m_shadowTexture; }
 
 private:
 	unsigned int shadowMapWidth, shadowMapHeight;

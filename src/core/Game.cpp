@@ -98,7 +98,7 @@ void Game::Run(){
         bool isbanana = (std::rand() % 100) < 5; // 5% chance for banana mesh
         m_objects.push_back(Shape(&m_meshes[isbanana+1]));
         
-        int scale = 2.5 + std::rand() % 10;
+        float scale = 2.5 + std::rand() % 10;
         m_objects[i + 1].SetScale(scale);
 		m_objects[i + 1].GetRigidBody().mass = scale;
 		m_objects[i + 1].GetRigidBody().radius = scale;
@@ -121,6 +121,14 @@ void Game::Run(){
     for (size_t i = 1; i < m_objects.size(); i++) {
         m_physicsWorld.AddBody(&m_objects[i].GetRigidBody());
     }
+    
+	VertexArray quadVAO = VertexArray();
+	VertexBuffer quadVBO = VertexBuffer(24 * sizeof(float), quadVertices);
+	quadVAO.Bind();
+	quadVAO.AddVertexBuffer(quadVBO, 0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	quadVAO.AddVertexBuffer(quadVBO, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	quadVAO.Unbind();
+	quadVBO.Unbind();
 
     auto last = std::chrono::high_resolution_clock::now();
     auto now = std::chrono::high_resolution_clock::now();
@@ -149,13 +157,18 @@ void Game::Run(){
         }
 
         // render screen 
-        renderer.RenderShadowMap(m_objects, m_lights, m_cam.GetPos());
+        renderer.RenderShadowMap(m_objects, m_lights, m_cam);
         glViewport(0,0 ,WIDTH, HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear
         renderer.RenderTerrain(m_meshes[0], terrainmodel, m_cam, m_proj, m_lights);
         renderer.RenderSkybox(skybox, m_cam, m_proj, m_lights[0]);
         renderer.RenderObjects(m_objects, m_lights, m_cam, m_proj);
+
+        // temp
+        renderer.m_orthographicProjection = glm::ortho(-projradius, projradius, -projradius, projradius, nearplane, farplane);
+        renderer.RenderBufferToScreen(quadVAO);
+        //
 
 		if (USE_DEBUG_XHAIR) { // render crosshair
             DebugXhair.Update(m_cam);
@@ -213,6 +226,12 @@ void Game::RenderImGuiData() {
 }
 
 void Game::RenderImGuiSettings(Renderer& renderer) {
+
+    ImGui::SliderFloat("radius ", &projradius, 0, 1000);
+    ImGui::SliderFloat("near ", &nearplane, -2000, 0);
+    ImGui::SliderFloat("far ", &farplane, 0, 10000);
+
+
     ImGui::Text("Settings");
 
 	if (ImGui::Button("Fullscreen"))        //toggle fullscreen
@@ -359,7 +378,7 @@ void Game::RenderImGuiSceneControl() {
     ImGui::NewLine();
 }
 
-void Game::keyPressed(const float& delta) {
+void Game::keyPressed(const double& delta) {
     // camera movement
     if (m_currentWindowMode == MouseInputMode::CAMERA_MODE) {
         if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)

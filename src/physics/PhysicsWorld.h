@@ -8,7 +8,6 @@ public:
 	void RemoveBody(RigidBody* body);
 	void Step(float deltaTime);
 
-
 private:
 	void Integrate(RigidBody* body, float delta);
 	void ResolveCollision(RigidBody& a, RigidBody& b, glm::vec3& normal, float& penetration);

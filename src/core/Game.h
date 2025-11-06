@@ -46,7 +46,7 @@ private:
     void toggleFullscreen();
     void ToggleMouseInputMode(GLFWwindow* window, MouseInputMode& mode); // for camera movment and ui control
     
-    void keyPressed(const float& delta); // update camera pos
+    void keyPressed(const double& delta); // update camera pos
     
     void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     void MouseCallBack(GLFWwindow* window, int button, int action, int mods);
@@ -78,6 +78,10 @@ private:
     double m_delta = 0.0;
 	double m_lifetime = 0.0;
 
+    float projradius = 500.0f;
+	float nearplane = -500.0f;
+	float farplane = 1000.0f;
+
     PhysicsWorld m_physicsWorld;
     std::vector<Shape> m_objects;
     std::vector<Light> m_lights;
@@ -89,6 +93,7 @@ private:
          0.0f, -0.02f, 0.0f,  0.0f,  0.02f, 0.0f,
          0.0f,  0.0f, -0.02f, 0.0f,  0.0f,  0.02f
     };
+
     float quadVertices[24] = { // for rendering buffers to screen
     -1.0f,  1.0f,    0.0f, 1.0f,
     -1.0f, -1.0f,    0.0f, 0.0f,

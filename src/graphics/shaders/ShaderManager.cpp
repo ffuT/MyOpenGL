@@ -23,6 +23,8 @@ Shader* ShaderManger::GetShader(const ShaderProgram& ShaderName) {
 			return &m_WireframeShader;
 		case ShaderProgram:: ShadowShader:
 			return &m_ShadowShader;
+		case ShaderProgram:: BasicShader:
+			return &m_BasicShader;
 	}
 	return nullptr; //cant happen
 }

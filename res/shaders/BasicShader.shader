@@ -6,8 +6,10 @@ layout(location = 1) in vec2 aTex;
 out vec2 TexCoords;
 
 void main() {
+    vec2 pos = aPos * 0.24;           // scale 
+    pos += vec2(0.75, 0.75);          // move it to top-right
     TexCoords = aTex;
-    gl_Position = vec4(aPos.xy, 0.0, 1.0);
+    gl_Position = vec4(pos, 0.0, 1.0);
 }
 
 #shader fragment
